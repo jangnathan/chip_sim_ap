@@ -19,7 +19,7 @@ typedef enum {
 typedef enum {
 	CLOCK,
 	SWITCH
-} InputType;
+} InputChipType;
 
 typedef enum {
 	CE_SIMPLE,
@@ -35,14 +35,19 @@ typedef struct {
 
 typedef struct {
 	u32 ID;
+	SimpleChipType type;
 
 	// inputs
-	InSignal aID;
-	InSignal bID;
+	InSignal inSignal[2];
 
 	u8 out;
 	// it can support up to 8 bits of output
 } SimpleChip;
+
+typedef struct {
+	InputChipType type;
+	u8 out;
+} InputChip;
 
 typedef struct {
 	u32 ID;
@@ -55,8 +60,15 @@ typedef struct {
 
 	u32 simpleChipsLen;
 	u32 simpleChipsSize;
+
+	u32 inputChipsLen;
+	u32 inputChipsSize;
+
+	InputChip *inputChipsArray;
 	SimpleChip *simpleChipsArray;
 	ChipEntity *array;
 } Chips;
 
 void chipsInit(Chips *chips);
+u32 newSimpleChip(Chips *chips, SimpleChipType type);
+u32 newInputChip(Chips *chips, InputChipType type);
