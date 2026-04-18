@@ -7,7 +7,6 @@
 // use bit shifting and AND to process individual bits
 
 typedef enum {
-	// two in. one out
 	AND,
 	OR,
 	NOT,
@@ -15,42 +14,49 @@ typedef enum {
 	NOR,
 	XOR,
 	XNOR,
+} SimpleChipType;
 
-	// one out
+typedef enum {
 	CLOCK,
+	SWITCH
+} InputType;
 
-	// end of 2x8
-} ChipType;
+typedef enum {
+	CE_SIMPLE,
+	CE_INPUT
+} ChipEntityType;
 
 // Input wiring
 typedef struct {
 	u32 ID;
 	u8 n; // if a chip has multiple outputs (e.g. dmux), then decide which one
 	// default = 0
-} Input;
-
-typedef struct {
-	// inputs
-	u32 aID;
-	u32 bID;
-
-	u8 out;
-	// it can support up to 8 bits of output
-} Chip2x8;
+} InSignal;
 
 typedef struct {
 	u32 ID;
-	ChipType type;
-} Chip;
+
+	// inputs
+	InSignal aID;
+	InSignal bID;
+
+	u8 out;
+	// it can support up to 8 bits of output
+} SimpleChip;
+
+typedef struct {
+	u32 ID;
+	ChipEntityType type;
+} ChipEntity;
 
 typedef struct {
 	u32 len;
 	u32 size;
-	Chip *array;
 
-	u32 chip2x8sLen;
-	u32 chip2x8sSize;
-	Chip2x8 *chip2x8sArray;
+	u32 simpleChipsLen;
+	u32 simpleChipsSize;
+	SimpleChip *simpleChipsArray;
+	ChipEntity *array;
 } Chips;
 
 void chipsInit(Chips *chips);
