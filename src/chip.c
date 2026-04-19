@@ -6,15 +6,16 @@
 #define INIT_ID_SIZE 64
 
 void chipsInit(Chips *chips) {
-	chips->len = 0;
+	// set len to 1 to reserve 0 for error handling
+	chips->len = 1;
 	chips->size = INIT_ID_SIZE;
 	chips->array = malloc(sizeof(ChipEntity) * chips->size);
 
-	chips->simpleChipsLen = 0;
+	chips->simpleChipsLen = 1;
 	chips->simpleChipsSize = 16;
 	chips->simpleChipsArray = malloc(sizeof(SimpleChip) * chips->simpleChipsSize);
 
-	chips->inputChipsLen = 0;
+	chips->inputChipsLen = 1;
 	chips->inputChipsSize = 16;
 	chips->inputChipsArray = malloc(sizeof(InputChip) * chips->inputChipsSize);
 }
@@ -23,7 +24,7 @@ u32 newChipEntity(Chips *chips, u32 ID, ChipEntityType type) {
 	if (chips->len >= chips->size) {
 		if (chips->size == UINT32_MAX) {
 			fprintf(stderr, "Cannot allocate any more memory for chips");
-			exit(1);
+			return 0;
 		}
 
 		chips->size *= 2;
@@ -40,7 +41,7 @@ u32 newSimpleChip(Chips *chips, SimpleChipType type) {
 	if (chips->simpleChipsLen >= chips->simpleChipsSize) {
 		if (chips->simpleChipsSize == UINT32_MAX) {
 			fprintf(stderr, "Cannot allocate any more memory for simple chips");
-			exit(1);
+			return 0;
 		}
 
 		chips->simpleChipsSize *= 2;
@@ -60,7 +61,7 @@ u32 newInputChip(Chips *chips, InputChipType type) {
 	if (chips->inputChipsLen >= chips->inputChipsSize) {
 		if (chips->inputChipsSize == UINT32_MAX) {
 			fprintf(stderr, "Cannot allocate any more memory for input chips");
-			exit(1);
+			return 0;
 		}
 
 		chips->inputChipsSize *= 2;
@@ -70,4 +71,25 @@ u32 newInputChip(Chips *chips, InputChipType type) {
 	chips->inputChipsArray[chips->inputChipsLen].type = type;
 	chips->inputChipsLen++;
 	return newChipEntity(chips, chips->inputChipsLen - 1, CE_INPUT);
+}
+
+// link chip's Nth input to another chip's Nth output (which is current chip's input)
+u8 linkChipInsignal(Chips *chips, u32 targetID, u8 targetN, u32 inputID, u8 n) {
+	ChipEntity chipEntity = chips->array[targetID];
+	switch (chipEntity.type) {
+		case CE_SIMPLE:
+			if (targetN > 2) {
+				fprintf(stderr, "Cannot link insignal to input");
+				return 0;
+			}
+			SimpleChip *chip = &chips->simpleChipsArray[chipEntity.ID];
+
+			chip->inSignal[targetN].ID = inputID;
+			chip->inSignal[targetN].n = n;
+			break;
+		case CE_INPUT:
+			fprintf(stderr, "Cannot link insignal to input");
+			return 0;
+	}
+	return 1;
 }

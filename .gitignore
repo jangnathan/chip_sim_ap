@@ -3,3 +3,4 @@
 plan
 test/build
 build
+vendored/SDL
