@@ -45,12 +45,17 @@ typedef struct {
 } SimpleChip;
 
 typedef struct {
+	u32 ID;
 	InputChipType type;
 	u8 out;
 } InputChip;
 
 typedef struct {
 	u32 ID;
+	// positions to render
+	float x;
+	float y;
+
 	ChipEntityType type;
 } ChipEntity;
 

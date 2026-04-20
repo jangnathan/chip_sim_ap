@@ -16,7 +16,9 @@ int main() {
 	Chips *chips = &ctx->chips;
 
 	u32 a = newInputChip(chips, SWITCH);
+	chips->array[a].x = 50;
 	u32 b = newInputChip(chips, SWITCH);
+	chips->array[b].x = 150;
 	u32 out = newSimpleChip(chips, XOR);
 	linkChipInsignal(chips, out, 0, a, 0);
 	linkChipInsignal(chips, out, 1, b, 0);

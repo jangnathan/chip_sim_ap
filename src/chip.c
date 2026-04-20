@@ -49,6 +49,7 @@ u32 newSimpleChip(Chips *chips, SimpleChipType type) {
 	}
 
 	chips->simpleChipsArray[chips->simpleChipsLen].type = type;
+	chips->simpleChipsArray[chips->simpleChipsLen].ID = chips->len;
 
 	chips->array[chips->len].ID = chips->simpleChipsLen;
 	chips->array[chips->len].type = CE_SIMPLE;
@@ -68,7 +69,9 @@ u32 newInputChip(Chips *chips, InputChipType type) {
 		chips->inputChipsArray = realloc(chips->inputChipsArray, sizeof(SimpleChip) * chips->inputChipsSize);
 	}
 
+	chips->inputChipsArray[chips->inputChipsLen].out = 0;
 	chips->inputChipsArray[chips->inputChipsLen].type = type;
+	chips->inputChipsArray[chips->inputChipsLen].ID = chips->len;
 	chips->inputChipsLen++;
 	return newChipEntity(chips, chips->inputChipsLen - 1, CE_INPUT);
 }
