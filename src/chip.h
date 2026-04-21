@@ -1,6 +1,7 @@
 // "Chips" include clocks, etc
 #pragma once
 #include "constants.h"
+#include "unit.h"
 
 // Usually 8 bits are enough for chips
 // E.g. make 4 way 1 bit mux e.g. 2 bits for selection + 4 bits for in + 1 bit for out = 7
@@ -53,8 +54,7 @@ typedef struct {
 typedef struct {
 	u32 ID;
 	// positions to render
-	float x;
-	float y;
+	Vec2 position;
 
 	ChipEntityType type;
 } ChipEntity;

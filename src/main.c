@@ -16,26 +16,17 @@ int main() {
 	Chips *chips = &ctx->chips;
 
 	u32 a = newInputChip(chips, SWITCH);
-	chips->array[a].x = 50;
+	chips->array[a].position.x = 50;
 	u32 b = newInputChip(chips, SWITCH);
-	chips->array[b].x = 150;
+	chips->array[b].position.x = 150;
 	u32 out = newSimpleChip(chips, XOR);
 	linkChipInsignal(chips, out, 0, a, 0);
 	linkChipInsignal(chips, out, 1, b, 0);
 
-	u8 running = 1;
-	while (running) {
-		SDL_Event event;
-		while (SDL_PollEvent(&event)) {
-			switch (event.type) {
-				case SDL_EVENT_QUIT:
-					running = 0;
-					break;
-
-				default:
-					break;
-			}
-		}
+	app.running = 1;
+	while (app.running) {
+		handleEvents(&app);
+		update(&app);
 
 		render(&app);
 		SDL_Delay(16);

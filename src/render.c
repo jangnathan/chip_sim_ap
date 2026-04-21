@@ -33,10 +33,11 @@ void renderSimpleChip(App *app, ChipEntity *chip, SimpleChip *simpleChip) {
 void renderInputChip(App *app, ChipEntity *chip, InputChip *inputChip) {
 	switch (inputChip->type) {
 		case CLOCK:
-			drawClock(app->renderer, chip->x, chip->y);
+			drawClock(app->renderer, chip->position.x, chip->position.y);
 			break;
 		case SWITCH:
-			drawSwitch(app->renderer, inputChip->out, chip->x, chip->y);
+			drawSwitch(app->renderer, inputChip->out, chip->position.x, chip->position.y);
+			break;
 	}
 }
 
