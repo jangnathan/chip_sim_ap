@@ -16,10 +16,12 @@ int main() {
 	Chips *chips = &ctx->chips;
 
 	u32 a = newInputChip(chips, SWITCH);
-	chips->array[a].position.x = 50;
+	chips->array[a].position = newVec2(50.0f, 50.0f);
 	u32 b = newInputChip(chips, SWITCH);
-	chips->array[b].position.x = 150;
+	chips->array[b].position = newVec2(150.0f, 50.0f);
+
 	u32 out = newSimpleChip(chips, XOR);
+	chips->array[out].position = newVec2(75.0f, 250.0f);
 	linkChipInsignal(chips, out, 0, a, 0);
 	linkChipInsignal(chips, out, 1, b, 0);
 

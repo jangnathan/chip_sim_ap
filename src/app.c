@@ -28,6 +28,42 @@ void initCtx(Ctx *ctx) {
 	chipsInit(&ctx->chips);
 }
 
+void loadTextures(App *app) {
+	SDL_Renderer *renderer = app->renderer;
+	Textures *textures = &app->textures;
+	SDL_Color White = {255, 255, 255};
+
+	// AND,OR,NOT,NAND,NOR,XOR,XNOR
+	SDL_Surface* surface;
+	surface = TTF_RenderText_Blended(app->font, "AND", 0, White);
+	textures->simpleAND = SDL_CreateTextureFromSurface(renderer, surface);
+	SDL_DestroySurface(surface);
+
+	surface = TTF_RenderText_Blended(app->font, "OR", 0, White);
+	textures->simpleOR = SDL_CreateTextureFromSurface(renderer, surface);
+	SDL_DestroySurface(surface);
+
+	surface = TTF_RenderText_Blended(app->font, "NOT", 0, White);
+	textures->simpleNOT = SDL_CreateTextureFromSurface(renderer, surface);
+	SDL_DestroySurface(surface);
+
+	surface = TTF_RenderText_Blended(app->font, "NAND", 0, White);
+	textures->simpleNAND = SDL_CreateTextureFromSurface(renderer, surface);
+	SDL_DestroySurface(surface);
+
+	surface = TTF_RenderText_Blended(app->font, "NOR", 0, White);
+	textures->simpleNOR = SDL_CreateTextureFromSurface(renderer, surface);
+	SDL_DestroySurface(surface);
+
+	surface = TTF_RenderText_Blended(app->font, "XOR", 0, White);
+	textures->simpleXOR = SDL_CreateTextureFromSurface(renderer, surface);
+	SDL_DestroySurface(surface);
+
+	surface = TTF_RenderText_Blended(app->font, "XNOR", 0, White);
+	textures->simpleXNOR = SDL_CreateTextureFromSurface(renderer, surface);
+	SDL_DestroySurface(surface);
+};
+
 void initApp(App *app) {
 	initCtx(&app->ctx);
 
@@ -37,11 +73,24 @@ void initApp(App *app) {
 		exit(1);
 	}
 
+	if (!TTF_Init()) {
+		fprintf(stderr, "error initializing SDL3_ttf");
+		exit(1);
+	}
+
+	app->font = TTF_OpenFont("asset/ARIAL.ttf", 16);
+	if (!app->font) {
+		fprintf(stderr, "error loading font");
+		exit(1);
+	}
+
 	app->mouse.isClick = 0;
 	app->running = 1;
 	app->bgColor = newColor(220, 220, 220, 0);
 	app->window = createWindow();
 	app->renderer = createRenderer(app->window);
+
+	loadTextures(app);
 }
 
 void updateSimpleChip(App *app, ChipEntity *chip, SimpleChip *simpleChip) {

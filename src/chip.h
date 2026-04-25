@@ -39,7 +39,7 @@ typedef struct {
 	SimpleChipType type;
 
 	// inputs
-	InSignal inSignal[2];
+	InSignal inSignals[2];
 
 	u8 out;
 	// it can support up to 8 bits of output

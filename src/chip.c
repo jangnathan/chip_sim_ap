@@ -87,8 +87,8 @@ u8 linkChipInsignal(Chips *chips, u32 targetID, u8 targetN, u32 inputID, u8 n) {
 			}
 			SimpleChip *chip = &chips->simpleChipsArray[chipEntity.ID];
 
-			chip->inSignal[targetN].ID = inputID;
-			chip->inSignal[targetN].n = n;
+			chip->inSignals[targetN].ID = inputID;
+			chip->inSignals[targetN].n = n;
 			break;
 		case CE_INPUT:
 			fprintf(stderr, "Cannot link insignal to input");
