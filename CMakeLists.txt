@@ -19,6 +19,7 @@ src/chip.c
 src/logic_gate.c
 src/runtime.c
 src/unit.c
+src/ui.c
 )
 
 target_link_libraries(chipsim PRIVATE SDL3::SDL3)

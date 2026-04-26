@@ -1,8 +1,10 @@
 #pragma once
+#include "chip.h"
+#include "ui.h"
+#include "unit.h"
+
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
-#include "chip.h"
-#include "unit.h"
 
 typedef enum {
 	MS_CHIP,
@@ -33,12 +35,17 @@ typedef struct {
 	SDL_Window *window;
 	SDL_Renderer *renderer;
 
+	UI ui;
+
 	Textures textures;
 	TTF_Font *font;
 	Color bgColor;
 
+	u16 menubarHeight;
+
 	Mouse mouse;
 	u8 running;
+	u8 simulating;
 } App;
 
 void initApp(App *app);

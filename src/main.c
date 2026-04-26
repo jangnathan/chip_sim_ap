@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <SDL3/SDL.h>
 #include "chip.h"
-#include "runtime.h"
 #include "render.h"
 #include "app.h"
 

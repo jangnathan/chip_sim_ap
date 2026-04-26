@@ -1,4 +1,5 @@
 #include "app.h"
+#include "simulate.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,7 +8,7 @@
 #define WINDOW_HEIGHT 720
 
 SDL_Window *createWindow() {
-	SDL_Window *window = SDL_CreateWindow("ChipSim", WINDOW_WIDTH, WINDOW_HEIGHT, 0);
+	SDL_Window *window = SDL_CreateWindow("ChipSim", WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE);
 	if (!window) {
 		fprintf(stderr, "failed to open window: %s", SDL_GetError());
 		exit(1);
@@ -31,40 +32,21 @@ void initCtx(Ctx *ctx) {
 void loadTextures(App *app) {
 	SDL_Renderer *renderer = app->renderer;
 	Textures *textures = &app->textures;
-	SDL_Color White = {255, 255, 255};
+	Color White = {255, 255, 255, 0};
 
 	// AND,OR,NOT,NAND,NOR,XOR,XNOR
-	SDL_Surface* surface;
-	surface = TTF_RenderText_Blended(app->font, "AND", 0, White);
-	textures->simpleAND = SDL_CreateTextureFromSurface(renderer, surface);
-	SDL_DestroySurface(surface);
-
-	surface = TTF_RenderText_Blended(app->font, "OR", 0, White);
-	textures->simpleOR = SDL_CreateTextureFromSurface(renderer, surface);
-	SDL_DestroySurface(surface);
-
-	surface = TTF_RenderText_Blended(app->font, "NOT", 0, White);
-	textures->simpleNOT = SDL_CreateTextureFromSurface(renderer, surface);
-	SDL_DestroySurface(surface);
-
-	surface = TTF_RenderText_Blended(app->font, "NAND", 0, White);
-	textures->simpleNAND = SDL_CreateTextureFromSurface(renderer, surface);
-	SDL_DestroySurface(surface);
-
-	surface = TTF_RenderText_Blended(app->font, "NOR", 0, White);
-	textures->simpleNOR = SDL_CreateTextureFromSurface(renderer, surface);
-	SDL_DestroySurface(surface);
-
-	surface = TTF_RenderText_Blended(app->font, "XOR", 0, White);
-	textures->simpleXOR = SDL_CreateTextureFromSurface(renderer, surface);
-	SDL_DestroySurface(surface);
-
-	surface = TTF_RenderText_Blended(app->font, "XNOR", 0, White);
-	textures->simpleXNOR = SDL_CreateTextureFromSurface(renderer, surface);
-	SDL_DestroySurface(surface);
+	textures->simpleAND = newTextTexture(renderer, "AND", app->font, White);
+	textures->simpleOR = newTextTexture(renderer, "OR", app->font, White);
+	textures->simpleNOT = newTextTexture(renderer, "NOT", app->font, White);
+	textures->simpleNAND = newTextTexture(renderer, "NAND", app->font, White);
+	textures->simpleNOR = newTextTexture(renderer, "NOR", app->font, White);
+	textures->simpleXOR = newTextTexture(renderer, "XOR", app->font, White);
+	textures->simpleXNOR = newTextTexture(renderer, "XNOR", app->font, White);
 };
 
 void initApp(App *app) {
+	UI *ui = &app->ui;
+
 	initCtx(&app->ctx);
 
 	u8 sucess = SDL_Init(SDL_INIT_VIDEO);
@@ -90,7 +72,20 @@ void initApp(App *app) {
 	app->window = createWindow();
 	app->renderer = createRenderer(app->window);
 
+	app->menubarHeight = 80;
 	loadTextures(app);
+
+	ui->stopSimulateTexture = newTextTexture(app->renderer, "Stop", app->font, newColor(0, 0, 0, 0));
+	ui->startSimulateTexture = newTextTexture(app->renderer, "Simulate", app->font, newColor(0, 0, 0, 0));
+
+	// Init ui
+	UIButton simulateButton = {
+		newVec2(10.0f, 15.0f),
+		newVec2(120.0f, 50.0f),
+		ui->startSimulateTexture,
+		newColor(50, 150, 50, 0)
+	};
+	ui->simulateButton = simulateButton;
 }
 
 void updateSimpleChip(App *app, ChipEntity *chip, SimpleChip *simpleChip) {
@@ -100,7 +95,7 @@ void updateSwitch(App *app, ChipEntity *chip, InputChip *inputChip) {
 	Vec2 switchSize = {50.0f, 100.0f};
 	Vec2 mouseSize = {0.0f, 0.0f};
 	if (app->mouse.isClick) {
-		if (collideAABB(chip->position, switchSize, app->mouse.position, mouseSize)) {
+		if (collideAABB(translatedVec2(chip->position, newVec2(0.0f, app->menubarHeight)), switchSize, app->mouse.position, mouseSize)) {
 			inputChip->out = !inputChip->out;
 		}
 	}
@@ -129,11 +124,28 @@ void updateChip(App *app, ChipEntity *chip) {
 }
 
 void update(App *app) {
+	UI *ui = &app->ui;
 	Chips *chips = &app->ctx.chips;
 
 	SDL_GetMouseState(&app->mouse.position.x, &app->mouse.position.y);
+
+	if (app->mouse.isClick && isHoveringButton(app->mouse.position, ui->simulateButton)) {
+		app->simulating = !app->simulating;
+		if (app->simulating) {
+			ui->simulateButton.texture = ui->stopSimulateTexture;
+			ui->simulateButton.bgColor = newColor(150, 50, 50, 0);
+		} else {
+			ui->simulateButton.texture = ui->startSimulateTexture;
+			ui->simulateButton.bgColor = newColor(50, 150, 50, 0);
+		}
+	}
+
 	for (u32 i = 0; i < chips->len; i++) {
 		updateChip(app, chips->array + i);
+	}
+
+	if (app->simulating) {
+		simulate(chips);
 	}
 }
 
