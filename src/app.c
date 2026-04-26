@@ -66,11 +66,14 @@ void initApp(App *app) {
 		exit(1);
 	}
 
-	app->mouse.isClick = 0;
 	app->running = 1;
-	app->bgColor = newColor(220, 220, 220, 0);
 	app->window = createWindow();
 	app->renderer = createRenderer(app->window);
+
+	// init values
+	app->simulating = 0;
+	app->mouse.isClick = 0;
+	app->bgColor = newColor(220, 220, 220, 0);
 
 	app->menubarHeight = 80;
 	loadTextures(app);

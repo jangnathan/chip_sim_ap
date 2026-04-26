@@ -78,3 +78,4 @@ void chipsInit(Chips *chips);
 u32 newSimpleChip(Chips *chips, SimpleChipType type);
 u32 newInputChip(Chips *chips, InputChipType type);
 u8 linkChipInsignal(Chips *chips, u32 targetID, u8 targetN, u32 inputID, u8 n);
+u8 getInSignalOutput(Chips *chips, InSignal inSignal);

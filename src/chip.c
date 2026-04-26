@@ -96,3 +96,18 @@ u8 linkChipInsignal(Chips *chips, u32 targetID, u8 targetN, u32 inputID, u8 n) {
 	}
 	return 1;
 }
+
+u8 getInSignalOutput(Chips *chips, InSignal inSignal) {
+	ChipEntity chipEntity = chips->array[inSignal.ID];
+	switch (chipEntity.type) {
+		case CE_SIMPLE:
+			return chips->simpleChipsArray[chipEntity.ID].out;
+			break;
+		case CE_INPUT:
+			return chips->inputChipsArray[chipEntity.ID].out;
+			break;
+	}
+
+	return 0;
+	// implement this function right here
+}
