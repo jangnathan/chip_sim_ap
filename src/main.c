@@ -31,6 +31,29 @@ int main() {
 	linkChipInsignal(chips, out2, 0, out, 0);
 	linkChipInsignal(chips, out2, 1, c, 0);
 
+	// SR LATCH
+	u32 s = newInputChip(chips, SWITCH);
+	chips->array[s].position = newVec2(350.0f, 50.0f);
+	u32 r = newInputChip(chips, SWITCH);
+	chips->array[r].position = newVec2(450.0f, 50.0f);
+
+	u32 nor = newSimpleChip(chips, NOR);
+	chips->array[nor].position = newVec2(350.0f, 250.0f);
+	u32 nor2 = newSimpleChip(chips, NOR);
+	chips->array[nor2].position = newVec2(450.0f, 200.0f);
+
+	u32 orgate = newSimpleChip(chips, OR);
+	chips->array[orgate].position = newVec2(375.0f, 350.0f);
+
+	linkChipInsignal(chips, nor, 0, s, 0);
+	linkChipInsignal(chips, nor, 1, nor2, 0);
+
+	linkChipInsignal(chips, nor2, 1, r, 0);
+	linkChipInsignal(chips, nor2, 0, nor, 0);
+
+	linkChipInsignal(chips, orgate, 0, nor, 0);
+	linkChipInsignal(chips, orgate, 1, nor, 0);
+
 	app.running = 1;
 	while (app.running) {
 		handleEvents(&app);

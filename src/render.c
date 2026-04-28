@@ -28,12 +28,14 @@ void drawClock(SDL_Renderer *renderer, float x, float y) {
 
 // a means input, b means the output which is used for out input
 void drawWiring(SDL_Renderer *renderer, float ax, float ay, float bx, float by) {
-	SDL_FRect vert = {ax, ay, 2.0f, by - ay};
-	SDL_FRect hor = {bx, by - 1.0f, ax - bx, 2.0f};
+	SDL_FRect vert = {ax, ay, 2.0f, by - ay - 2.0f};
+	SDL_FRect hor = {bx, by - 4.0f, ax - bx, 2.0f};
+	SDL_FRect nub = {bx, by - 4.0f, 2.0f, 4.0f};
 
 	SDL_SetRenderDrawColor(renderer, 25, 25, 120, 0);
 	SDL_RenderFillRect(renderer, &vert);
 	SDL_RenderFillRect(renderer, &hor);
+	SDL_RenderFillRect(renderer, &nub);
 }
 
 void renderSimpleChip(App *app, ChipEntity *chip, SimpleChip *simpleChip) {
@@ -53,7 +55,7 @@ void renderSimpleChip(App *app, ChipEntity *chip, SimpleChip *simpleChip) {
 	Vec2 inAPos = chipsArray[simpleChip->inSignals[0].ID].position;
 	Vec2 inBPos = chipsArray[simpleChip->inSignals[1].ID].position;
 	drawWiring(renderer, inAPos.x, inAPos.y + app->menubarHeight, pos.x, pos.y);
-	drawWiring(renderer, inBPos.x, inBPos.y + app->menubarHeight, pos.x, pos.y);
+	drawWiring(renderer, inBPos.x, inBPos.y + app->menubarHeight, pos.x + 48.0f, pos.y);
 
 	SDL_FRect text = {pos.x + 5.0f, pos.y + 15.0f, 40.0f, 20.0f};
 	switch (simpleChip->type) {

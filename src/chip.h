@@ -41,6 +41,7 @@ typedef struct {
 	// inputs
 	InSignal inSignals[2];
 
+	u8 nextOut; // to synchronize
 	u8 out;
 	// it can support up to 8 bits of output
 } SimpleChip;
