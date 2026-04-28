@@ -39,6 +39,9 @@ int main() {
 
 	u32 nor = newSimpleChip(chips, NOR);
 	chips->array[nor].position = newVec2(350.0f, 250.0f);
+	// in a real world, one gate would be reached faster
+	chips->simpleChipsArray[chips->array[nor].ID].out = 1;
+
 	u32 nor2 = newSimpleChip(chips, NOR);
 	chips->array[nor2].position = newVec2(450.0f, 200.0f);
 
