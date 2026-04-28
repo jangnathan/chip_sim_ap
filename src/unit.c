@@ -20,7 +20,7 @@ Vec2 newVec2(float x, float y) {
 
 Vec2 translatedVec2(Vec2 a, Vec2 b) {
 	return newVec2(a.x + b.x, a.y + b.y);
-};
+}
 
 u8 collideABB(Vec2 a_pos, Vec2 b_pos, Vec2 b_size) {
 	if (a_pos.x >= b_pos.x && a_pos.x <= b_pos.x + b_size.x &&

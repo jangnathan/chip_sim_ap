@@ -16,7 +16,6 @@ src/main.c
 src/app.c
 src/render.c
 src/chip.c
-src/logic_gate.c
 src/simulate.c
 src/unit.c
 src/ui.c
@@ -25,4 +24,4 @@ src/ui.c
 target_link_libraries(chipsim PRIVATE SDL3::SDL3)
 target_link_libraries(chipsim PRIVATE SDL3_ttf::SDL3_ttf)
 
-FILE(COPY "asset/" DESTINATION "${CMAKE_BINARY_DIR}/asset/")
+install(DIRECTORY "asset/" DESTINATION share/chipsimap)
