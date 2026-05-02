@@ -9,8 +9,9 @@
 
 // to account for camera, zoom, offset etc
 Vec2 world2screenVec2(App *app, Vec2 a) {
-	a.y += app->menubarHeight;
-	return scaleVec2(translateVec2(a, app->camera.position), app->camera.zoom);
+	Vec2 out = scaleVec2(translateVec2(a, app->camera.position), app->camera.zoom);
+	out.y += app->menubarHeight;
+	return out;
 }
 
 SDL_Window *createWindow() {
@@ -95,11 +96,9 @@ void initApp(App *app) {
 		SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT);
 	app->mouse.cursorMove =
 		SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_MOVE);
-
 	SDL_SetCursor(app->mouse.cursorDefault);
 
 	loadTextures(app);
-
 	ui->stopSimulateTexture = newTextTexture(app->renderer, "Stop", app->font, newColor(0, 0, 0, 0));
 	ui->startSimulateTexture = newTextTexture(app->renderer, "Simulate", app->font, newColor(0, 0, 0, 0));
 
@@ -158,7 +157,8 @@ void update(App *app) {
 	if (keystates[SDL_SCANCODE_SPACE]) {
 		SDL_SetCursor(app->mouse.cursorMove);
 		if (app->mouse.leftKeyHeld) {
-			app->camera.position = subtractVec2(app->camera.oldPosition, subtractVec2(app->mouse.oldPosition, app->mouse.position));
+			app->camera.position = subtractVec2(app->camera.oldPosition,
+																			 scaleVec2(subtractVec2(app->mouse.oldPosition, app->mouse.position), 1.0f / app->camera.zoom));
 		}
 	}
 

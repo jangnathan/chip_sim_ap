@@ -24,7 +24,8 @@ typedef enum {
 
 typedef enum {
 	CE_SIMPLE,
-	CE_INPUT
+	CE_INPUT,
+	CE_GROUP
 } ChipEntityType;
 
 // Input wiring
@@ -51,6 +52,11 @@ typedef struct {
 	InputChipType type;
 	u8 out;
 } InputChip;
+
+typedef struct {
+	u16 len; 
+	u32 *IDs;
+} Group;
 
 typedef struct {
 	u32 ID;
