@@ -72,10 +72,26 @@ void initApp(App *app) {
 
 	// init values
 	app->simulating = 0;
-	app->mouse.isClick = 0;
-	app->bgColor = newColor(220, 220, 220, 0);
+	app->mouse.leftClick = 0;
+	app->mouse.rightClick = 0;
+	app->mouse.leftKeyHeld = 0;
+	app->mouse.oldPosition = newVec2(0.0f, 0.0f);
+	app->mouse.position = newVec2(0.0f, 0.0f);
 
+	app->camera.zoom = 1.0f;
+	app->camera.position = newVec2(0.0f, 0.0f);
+	app->camera.oldPosition = newVec2(0.0f, 0.0f);
+
+	app->bgColor = newColor(220, 220, 220, 0);
 	app->menubarHeight = 80;
+
+	app->mouse.cursorDefault =
+		SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT);
+	app->mouse.cursorMove =
+		SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_MOVE);
+
+	SDL_SetCursor(app->mouse.cursorDefault);
+
 	loadTextures(app);
 
 	ui->stopSimulateTexture = newTextTexture(app->renderer, "Stop", app->font, newColor(0, 0, 0, 0));
@@ -95,10 +111,11 @@ void updateSimpleChip(App *app, ChipEntity *chip, SimpleChip *simpleChip) {
 }
 
 void updateSwitch(App *app, ChipEntity *chip, InputChip *inputChip) {
-	Vec2 switchSize = {50.0f, 100.0f};
+	Vec2 switchSize = {50.0f, 120.0f};
 	Vec2 mouseSize = {0.0f, 0.0f};
-	if (app->mouse.isClick) {
-		if (collideAABB(translatedVec2(chip->position, newVec2(0.0f, app->menubarHeight)), switchSize, app->mouse.position, mouseSize)) {
+	if (app->mouse.leftClick) {
+		if (collideAABB(translateVec2(translateVec2(chip->position, app->camera.position),
+																newVec2(0.0f, app->menubarHeight)), switchSize, app->mouse.position, mouseSize)) {
 			inputChip->out = !inputChip->out;
 		}
 	}
@@ -130,9 +147,16 @@ void update(App *app) {
 	UI *ui = &app->ui;
 	Chips *chips = &app->ctx.chips;
 
-	SDL_GetMouseState(&app->mouse.position.x, &app->mouse.position.y);
+	SDL_SetCursor(app->mouse.cursorDefault);
+	const bool *keystates = SDL_GetKeyboardState(NULL);
+	if (keystates[SDL_SCANCODE_SPACE]) {
+		SDL_SetCursor(app->mouse.cursorMove);
+		if (app->mouse.leftKeyHeld) {
+			app->camera.position = subtractVec2(app->camera.oldPosition, subtractVec2(app->mouse.oldPosition, app->mouse.position));
+		}
+	}
 
-	if (app->mouse.isClick && isHoveringButton(app->mouse.position, ui->simulateButton)) {
+	if (app->mouse.leftClick && isHoveringButton(app->mouse.position, ui->simulateButton)) {
 		app->simulating = !app->simulating;
 		if (app->simulating) {
 			ui->simulateButton.texture = ui->stopSimulateTexture;
@@ -153,9 +177,8 @@ void update(App *app) {
 }
 
 void handleEvents(App *app) {
-	if (app->mouse.isClick) {
-		app->mouse.isClick = 0;
-	}
+	app->mouse.leftClick = 0;
+	app->mouse.rightClick = 0;
 
 	SDL_Event event;
 	while (SDL_PollEvent(&event)) {
@@ -163,10 +186,27 @@ void handleEvents(App *app) {
 			case SDL_EVENT_QUIT:
 				app->running = 0;
 				break;
+			case SDL_EVENT_MOUSE_MOTION:
+				app->mouse.position = newVec2(event.motion.x, event.motion.y);
+				break;
 			case SDL_EVENT_MOUSE_BUTTON_DOWN:
 				if (event.button.button == SDL_BUTTON_LEFT) {
-					app->mouse.isClick = 1;
+					if (!app->mouse.leftKeyHeld) {
+						app->mouse.oldPosition = app->mouse.position;
+						app->camera.oldPosition = app->camera.position;
+					}
+					app->mouse.leftKeyHeld = 1;
 				}
+				break;
+			case SDL_EVENT_MOUSE_BUTTON_UP:
+				if (event.button.button == SDL_BUTTON_LEFT) {
+					app->mouse.leftKeyHeld = 1;
+					app->mouse.leftClick = 1;
+				}
+				if (event.button.button == SDL_BUTTON_RIGHT) {
+					app->mouse.rightClick = 1;
+				}
+				app->mouse.leftKeyHeld = 0;
 				break;
 			default:
 				break;
@@ -175,6 +215,9 @@ void handleEvents(App *app) {
 }
 
 void closeApp(App *app) {
+	SDL_DestroyCursor(app->mouse.cursorDefault);
+	SDL_DestroyCursor(app->mouse.cursorMove);
+
 	SDL_DestroyRenderer(app->renderer);
 	SDL_DestroyWindow(app->window);
 	SDL_Quit();

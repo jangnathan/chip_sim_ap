@@ -18,8 +18,11 @@ Vec2 newVec2(float x, float y) {
 	return vec2;
 }
 
-Vec2 translatedVec2(Vec2 a, Vec2 b) {
+Vec2 translateVec2(Vec2 a, Vec2 b) {
 	return newVec2(a.x + b.x, a.y + b.y);
+}
+Vec2 subtractVec2(Vec2 a, Vec2 b) {
+	return newVec2(a.x - b.x, a.y - b.y);
 }
 
 u8 collideABB(Vec2 a_pos, Vec2 b_pos, Vec2 b_size) {

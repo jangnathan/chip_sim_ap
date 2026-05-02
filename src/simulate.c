@@ -56,6 +56,8 @@ u8 deltaCycle(Chips *chips) {
 			break;
 		}
 	}
+
+	return 1;
 }
 
 u8 simulate(Chips *chips) {

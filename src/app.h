@@ -12,8 +12,19 @@ typedef enum {
 } MouseTarget;
 
 typedef struct {
+	Vec2 oldPosition;
 	Vec2 position;
-	u8 isClick;
+	float zoom;
+} Camera;
+
+typedef struct {
+	SDL_Cursor *cursorDefault;
+	SDL_Cursor *cursorMove;
+	Vec2 oldPosition;
+	Vec2 position;
+	u8 leftClick;
+	u8 rightClick;
+	u8 leftKeyHeld;
 } Mouse;
 
 typedef struct {
@@ -35,13 +46,14 @@ typedef struct {
 	SDL_Window *window;
 	SDL_Renderer *renderer;
 
-	UI ui;
-
 	Textures textures;
 	TTF_Font *font;
 	Color bgColor;
 
 	u16 menubarHeight;
+	UI ui;
+
+	Camera camera;
 
 	Mouse mouse;
 	u8 running;

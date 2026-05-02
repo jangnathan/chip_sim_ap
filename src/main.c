@@ -33,8 +33,8 @@ int main() {
 
 	// SR LATCH
 	u32 s = newInputChip(chips, SWITCH);
-	chips->array[s].position = newVec2(350.0f, 50.0f);
 	u32 r = newInputChip(chips, SWITCH);
+	chips->array[s].position = newVec2(350.0f, 50.0f);
 	chips->array[r].position = newVec2(450.0f, 50.0f);
 
 	u32 nor = newSimpleChip(chips, NOR);
@@ -63,7 +63,7 @@ int main() {
 		update(&app);
 
 		render(&app);
-		SDL_Delay(16);
+		SDL_Delay(33);
 	}
 
 	closeApp(&app);

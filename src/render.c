@@ -44,7 +44,7 @@ void renderSimpleChip(App *app, ChipEntity *chip, SimpleChip *simpleChip) {
 	Textures *textures = &app->textures;
 
 	// pos used to render
-	Vec2 pos = chip->position;
+	Vec2 pos = translateVec2(chip->position, app->camera.position);
 	pos.y += app->menubarHeight;
 
 	SDL_FRect box = {pos.x, pos.y, 50.0f, 50.0f};
@@ -52,8 +52,8 @@ void renderSimpleChip(App *app, ChipEntity *chip, SimpleChip *simpleChip) {
 	SDL_RenderFillRect(renderer, &box);
 
 	//Vec2 wireIn = translateVec2(pos, newVec2(10.0f, 0.0f));
-	Vec2 inAPos = chipsArray[simpleChip->inSignals[0].ID].position;
-	Vec2 inBPos = chipsArray[simpleChip->inSignals[1].ID].position;
+	Vec2 inAPos = translateVec2(chipsArray[simpleChip->inSignals[0].ID].position, app->camera.position);
+	Vec2 inBPos = translateVec2(chipsArray[simpleChip->inSignals[1].ID].position, app->camera.position);
 	drawWiring(renderer, inAPos.x, inAPos.y + app->menubarHeight, pos.x, pos.y);
 	drawWiring(renderer, inBPos.x, inBPos.y + app->menubarHeight, pos.x + 48.0f, pos.y);
 
@@ -95,10 +95,12 @@ void renderSimpleChip(App *app, ChipEntity *chip, SimpleChip *simpleChip) {
 void renderInputChip(App *app, ChipEntity *chip, InputChip *inputChip) {
 	switch (inputChip->type) {
 		case CLOCK:
-			drawClock(app->renderer, chip->position.x, chip->position.y + app->menubarHeight);
+			drawClock(app->renderer, chip->position.x + app->camera.position.x,
+						 (chip->position.y + app->camera.position.y) + app->menubarHeight);
 			break;
 		case SWITCH:
-			drawSwitch(app->renderer, inputChip->out, chip->position.x, chip->position.y + app->menubarHeight);
+			drawSwitch(app->renderer, inputChip->out, chip->position.x + app->camera.position.x,
+							(chip->position.y + app->camera.position.y) + app->menubarHeight);
 			break;
 	}
 }
@@ -137,17 +139,23 @@ void render(App *app) {
 	SDL_SetRenderDrawColor(renderer, bgColor.r, bgColor.g, bgColor.b,  bgColor.a);
 	SDL_RenderClear(renderer);
 
-	int winWidth, winHeight;
-	SDL_GetWindowSize(window, &winWidth, &winHeight);
-	SDL_FRect menubar = {0.0f, app->menubarHeight, winWidth, 1.0f};
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, bgColor.a);
-	SDL_RenderFillRect(renderer, &menubar);
-
-	renderButton(renderer, ui->simulateButton);
-
 	// render chips
 	for (u32 i = 1; i < chips->len; i++) {
 		renderChip(app, i);
 	}
+
+	// render UI
+
+	int winWidth, winHeight;
+	SDL_GetWindowSize(window, &winWidth, &winHeight);
+	SDL_FRect menubar = {0.0f, 0, winWidth, app->menubarHeight};
+	SDL_FRect menubarOutline = {0.0f, app->menubarHeight, winWidth, 1.0f};
+	SDL_SetRenderDrawColor(renderer, 245, 245, 245, 0);
+	SDL_RenderFillRect(renderer, &menubar);
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+	SDL_RenderFillRect(renderer, &menubarOutline);
+
+	renderButton(renderer, ui->simulateButton);
+	
 	SDL_RenderPresent(renderer);
 }
