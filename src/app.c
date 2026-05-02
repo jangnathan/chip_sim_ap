@@ -7,6 +7,12 @@
 #define WINDOW_WIDTH 1080
 #define WINDOW_HEIGHT 720
 
+// to account for camera, zoom, offset etc
+Vec2 world2screenVec2(App *app, Vec2 a) {
+	a.y += app->menubarHeight;
+	return scaleVec2(translateVec2(a, app->camera.position), app->camera.zoom);
+}
+
 SDL_Window *createWindow() {
 	SDL_Window *window = SDL_CreateWindow("ChipSim", WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE);
 	if (!window) {
@@ -114,8 +120,8 @@ void updateSwitch(App *app, ChipEntity *chip, InputChip *inputChip) {
 	Vec2 switchSize = {50.0f, 120.0f};
 	Vec2 mouseSize = {0.0f, 0.0f};
 	if (app->mouse.leftClick) {
-		if (collideAABB(translateVec2(translateVec2(chip->position, app->camera.position),
-																newVec2(0.0f, app->menubarHeight)), switchSize, app->mouse.position, mouseSize)) {
+		if (collideAABB(world2screenVec2(app, chip->position), scaleVec2(switchSize, app->camera.zoom),
+									app->mouse.position, mouseSize)) {
 			inputChip->out = !inputChip->out;
 		}
 	}
@@ -176,6 +182,27 @@ void update(App *app) {
 	}
 }
 
+void handleKeyPress(App *app, SDL_KeyboardEvent event) {
+	switch (event.scancode) {
+		case SDL_SCANCODE_MINUS:
+			app->camera.zoom -= 0.1f;
+
+			if (app->camera.zoom <= 0.1f) {
+				app->camera.zoom = 0.1f;
+			}
+			break;
+		case SDL_SCANCODE_EQUALS:
+			app->camera.zoom += 0.1f;
+
+			if (app->camera.zoom >= 3.0f) {
+				app->camera.zoom = 3.0f;
+			}
+			break;
+		default:
+			break;
+	}
+}
+
 void handleEvents(App *app) {
 	app->mouse.leftClick = 0;
 	app->mouse.rightClick = 0;
@@ -207,6 +234,12 @@ void handleEvents(App *app) {
 					app->mouse.rightClick = 1;
 				}
 				app->mouse.leftKeyHeld = 0;
+				break;
+			case SDL_EVENT_KEY_DOWN:
+				if (event.key.repeat) {
+				} else {
+					handleKeyPress(app, event.key);
+				}
 				break;
 			default:
 				break;

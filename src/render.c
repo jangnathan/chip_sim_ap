@@ -1,10 +1,18 @@
 #include "render.h"
 
-void drawSwitch(SDL_Renderer *renderer, u8 on, float x, float y) {
-	SDL_FRect indicator = {x, y, 50.0f, 20.0f};
-	SDL_FRect box = {x, y + 20.0f, 50.0f, 100.0f};
-	SDL_FRect switchPath = {x + 5.0f, y + 20.0f + 5.0f, 40.0f, 90.0f};
-	SDL_FRect switchBox = {x + 5.0f, y + 20.0f + 5.0f + (on * 45.0f), 40.0f, 45.0f};
+SDL_FRect createRenderRect(App *app, float x, float y, float width, float height) {
+	SDL_FRect rect = {(x + app->camera.position.x) * app->camera.zoom,
+		(y + app->camera.position.y) * app->camera.zoom + app->menubarHeight, width * app->camera.zoom, height * app->camera.zoom};
+	return rect;
+}
+
+void drawSwitch(App *app, u8 on, float x, float y) {
+	SDL_Renderer *renderer = app->renderer;
+
+	SDL_FRect indicator = createRenderRect(app, x, y, 50.0f, 20.0f);
+	SDL_FRect box = createRenderRect(app, x, y + 20.0f, 50.0f, 100.0f);
+	SDL_FRect switchPath = createRenderRect(app, x + 5.0f, y + 20.0f + 5.0f, 40.0f, 90.0f);
+	SDL_FRect switchBox = createRenderRect(app, x + 5.0f, y + 20.0f + 5.0f + (on * 45.0f), 40.0f, 45.0f);
 
 	if (on) {
 		SDL_SetRenderDrawColor(renderer, 205, 20, 20, 0);
@@ -23,14 +31,16 @@ void drawSwitch(SDL_Renderer *renderer, u8 on, float x, float y) {
 	SDL_RenderFillRect(renderer, &switchBox);
 }
 
-void drawClock(SDL_Renderer *renderer, float x, float y) {
+void drawClock(App *app, float x, float y) {
 }
 
 // a means input, b means the output which is used for out input
-void drawWiring(SDL_Renderer *renderer, float ax, float ay, float bx, float by) {
-	SDL_FRect vert = {ax, ay, 2.0f, by - ay - 2.0f};
-	SDL_FRect hor = {bx, by - 4.0f, ax - bx, 2.0f};
-	SDL_FRect nub = {bx, by - 4.0f, 2.0f, 4.0f};
+void drawWiring(App *app, float ax, float ay, float bx, float by) {
+	SDL_Renderer *renderer = app->renderer;
+
+	SDL_FRect vert = createRenderRect(app, ax, ay, 2.0f, by - ay - 2.0f);
+	SDL_FRect hor = createRenderRect(app, bx, by - 4.0f, ax - bx, 2.0f);
+	SDL_FRect nub = createRenderRect(app, bx, by - 4.0f, 2.0f, 4.0f);
 
 	SDL_SetRenderDrawColor(renderer, 25, 25, 120, 0);
 	SDL_RenderFillRect(renderer, &vert);
@@ -44,20 +54,19 @@ void renderSimpleChip(App *app, ChipEntity *chip, SimpleChip *simpleChip) {
 	Textures *textures = &app->textures;
 
 	// pos used to render
-	Vec2 pos = translateVec2(chip->position, app->camera.position);
-	pos.y += app->menubarHeight;
+	Vec2 pos = chip->position;
 
-	SDL_FRect box = {pos.x, pos.y, 50.0f, 50.0f};
+	SDL_FRect box = createRenderRect(app, pos.x, pos.y, 50.0f, 50.0f);
 	SDL_SetRenderDrawColor(renderer, 25, 25, 25, 0);
 	SDL_RenderFillRect(renderer, &box);
 
 	//Vec2 wireIn = translateVec2(pos, newVec2(10.0f, 0.0f));
-	Vec2 inAPos = translateVec2(chipsArray[simpleChip->inSignals[0].ID].position, app->camera.position);
-	Vec2 inBPos = translateVec2(chipsArray[simpleChip->inSignals[1].ID].position, app->camera.position);
-	drawWiring(renderer, inAPos.x, inAPos.y + app->menubarHeight, pos.x, pos.y);
-	drawWiring(renderer, inBPos.x, inBPos.y + app->menubarHeight, pos.x + 48.0f, pos.y);
+	Vec2 inAPos = chipsArray[simpleChip->inSignals[0].ID].position;
+	Vec2 inBPos = chipsArray[simpleChip->inSignals[1].ID].position;
+	drawWiring(app, inAPos.x, inAPos.y, pos.x, pos.y);
+	drawWiring(app, inBPos.x, inBPos.y, pos.x + 48.0f, pos.y);
 
-	SDL_FRect text = {pos.x + 5.0f, pos.y + 15.0f, 40.0f, 20.0f};
+	SDL_FRect text = createRenderRect(app, pos.x + 5.0f, pos.y + 15.0f, 40.0f, 20.0f);
 	switch (simpleChip->type) {
 		case AND:
 			SDL_RenderTexture(renderer, textures->simpleAND, NULL, &text);
@@ -82,7 +91,7 @@ void renderSimpleChip(App *app, ChipEntity *chip, SimpleChip *simpleChip) {
 			break;
 	}
 
-	SDL_FRect indicator = {pos.x, pos.y + 50, 50.0f, 10.0f};
+	SDL_FRect indicator = createRenderRect(app, pos.x, pos.y + 50, 50.0f, 10.0f);
 
 	if (simpleChip->out) {
 		SDL_SetRenderDrawColor(renderer, 205, 20, 20, 0);
@@ -95,12 +104,10 @@ void renderSimpleChip(App *app, ChipEntity *chip, SimpleChip *simpleChip) {
 void renderInputChip(App *app, ChipEntity *chip, InputChip *inputChip) {
 	switch (inputChip->type) {
 		case CLOCK:
-			drawClock(app->renderer, chip->position.x + app->camera.position.x,
-						 (chip->position.y + app->camera.position.y) + app->menubarHeight);
+			drawClock(app, chip->position.x, chip->position.y);
 			break;
 		case SWITCH:
-			drawSwitch(app->renderer, inputChip->out, chip->position.x + app->camera.position.x,
-							(chip->position.y + app->camera.position.y) + app->menubarHeight);
+			drawSwitch(app, inputChip->out, chip->position.x, chip->position.y);
 			break;
 	}
 }
@@ -156,6 +163,6 @@ void render(App *app) {
 	SDL_RenderFillRect(renderer, &menubarOutline);
 
 	renderButton(renderer, ui->simulateButton);
-	
+
 	SDL_RenderPresent(renderer);
 }
