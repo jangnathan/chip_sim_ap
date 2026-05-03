@@ -9,7 +9,7 @@
 
 // to account for camera, zoom, offset etc
 Vec2 world2screenVec2(App *app, Vec2 a) {
-	Vec2 out = scaleVec2(translateVec2(a, app->camera.position), app->camera.zoom);
+	Vec2 out = scaleVec2(subtractVec2(a, app->camera.position), app->camera.zoom);
 	out.y += app->menubarHeight;
 	return out;
 }
@@ -112,38 +112,41 @@ void initApp(App *app) {
 	ui->simulateButton = simulateButton;
 }
 
-void updateSimpleChip(App *app, ChipEntity *chip, SimpleChip *simpleChip) {
+void updateSimpleChip(App *app, Vec2 pos, SimpleChip *simpleChip) {
 }
 
-void updateSwitch(App *app, ChipEntity *chip, InputChip *inputChip) {
+void updateSwitch(App *app, Vec2 pos, InputChip *inputChip) {
 	Vec2 switchSize = {50.0f, 120.0f};
 	Vec2 mouseSize = {0.0f, 0.0f};
 	if (app->mouse.leftClick) {
-		if (collideAABB(world2screenVec2(app, chip->position), scaleVec2(switchSize, app->camera.zoom),
+		if (collideAABB(pos, scaleVec2(switchSize, app->camera.zoom),
 									app->mouse.position, mouseSize)) {
 			inputChip->out = !inputChip->out;
 		}
 	}
 }
 
-void updateInputChip(App *app, ChipEntity *chip, InputChip *inputChip) {
+void updateInputChip(App *app, Vec2 pos, InputChip *inputChip) {
 	switch (inputChip->type) {
 		case CLOCK:
 			break;
 		case SWITCH:
-			updateSwitch(app, chip, inputChip);
+			updateSwitch(app, pos, inputChip);
 			break;
 	}
 }
 
 void updateChip(App *app, ChipEntity *chip) {
 	Chips *chips = &app->ctx.chips;
+	Vec2 pos = world2screenVec2(app, chip->position);
 	switch (chip->type) {
+		case CE_NONE:
+			break;
 		case CE_SIMPLE:
-			updateSimpleChip(app, chip, chips->simpleChipsArray + chip->ID);
+			updateSimpleChip(app, pos, chips->simpleChipsArray + chip->ID);
 			break;
 		case CE_INPUT:
-			updateInputChip(app, chip, chips->inputChipsArray + chip->ID);
+			updateInputChip(app, pos, chips->inputChipsArray + chip->ID);
 			break;
 	}
 }
@@ -157,7 +160,7 @@ void update(App *app) {
 	if (keystates[SDL_SCANCODE_SPACE]) {
 		SDL_SetCursor(app->mouse.cursorMove);
 		if (app->mouse.leftKeyHeld) {
-			app->camera.position = subtractVec2(app->camera.oldPosition,
+			app->camera.position = translateVec2(app->camera.oldPosition,
 																			 scaleVec2(subtractVec2(app->mouse.oldPosition, app->mouse.position), 1.0f / app->camera.zoom));
 		}
 	}

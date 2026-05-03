@@ -10,6 +10,7 @@ void chipsInit(Chips *chips) {
 	chips->len = 1;
 	chips->size = INIT_ID_SIZE;
 	chips->array = malloc(sizeof(ChipEntity) * chips->size);
+	chips->array[0].position = newVec2(0.0f, 0.0f);
 
 	chips->simpleChipsLen = 1;
 	chips->simpleChipsSize = 16;

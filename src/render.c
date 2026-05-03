@@ -1,8 +1,8 @@
 #include "render.h"
 
 SDL_FRect createRenderRect(App *app, float x, float y, float width, float height) {
-	SDL_FRect rect = {(x + app->camera.position.x) * app->camera.zoom,
-		(y + app->camera.position.y) * app->camera.zoom + app->menubarHeight, width * app->camera.zoom, height * app->camera.zoom};
+	SDL_FRect rect = {(x - app->camera.position.x) * app->camera.zoom,
+		(y - app->camera.position.y) * app->camera.zoom + app->menubarHeight, width * app->camera.zoom, height * app->camera.zoom};
 	return rect;
 }
 
@@ -48,13 +48,10 @@ void drawWiring(App *app, float ax, float ay, float bx, float by) {
 	SDL_RenderFillRect(renderer, &nub);
 }
 
-void renderSimpleChip(App *app, ChipEntity *chip, SimpleChip *simpleChip) {
+void renderSimpleChip(App *app, Vec2 pos, SimpleChip *simpleChip) {
 	ChipEntity* chipsArray = app->ctx.chips.array;
 	SDL_Renderer *renderer = app->renderer;
 	Textures *textures = &app->textures;
-
-	// pos used to render
-	Vec2 pos = chip->position;
 
 	SDL_FRect box = createRenderRect(app, pos.x, pos.y, 50.0f, 50.0f);
 	SDL_SetRenderDrawColor(renderer, 25, 25, 25, 0);
@@ -63,8 +60,8 @@ void renderSimpleChip(App *app, ChipEntity *chip, SimpleChip *simpleChip) {
 	//Vec2 wireIn = translateVec2(pos, newVec2(10.0f, 0.0f));
 	Vec2 inAPos = chipsArray[simpleChip->inSignals[0].ID].position;
 	Vec2 inBPos = chipsArray[simpleChip->inSignals[1].ID].position;
-	drawWiring(app, inAPos.x, inAPos.y, pos.x, pos.y);
-	drawWiring(app, inBPos.x, inBPos.y, pos.x + 48.0f, pos.y);
+	drawWiring(app, inAPos.x, inAPos.y + 30, pos.x, pos.y);
+	drawWiring(app, inBPos.x, inBPos.y + 30, pos.x + 48.0f, pos.y);
 
 	SDL_FRect text = createRenderRect(app, pos.x + 5.0f, pos.y + 15.0f, 40.0f, 20.0f);
 	switch (simpleChip->type) {
@@ -101,13 +98,13 @@ void renderSimpleChip(App *app, ChipEntity *chip, SimpleChip *simpleChip) {
 	SDL_RenderFillRect(renderer, &indicator);
 }
 
-void renderInputChip(App *app, ChipEntity *chip, InputChip *inputChip) {
+void renderInputChip(App *app, Vec2 pos, InputChip *inputChip) {
 	switch (inputChip->type) {
 		case CLOCK:
-			drawClock(app, chip->position.x, chip->position.y);
+			drawClock(app, pos.x, pos.y);
 			break;
 		case SWITCH:
-			drawSwitch(app, inputChip->out, chip->position.x, chip->position.y);
+			drawSwitch(app, inputChip->out, pos.x, pos.y);
 			break;
 	}
 }
@@ -119,11 +116,13 @@ void renderChip(App *app, u32 i) {
 	u32 localID = chips->array[i].ID;
 
 	switch (chips->array[i].type) {
+		case CE_NONE:
+			break;
 		case CE_SIMPLE:
-			renderSimpleChip(app, chips->array + i, chips->simpleChipsArray + localID);
+			renderSimpleChip(app, chips->array[i].position, chips->simpleChipsArray + localID);
 			break;
 		case CE_INPUT:
-			renderInputChip(app, chips->array + i, chips->inputChipsArray + localID);
+			renderInputChip(app, chips->array[i].position, chips->inputChipsArray + localID);
 			break;
 	}
 }
