@@ -31,6 +31,7 @@ u32 newChipEntity(Chips *chips, u32 ID, ChipEntityType type) {
 		chips->array = realloc(chips->array, sizeof(ChipEntity) * chips->size);
 	}
 
+	chips->array[chips->len].parentID = 0;
 	chips->array[chips->len].ID = ID;
 	chips->array[chips->len].type = type;
 	chips->len++;
@@ -110,4 +111,22 @@ u8 getInSignalOutput(Chips *chips, InSignal inSignal) {
 
 	return 0;
 	// implement this function right here
+}
+
+ChipEntity *getChip(Chips *chips, u32 ID) {
+	return chips->array + ID;
+}
+SimpleChip *getSimpleChip(Chips *chips, u32 ID) {
+	if (chips->array[ID].type != CE_SIMPLE) {
+		fprintf(stderr, "Chip is not a simple chip");
+		exit(1);
+	}
+	return chips->simpleChipsArray + chips->array[ID].ID;
+}
+InputChip *getInputChip(Chips *chips, u32 ID) {
+	if (chips->array[ID].type != CE_INPUT) {
+		fprintf(stderr, "Chip is not a input chip");
+		exit(1);
+	}
+	return chips->inputChipsArray + chips->array[ID].ID;
 }

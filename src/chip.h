@@ -25,7 +25,6 @@ typedef enum {
 typedef enum {
 	CE_SIMPLE,
 	CE_INPUT,
-	CE_GROUP
 } ChipEntityType;
 
 // Input wiring
@@ -54,13 +53,8 @@ typedef struct {
 } InputChip;
 
 typedef struct {
-	u16 len; 
-	u32 *IDs;
-} Group;
-
-typedef struct {
+	u32 parentID;
 	u32 ID;
-	// positions to render
 	Vec2 position;
 
 	ChipEntityType type;
@@ -86,3 +80,7 @@ u32 newSimpleChip(Chips *chips, SimpleChipType type);
 u32 newInputChip(Chips *chips, InputChipType type);
 u8 linkChipInsignal(Chips *chips, u32 targetID, u8 targetN, u32 inputID, u8 n);
 u8 getInSignalOutput(Chips *chips, InSignal inSignal);
+
+ChipEntity *getChip(Chips *chips, u32 ID);
+SimpleChip *getSimpleChip(Chips *chips, u32 ID);
+InputChip *getInputChip(Chips *chips, u32 ID);
