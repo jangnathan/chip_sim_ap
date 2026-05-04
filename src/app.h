@@ -51,6 +51,7 @@ typedef struct {
 	Color bgColor;
 
 	u16 menubarHeight;
+	u16 gridSize;
 	UI ui;
 
 	Camera camera;

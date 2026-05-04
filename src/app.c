@@ -91,6 +91,7 @@ void initApp(App *app) {
 
 	app->bgColor = newColor(220, 220, 220, 0);
 	app->menubarHeight = 80;
+	app->gridSize = 16;
 
 	app->mouse.cursorDefault =
 		SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT);

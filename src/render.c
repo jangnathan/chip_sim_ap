@@ -1,4 +1,5 @@
 #include "render.h"
+#include <math.h>
 
 SDL_FRect createRenderRect(App *app, float x, float y, float width, float height) {
 	SDL_FRect rect = {(x - app->camera.position.x) * app->camera.zoom,
@@ -134,6 +135,21 @@ void renderButton(SDL_Renderer *renderer, UIButton button) {
 	SDL_RenderTexture(renderer, button.texture, NULL, &background);
 }
 
+void renderGrid(App *app, float x, float y, float w, float h) {
+	SDL_Renderer *renderer = app->renderer;
+
+	SDL_SetRenderDrawColor(renderer, 180, 180, 180, app->bgColor.a);
+	for (u16 i = 0; i < h / app->gridSize; i++) {
+		// line across x axis
+		SDL_FRect lineX = {0, i * app->gridSize - fmodf(app->camera.position.y, app->gridSize) * app->camera.zoom + y, w, 1.0f};
+		SDL_RenderFillRect(renderer, &lineX);
+	}
+	for (u16 i = 0; i < w / app->gridSize; i++) {
+		SDL_FRect lineY = {i * app->gridSize - fmodf(app->camera.position.x, app->gridSize) * app->camera.zoom + x, y, 1.0f, h};
+		SDL_RenderFillRect(renderer, &lineY);
+	}
+}
+
 void render(App *app) {
 	Ctx *ctx = &app->ctx;
 	UI *ui = &app->ui;
@@ -145,15 +161,16 @@ void render(App *app) {
 	SDL_SetRenderDrawColor(renderer, bgColor.r, bgColor.g, bgColor.b,  bgColor.a);
 	SDL_RenderClear(renderer);
 
+	int winWidth, winHeight;
+	SDL_GetWindowSize(window, &winWidth, &winHeight);
+	renderGrid(app, 0, app->menubarHeight, winWidth, winHeight - app->menubarHeight);
+
 	// render chips
 	for (u32 i = 1; i < chips->len; i++) {
 		renderChip(app, i);
 	}
 
 	// render UI
-
-	int winWidth, winHeight;
-	SDL_GetWindowSize(window, &winWidth, &winHeight);
 	SDL_FRect menubar = {0.0f, 0, winWidth, app->menubarHeight};
 	SDL_FRect menubarOutline = {0.0f, app->menubarHeight, winWidth, 1.0f};
 	SDL_SetRenderDrawColor(renderer, 245, 245, 245, 0);
