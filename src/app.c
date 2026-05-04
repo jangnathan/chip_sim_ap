@@ -138,7 +138,13 @@ void updateInputChip(App *app, Vec2 pos, InputChip *inputChip) {
 
 void updateChip(App *app, ChipEntity *chip) {
 	Chips *chips = &app->ctx.chips;
+
+	if (chip->parentID != 0) {
+		chip->position = translateVec2(chips->array[chip->parentID].position, chip->attachPosition);
+	}
+
 	Vec2 pos = world2screenVec2(app, chip->position);
+
 	switch (chip->type) {
 		case CE_NONE:
 			break;

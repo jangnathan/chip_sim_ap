@@ -12,16 +12,16 @@ void createHalfAdder(Chips *chips, Vec2 position, u32 *carry_ptr) {
 	chips->array[halfAdder].position = position;
 	
 	u32 in1 = newInputChip(chips, SWITCH);
-	chips->array[in1].position = translateVec2(position, newVec2(0.0f, 0.0f));
+	chips->array[in1].attachPosition = newVec2(0.0f, 0.0f);
 	chips->array[in1].parentID = halfAdder;
 	u32 in2 = newInputChip(chips, SWITCH);
-	chips->array[in2].position = translateVec2(position, newVec2(0.0f, 140.0f));
+	chips->array[in2].attachPosition = newVec2(0.0f, 140.0f);
 	chips->array[in2].parentID = halfAdder;
 	u32 carry = newSimpleChip(chips, AND);
-	chips->array[carry].position = translateVec2(position, newVec2(-55.0f, -20.0f));
+	chips->array[carry].attachPosition = newVec2(-55.0f, -20.0f);
 	chips->array[carry].parentID = halfAdder;
 	u32 sum = newSimpleChip(chips, XOR);
-	chips->array[sum].position = translateVec2(position, newVec2(0.0f, 340.0f));
+	chips->array[sum].attachPosition = newVec2(0.0f, 340.0f);
 	chips->array[sum].parentID = halfAdder;
 
 	linkChipInsignal(chips, carry, 0, in1, 0);

@@ -113,16 +113,16 @@ void renderChip(App *app, u32 i) {
 	Ctx *ctx = &app->ctx;
 	Chips *chips = &ctx->chips;
 
-	u32 localID = chips->array[i].ID;
+	u32 typeID = chips->array[i].ID;
 
 	switch (chips->array[i].type) {
 		case CE_NONE:
 			break;
 		case CE_SIMPLE:
-			renderSimpleChip(app, chips->array[i].position, chips->simpleChipsArray + localID);
+			renderSimpleChip(app, chips->array[i].position, chips->simpleChipsArray + typeID);
 			break;
 		case CE_INPUT:
-			renderInputChip(app, chips->array[i].position, chips->inputChipsArray + localID);
+			renderInputChip(app, chips->array[i].position, chips->inputChipsArray + typeID);
 			break;
 	}
 }

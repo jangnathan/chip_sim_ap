@@ -82,6 +82,10 @@ u32 newInputChip(Chips *chips, InputChipType type) {
 u8 linkChipInsignal(Chips *chips, u32 targetID, u8 targetN, u32 inputID, u8 n) {
 	ChipEntity chipEntity = chips->array[targetID];
 	switch (chipEntity.type) {
+		case CE_NONE:
+			fprintf(stderr, "Cannot link insignal to NONE");
+			return 0;
+			break;
 		case CE_SIMPLE:
 			if (targetN > 2) {
 				fprintf(stderr, "Cannot link insignal to input");
@@ -102,6 +106,8 @@ u8 linkChipInsignal(Chips *chips, u32 targetID, u8 targetN, u32 inputID, u8 n) {
 u8 getInSignalOutput(Chips *chips, InSignal inSignal) {
 	ChipEntity chipEntity = chips->array[inSignal.ID];
 	switch (chipEntity.type) {
+		case CE_NONE:
+			break;
 		case CE_SIMPLE:
 			return chips->simpleChipsArray[chipEntity.ID].out;
 			break;

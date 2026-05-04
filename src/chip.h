@@ -57,6 +57,7 @@ typedef struct {
 	u32 parentID;
 	u32 ID;
 	Vec2 position;
+	Vec2 attachPosition;
 
 	ChipEntityType type;
 } ChipEntity;
