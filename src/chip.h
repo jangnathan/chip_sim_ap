@@ -55,7 +55,7 @@ typedef struct {
 
 typedef struct {
 	u32 parentID;
-	u32 ID;
+	u32 typeID;
 	Vec2 position;
 	Vec2 attachPosition;
 

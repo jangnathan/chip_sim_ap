@@ -36,7 +36,7 @@ void initCtx(Ctx *ctx) {
 	chipsInit(&ctx->chips);
 }
 
-void loadTextures(App *app) {
+void loadWorldTextures(App *app) {
 	SDL_Renderer *renderer = app->renderer;
 	Textures *textures = &app->textures;
 	Color White = {255, 255, 255, 0};
@@ -99,46 +99,69 @@ void initApp(App *app) {
 		SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_MOVE);
 	SDL_SetCursor(app->mouse.cursorDefault);
 
-	loadTextures(app);
+	loadWorldTextures(app);
+
+	// ui textures
 	ui->stopSimulateTexture = newTextTexture(app->renderer, "Stop", app->font, newColor(0, 0, 0, 0));
 	ui->startSimulateTexture = newTextTexture(app->renderer, "Simulate", app->font, newColor(0, 0, 0, 0));
 
 	// Init ui
-	UIButton simulateButton = {
+	UIBox simulateButton = newBox(
 		newVec2(10.0f, 15.0f),
 		newVec2(120.0f, 50.0f),
 		ui->startSimulateTexture,
-		newColor(50, 150, 50, 0)
-	};
+		newColor(50, 150, 50, 0));
+
 	ui->simulateButton = simulateButton;
+
+	app->editChipID = 0;
+	app->editingChip = 0;
+	ui->editChipBox = newBox(newVec2(0.0f, 0.0f), newVec2(120.0f, 350.0f), 0, newColor(225, 225, 225, 0));
+
+	ui->editChipMoveButton = newBox(newVec2(20.0f, 20.0f), newVec2(50.0f, 20.0f),
+																 newTextTexture(app->renderer, "Move", app->font, newColor(0, 0, 0, 0)), newColor(255, 255, 255, 0));
 }
 
-void updateSimpleChip(App *app, Vec2 pos, SimpleChip *simpleChip) {
+void updateSimpleChip(App *app, Vec2 pos, u32 ID, SimpleChip *simpleChip) {
 }
 
-void updateSwitch(App *app, Vec2 pos, InputChip *inputChip) {
+void openEditChip(App *app, u32 ID) {
+	if (app->editingChip) {
+		app->editChipID = 0;
+		app->editingChip = 0;
+	} else {
+		app->editChipID = ID;
+		app->editingChip = 1;
+	}
+}
+
+void updateSwitch(App *app, Vec2 pos, u32 ID, InputChip *inputChip) {
 	Vec2 switchSize = {50.0f, 120.0f};
 	Vec2 mouseSize = {0.0f, 0.0f};
-	if (app->mouse.leftClick) {
-		if (collideAABB(pos, scaleVec2(switchSize, app->camera.zoom),
-									app->mouse.position, mouseSize)) {
+	if (collideAABB(pos, scaleVec2(switchSize, app->camera.zoom),
+								 app->mouse.position, mouseSize)) {
+
+		if (app->mouse.leftClick) {
 			inputChip->out = !inputChip->out;
+		} else if (app->mouse.rightClick) {
+			openEditChip(app, ID);
 		}
 	}
 }
 
-void updateInputChip(App *app, Vec2 pos, InputChip *inputChip) {
+void updateInputChip(App *app, Vec2 pos, u32 ID, InputChip *inputChip) {
 	switch (inputChip->type) {
 		case CLOCK:
 			break;
 		case SWITCH:
-			updateSwitch(app, pos, inputChip);
+			updateSwitch(app, pos, ID, inputChip);
 			break;
 	}
 }
 
-void updateChip(App *app, ChipEntity *chip) {
+void updateChip(App *app, u32 ID) {
 	Chips *chips = &app->ctx.chips;
+	ChipEntity *chip = chips->array + ID;
 
 	if (chip->parentID != 0) {
 		chip->position = translateVec2(chips->array[chip->parentID].position, chip->attachPosition);
@@ -150,11 +173,37 @@ void updateChip(App *app, ChipEntity *chip) {
 		case CE_NONE:
 			break;
 		case CE_SIMPLE:
-			updateSimpleChip(app, pos, chips->simpleChipsArray + chip->ID);
+			updateSimpleChip(app, pos, ID, chips->simpleChipsArray + chip->typeID);
 			break;
 		case CE_INPUT:
-			updateInputChip(app, pos, chips->inputChipsArray + chip->ID);
+			updateInputChip(app, pos, ID, chips->inputChipsArray + chip->typeID);
 			break;
+	}
+}
+
+void updateUI(App *app) {
+	UI *ui = &app->ui;
+
+	Vec2 editChipBoxPos = newVec2(app->winWidth - ui->editChipBox.size.x - 20.0f,
+															 (app->winHeight - app->menubarHeight) / 2 + app->menubarHeight - ui->editChipBox.size.y / 2);
+	ui->editChipBox.position = editChipBoxPos;
+	ui->editChipMoveButton.position = translateVec2(editChipBoxPos, newVec2(20.0f, 20.0f));
+
+	// move mode
+	if (app->mouse.leftClick
+		&& collideABB(app->mouse.position, ui->editChipMoveButton.position, ui->editChipMoveButton.size) && app->editingChip) {
+		app->editingChip = 0;
+	}
+
+	if (app->mouse.leftClick && collideABB(app->mouse.position, ui->simulateButton.position, ui->simulateButton.size)) {
+		app->simulating = !app->simulating;
+		if (app->simulating) {
+			ui->simulateButton.texture = ui->stopSimulateTexture;
+			ui->simulateButton.bgColor = newColor(150, 50, 50, 0);
+		} else {
+			ui->simulateButton.texture = ui->startSimulateTexture;
+			ui->simulateButton.bgColor = newColor(50, 150, 50, 0);
+		}
 	}
 }
 
@@ -168,23 +217,14 @@ void update(App *app) {
 		SDL_SetCursor(app->mouse.cursorMove);
 		if (app->mouse.leftKeyHeld) {
 			app->camera.position = translateVec2(app->camera.oldPosition,
-																			 scaleVec2(subtractVec2(app->mouse.oldPosition, app->mouse.position), 1.0f / app->camera.zoom));
+																				scaleVec2(subtractVec2(app->mouse.oldPosition, app->mouse.position), 1.0f / app->camera.zoom));
 		}
 	}
 
-	if (app->mouse.leftClick && isHoveringButton(app->mouse.position, ui->simulateButton)) {
-		app->simulating = !app->simulating;
-		if (app->simulating) {
-			ui->simulateButton.texture = ui->stopSimulateTexture;
-			ui->simulateButton.bgColor = newColor(150, 50, 50, 0);
-		} else {
-			ui->simulateButton.texture = ui->startSimulateTexture;
-			ui->simulateButton.bgColor = newColor(50, 150, 50, 0);
-		}
-	}
+	updateUI(app);
 
 	for (u32 i = 0; i < chips->len; i++) {
-		updateChip(app, chips->array + i);
+		updateChip(app, i);
 	}
 
 	if (app->simulating) {

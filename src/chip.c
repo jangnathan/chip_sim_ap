@@ -33,7 +33,7 @@ u32 newChipEntity(Chips *chips, u32 ID, ChipEntityType type) {
 	}
 
 	chips->array[chips->len].parentID = 0;
-	chips->array[chips->len].ID = ID;
+	chips->array[chips->len].typeID = ID;
 	chips->array[chips->len].type = type;
 	chips->len++;
 	return chips->len - 1;
@@ -53,7 +53,7 @@ u32 newSimpleChip(Chips *chips, SimpleChipType type) {
 	chips->simpleChipsArray[chips->simpleChipsLen].type = type;
 	chips->simpleChipsArray[chips->simpleChipsLen].ID = chips->len;
 
-	chips->array[chips->len].ID = chips->simpleChipsLen;
+	chips->array[chips->len].typeID = chips->simpleChipsLen;
 	chips->array[chips->len].type = CE_SIMPLE;
 
 	chips->simpleChipsLen++;
@@ -91,7 +91,7 @@ u8 linkChipInsignal(Chips *chips, u32 targetID, u8 targetN, u32 inputID, u8 n) {
 				fprintf(stderr, "Cannot link insignal to input");
 				return 0;
 			}
-			SimpleChip *chip = &chips->simpleChipsArray[chipEntity.ID];
+			SimpleChip *chip = &chips->simpleChipsArray[chipEntity.typeID];
 
 			chip->inSignals[targetN].ID = inputID;
 			chip->inSignals[targetN].n = n;
@@ -105,14 +105,15 @@ u8 linkChipInsignal(Chips *chips, u32 targetID, u8 targetN, u32 inputID, u8 n) {
 
 u8 getInSignalOutput(Chips *chips, InSignal inSignal) {
 	ChipEntity chipEntity = chips->array[inSignal.ID];
+	u32 typeID = chipEntity.typeID;
 	switch (chipEntity.type) {
 		case CE_NONE:
 			break;
 		case CE_SIMPLE:
-			return chips->simpleChipsArray[chipEntity.ID].out;
+			return chips->simpleChipsArray[typeID].out;
 			break;
 		case CE_INPUT:
-			return chips->inputChipsArray[chipEntity.ID].out;
+			return chips->inputChipsArray[typeID].out;
 			break;
 	}
 
@@ -128,12 +129,12 @@ SimpleChip *getSimpleChip(Chips *chips, u32 ID) {
 		fprintf(stderr, "Chip is not a simple chip");
 		exit(1);
 	}
-	return chips->simpleChipsArray + chips->array[ID].ID;
+	return chips->simpleChipsArray + chips->array[ID].typeID;
 }
 InputChip *getInputChip(Chips *chips, u32 ID) {
 	if (chips->array[ID].type != CE_INPUT) {
 		fprintf(stderr, "Chip is not a input chip");
 		exit(1);
 	}
-	return chips->inputChipsArray + chips->array[ID].ID;
+	return chips->inputChipsArray + chips->array[ID].typeID;
 }

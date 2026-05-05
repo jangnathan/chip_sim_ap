@@ -114,7 +114,7 @@ void renderChip(App *app, u32 i) {
 	Ctx *ctx = &app->ctx;
 	Chips *chips = &ctx->chips;
 
-	u32 typeID = chips->array[i].ID;
+	u32 typeID = chips->array[i].typeID;
 
 	switch (chips->array[i].type) {
 		case CE_NONE:
@@ -128,11 +128,13 @@ void renderChip(App *app, u32 i) {
 	}
 }
 
-void renderButton(SDL_Renderer *renderer, UIButton button) {
-	SDL_FRect background = {button.position.x, button.position.y, button.size.x, button.size.y};
-	SDL_SetRenderDrawColor(renderer, button.bgColor.r, button.bgColor.g, button.bgColor.b,  button.bgColor.a);
+void renderBox(SDL_Renderer *renderer, UIBox box) {
+	SDL_FRect background = {box.position.x, box.position.y, box.size.x, box.size.y};
+	SDL_SetRenderDrawColor(renderer, box.bgColor.r, box.bgColor.g, box.bgColor.b,  box.bgColor.a);
 	SDL_RenderFillRect(renderer, &background);
-	SDL_RenderTexture(renderer, button.texture, NULL, &background);
+	if (box.texture != 0) {
+		SDL_RenderTexture(renderer, box.texture, NULL, &background);
+	}
 }
 
 void renderGrid(App *app, float x, float y, float w, float h) {
@@ -161,9 +163,8 @@ void render(App *app) {
 	SDL_SetRenderDrawColor(renderer, bgColor.r, bgColor.g, bgColor.b,  bgColor.a);
 	SDL_RenderClear(renderer);
 
-	int winWidth, winHeight;
-	SDL_GetWindowSize(window, &winWidth, &winHeight);
-	renderGrid(app, 0, app->menubarHeight, winWidth, winHeight - app->menubarHeight);
+	SDL_GetWindowSize(window, &app->winWidth, &app->winHeight);
+	renderGrid(app, 0, app->menubarHeight, app->winWidth, app->winHeight - app->menubarHeight);
 
 	// render chips
 	for (u32 i = 1; i < chips->len; i++) {
@@ -171,14 +172,18 @@ void render(App *app) {
 	}
 
 	// render UI
-	SDL_FRect menubar = {0.0f, 0, winWidth, app->menubarHeight};
-	SDL_FRect menubarOutline = {0.0f, app->menubarHeight, winWidth, 1.0f};
+	SDL_FRect menubar = {0.0f, 0, app->winWidth, app->menubarHeight};
+	SDL_FRect menubarOutline = {0.0f, app->menubarHeight, app->winWidth, 1.0f};
 	SDL_SetRenderDrawColor(renderer, 245, 245, 245, 0);
 	SDL_RenderFillRect(renderer, &menubar);
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 	SDL_RenderFillRect(renderer, &menubarOutline);
 
-	renderButton(renderer, ui->simulateButton);
+	renderBox(renderer, ui->simulateButton);
+	if (app->editingChip) {
+		renderBox(renderer, ui->editChipBox);
+		renderBox(renderer, ui->editChipMoveButton);
+	}
 
 	SDL_RenderPresent(renderer);
 }

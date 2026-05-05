@@ -10,8 +10,11 @@ SDL_Texture *newTextTexture(SDL_Renderer *renderer, char *text, TTF_Font *font, 
 	return texture;
 }
 
-u8 isHoveringButton(Vec2 mousePos, UIButton button) {
-	if (collideABB(mousePos, button.position, button.size)) return 1;
-
-	return 0;
+UIBox newBox(Vec2 pos, Vec2 size, SDL_Texture *texture, Color bgColor) {
+	UIBox x;
+	x.position = pos;
+	x.size = size;
+	x.texture = texture;
+	x.bgColor = bgColor;
+	return x;
 }

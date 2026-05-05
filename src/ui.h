@@ -8,13 +8,16 @@ typedef struct {
 	Vec2 size;
 	SDL_Texture *texture;
 	Color bgColor;
-} UIButton;
+} UIBox;
 
 typedef struct {
 	SDL_Texture *stopSimulateTexture;
 	SDL_Texture *startSimulateTexture;
-	UIButton simulateButton;
+
+	UIBox simulateButton;
+	UIBox editChipBox;
+	UIBox editChipMoveButton;
 } UI;
 
 SDL_Texture *newTextTexture(SDL_Renderer *renderer, char *text, TTF_Font *font, Color color);
-u8 isHoveringButton(Vec2 mousePos, UIButton button);
+UIBox newBox(Vec2 attachPosition, Vec2 size, SDL_Texture *texture, Color bgColor);

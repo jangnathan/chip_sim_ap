@@ -50,9 +50,15 @@ typedef struct {
 	TTF_Font *font;
 	Color bgColor;
 
+	i32 winWidth;
+	i32 winHeight;
+
 	u16 menubarHeight;
 	u16 gridSize;
 	UI ui;
+
+	u32 editChipID;
+	u32 editingChip;
 
 	Camera camera;
 
