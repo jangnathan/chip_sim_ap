@@ -41,6 +41,12 @@ typedef struct {
 	SDL_Texture *simpleXNOR;
 } Textures;
 
+typedef enum {
+	EDIT_NONE,
+	EDIT_SELECT_OPTION,
+	EDIT_MOVE_CHIP
+} EditState;
+
 typedef struct {
 	Ctx ctx;
 	SDL_Window *window;
@@ -50,6 +56,8 @@ typedef struct {
 	TTF_Font *font;
 	Color bgColor;
 
+	EditState editState;
+
 	i32 winWidth;
 	i32 winHeight;
 
@@ -58,7 +66,6 @@ typedef struct {
 	UI ui;
 
 	u32 editChipID;
-	u32 editingChip;
 
 	Camera camera;
 

@@ -180,7 +180,7 @@ void render(App *app) {
 	SDL_RenderFillRect(renderer, &menubarOutline);
 
 	renderBox(renderer, ui->simulateButton);
-	if (app->editingChip) {
+	if (app->editState == EDIT_SELECT_OPTION) {
 		renderBox(renderer, ui->editChipBox);
 		renderBox(renderer, ui->editChipMoveButton);
 	}

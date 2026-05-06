@@ -78,6 +78,7 @@ void initApp(App *app) {
 	app->renderer = createRenderer(app->window);
 
 	// init values
+	app->editState = EDIT_NONE;
 	app->simulating = 0;
 	app->mouse.leftClick = 0;
 	app->mouse.rightClick = 0;
@@ -115,23 +116,29 @@ void initApp(App *app) {
 	ui->simulateButton = simulateButton;
 
 	app->editChipID = 0;
-	app->editingChip = 0;
+	app->editState = EDIT_NONE;
 	ui->editChipBox = newBox(newVec2(0.0f, 0.0f), newVec2(120.0f, 350.0f), 0, newColor(225, 225, 225, 0));
 
 	ui->editChipMoveButton = newBox(newVec2(20.0f, 20.0f), newVec2(50.0f, 20.0f),
 																 newTextTexture(app->renderer, "Move", app->font, newColor(0, 0, 0, 0)), newColor(255, 255, 255, 0));
 }
 
-void updateSimpleChip(App *app, Vec2 pos, u32 ID, SimpleChip *simpleChip) {
-}
-
 void openEditChip(App *app, u32 ID) {
-	if (app->editingChip) {
+	if (app->editState == EDIT_SELECT_OPTION) {
 		app->editChipID = 0;
-		app->editingChip = 0;
+		app->editState = EDIT_NONE;
 	} else {
 		app->editChipID = ID;
-		app->editingChip = 1;
+		app->editState = EDIT_SELECT_OPTION;
+	}
+}
+
+void updateSimpleChip(App *app, Vec2 pos, u32 ID, SimpleChip *simpleChip) {
+	Vec2 size = {50.0f, 50.0f}; 
+	if (collideABB(app->mouse.position, pos, scaleVec2(size, app->camera.zoom))) {
+		if (app->mouse.rightClick) {
+			openEditChip(app, ID);
+		}
 	}
 }
 
@@ -191,8 +198,9 @@ void updateUI(App *app) {
 
 	// move mode
 	if (app->mouse.leftClick
-		&& collideABB(app->mouse.position, ui->editChipMoveButton.position, ui->editChipMoveButton.size) && app->editingChip) {
-		app->editingChip = 0;
+		&& collideABB(app->mouse.position, ui->editChipMoveButton.position, ui->editChipMoveButton.size) && app->editState == EDIT_SELECT_OPTION) {
+		app->mouse.leftClick = 0;
+		app->editState = EDIT_MOVE_CHIP;
 	}
 
 	if (app->mouse.leftClick && collideABB(app->mouse.position, ui->simulateButton.position, ui->simulateButton.size)) {
@@ -213,7 +221,10 @@ void update(App *app) {
 
 	SDL_SetCursor(app->mouse.cursorDefault);
 	const bool *keystates = SDL_GetKeyboardState(NULL);
+	u8 isMovingCamera = 0;
+
 	if (keystates[SDL_SCANCODE_SPACE]) {
+		isMovingCamera = 1;
 		SDL_SetCursor(app->mouse.cursorMove);
 		if (app->mouse.leftKeyHeld) {
 			app->camera.position = translateVec2(app->camera.oldPosition,
@@ -222,6 +233,20 @@ void update(App *app) {
 	}
 
 	updateUI(app);
+
+	if (isMovingCamera == 0) {
+		if (app->editState == EDIT_MOVE_CHIP) {
+			Vec2 pos1 = translateVec2(app->camera.position, app->mouse.position);
+			pos1.y -= app->menubarHeight;
+			Vec2 pos = scaleVec2(pos1, 1.0f / app->camera.zoom);
+
+			chips->array[app->editChipID].position = pos;
+			if (app->mouse.leftClick) {
+				app->mouse.leftClick = 0;
+				app->editState = EDIT_NONE;
+			}
+		}
+	}
 
 	for (u32 i = 0; i < chips->len; i++) {
 		updateChip(app, i);
