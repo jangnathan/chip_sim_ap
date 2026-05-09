@@ -240,7 +240,13 @@ void update(App *app) {
 			pos1.y -= app->menubarHeight;
 			Vec2 pos = scaleVec2(pos1, 1.0f / app->camera.zoom);
 
-			chips->array[app->editChipID].position = pos;
+			if (chips->array[app->editChipID].parentID != 0) {
+				u32 parentID = chips->array[app->editChipID].parentID;
+				chips->array[app->editChipID].attachPosition =
+					subtractVec2(pos1, chips->array[parentID].position);
+			} else {
+				chips->array[app->editChipID].position = pos;
+			}
 			if (app->mouse.leftClick) {
 				app->mouse.leftClick = 0;
 				app->editState = EDIT_NONE;

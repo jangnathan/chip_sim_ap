@@ -128,12 +128,16 @@ void renderChip(App *app, u32 i) {
 	}
 }
 
-void renderBox(SDL_Renderer *renderer, UIBox box) {
-	SDL_FRect background = {box.position.x, box.position.y, box.size.x, box.size.y};
-	SDL_SetRenderDrawColor(renderer, box.bgColor.r, box.bgColor.g, box.bgColor.b,  box.bgColor.a);
+// has to do with refreshing the textures
+UITextInput setUITextInput(App *app, UITextInput textInput, char *str) {
+}
+
+void renderBox(SDL_Renderer *renderer, UIBox *box) {
+	SDL_FRect background = {box->position.x, box->position.y, box->size.x, box->size.y};
+	SDL_SetRenderDrawColor(renderer, box->bgColor.r, box->bgColor.g, box->bgColor.b,  box->bgColor.a);
 	SDL_RenderFillRect(renderer, &background);
-	if (box.texture != 0) {
-		SDL_RenderTexture(renderer, box.texture, NULL, &background);
+	if (box->texture != 0) {
+		SDL_RenderTexture(renderer, box->texture, NULL, &background);
 	}
 }
 
@@ -179,10 +183,10 @@ void render(App *app) {
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 	SDL_RenderFillRect(renderer, &menubarOutline);
 
-	renderBox(renderer, ui->simulateButton);
+	renderBox(renderer, &ui->simulateButton);
 	if (app->editState == EDIT_SELECT_OPTION) {
-		renderBox(renderer, ui->editChipBox);
-		renderBox(renderer, ui->editChipMoveButton);
+		renderBox(renderer, &ui->editChipBox);
+		renderBox(renderer, &ui->editChipMoveButton);
 	}
 
 	SDL_RenderPresent(renderer);

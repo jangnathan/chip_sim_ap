@@ -1,4 +1,5 @@
 #include "ui.h"
+#include <string.h>
 
 SDL_Texture *newTextTexture(SDL_Renderer *renderer, char *text, TTF_Font *font, Color color) {
 	SDL_Surface* surface;
@@ -18,3 +19,4 @@ UIBox newBox(Vec2 pos, Vec2 size, SDL_Texture *texture, Color bgColor) {
 	x.bgColor = bgColor;
 	return x;
 }
+
