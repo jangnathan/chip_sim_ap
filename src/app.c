@@ -219,8 +219,7 @@ void updateUI(App *app) {
 															 (app->winHeight - app->menubarHeight) / 2 + app->menubarHeight - ui->editChipBox.size.y / 2);
 	ui->editChipBox.position = editChipBoxPos;
 	ui->editChipMoveButton.position = translateVec2(editChipBoxPos, newVec2(20.0f, 20.0f));
-
-
+	
 	// move mode
 	if (app->mouse.leftClick
 		&& collideABB(app->mouse.position, ui->editChipMoveButton.position, ui->editChipMoveButton.size) && app->editState == EDIT_SELECT_OPTION) {
@@ -236,6 +235,13 @@ void updateUI(App *app) {
 		} else {
 			ui->simulateButton.texture = ui->startSimulateTexture;
 			ui->simulateButton.bgColor = newColor(50, 150, 50, 0);
+		}
+	}
+
+	// update text inputs
+	for (u8 i = 0; i < textInputNone; i++) {
+		if (app->mouse.leftClick && collideABB(app->mouse.position, ui->textInputs[i].posiition, ui->textInputs[i].size)) {
+			ui->activeTextInput = i;
 		}
 	}
 }
