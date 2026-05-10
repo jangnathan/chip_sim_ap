@@ -211,7 +211,7 @@ void render(App *app) {
 			renderInputText(renderer, ui->textInputs + textInputPositionY);
 			break;
 		}
-		case EDIT_LINK_CHIP: {
+		case EDIT_FIND_LINK_CHIP: {
 			Vec2 mousePos = scaleVec2(translateVec2(app->camera.position, app->mouse.position), 1.0f / app->camera.zoom);
 			mousePos.y -= app->menubarHeight;
 			drawWiring(app, mousePos.x,

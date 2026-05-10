@@ -149,15 +149,29 @@ void openEditChip(App *app, u32 ID) {
 	}
 }
 
+void chipEditClicked(App *app, u32 ID) {
+	if (app->editState == EDIT_FIND_LINK_CHIP) {
+		// open link edit menu
+		app->editState = EDIT_SELECT_OUT_LINK_CHIP;
+	}
+}
+
 void updateSimpleChip(App *app, Vec2 pos, u32 ID, SimpleChip *simpleChip) {
 	Vec2 size = {50.0f, 50.0f}; 
 	if (collideABB(app->mouse.position, pos, scaleVec2(size, app->camera.zoom)) && app->selectBoxActive == 0) {
 		app->selectBoxActive = 1;
 		app->selectBoxPos = pos;
-		app->selectBoxSize = size;
+		app->selectBoxSize = scaleVec2(size, app->camera.zoom);
 
 		if (app->mouse.rightClick) {
 			openEditChip(app, ID);
+		}
+
+		if (app->mouse.leftClick) {
+			if (app->simulating) {
+			} else {
+				chipEditClicked(app, ID);
+			}
 		}
 	}
 }
@@ -170,12 +184,17 @@ void updateSwitch(App *app, Vec2 pos, u32 ID, InputChip *inputChip) {
 
 		app->selectBoxActive = 1;
 		app->selectBoxPos = pos;
-		app->selectBoxSize = switchSize;
+		app->selectBoxSize = scaleVec2(switchSize, app->camera.zoom);
 
-		if (app->mouse.leftClick) {
-			inputChip->out = !inputChip->out;
-		} else if (app->mouse.rightClick) {
+		if (app->mouse.rightClick) {
 			openEditChip(app, ID);
+		}
+		if (app->mouse.leftClick) {
+			if (app->simulating) {
+				inputChip->out = !inputChip->out;
+			} else {
+				chipEditClicked(app, ID);
+			}
 		}
 	}
 }
@@ -231,7 +250,7 @@ void updateUI(App *app) {
 	ui->editChipBox.position = editChipBoxPos;
 	ui->editChipMoveButton.position = translateVec2(editChipBoxPos, newVec2(20.0f, 20.0f));
 	ui->editChipLinkButton.position = translateVec2(editChipBoxPos, newVec2(20.0f, 50.0f));
-	
+
 	// select modes
 	if (app->editState == EDIT_SELECT_OPTION) {
 		if (app->mouse.leftClick
@@ -242,7 +261,7 @@ void updateUI(App *app) {
 		if (app->mouse.leftClick
 			&& collideABB(app->mouse.position, ui->editChipLinkButton.position, ui->editChipLinkButton.size)) {
 			app->mouse.leftClick = 0;
-			app->editState = EDIT_LINK_CHIP;
+			app->editState = EDIT_SELECT_IN_LINK_CHIP;
 		}
 	}
 
