@@ -44,7 +44,9 @@ typedef struct {
 typedef enum {
 	EDIT_NONE,
 	EDIT_SELECT_OPTION,
-	EDIT_MOVE_CHIP
+	EDIT_MOVE_CHIP,
+	EDIT_LINK_CHIP,	
+	EDIT_SELECT_LINK_CHIP
 } EditState;
 
 typedef struct {
@@ -64,6 +66,10 @@ typedef struct {
 	u16 menubarHeight;
 	u16 gridSize;
 	UI ui;
+
+	u8 selectBoxActive;
+	Vec2 selectBoxPos;
+	Vec2 selectBoxSize;
 
 	u32 editChipID;
 

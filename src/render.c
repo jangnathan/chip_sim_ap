@@ -183,6 +183,13 @@ void render(App *app) {
 		renderChip(app, i);
 	}
 
+	if (app->selectBoxActive) {
+		SDL_FRect box = {app->selectBoxPos.x, app->selectBoxPos.y,
+			app->selectBoxSize.x, app->selectBoxSize.y};
+		SDL_SetRenderDrawColor(renderer, 50, 50, 255, 0);
+		SDL_RenderRect(renderer, &box);
+	}
+
 	// render UI
 	SDL_FRect menubar = {0.0f, 0, app->winWidth, app->menubarHeight};
 	SDL_FRect menubarOutline = {0.0f, app->menubarHeight, app->winWidth, 1.0f};
@@ -196,10 +203,22 @@ void render(App *app) {
 		case EDIT_SELECT_OPTION: {
 			renderBox(renderer, &ui->editChipBox);
 			renderBox(renderer, &ui->editChipMoveButton);
+			renderBox(renderer, &ui->editChipLinkButton);
+			break;
 		}
 		case EDIT_MOVE_CHIP: {
 			renderInputText(renderer, ui->textInputs + textInputPositionX);
 			renderInputText(renderer, ui->textInputs + textInputPositionY);
+			break;
+		}
+		case EDIT_LINK_CHIP: {
+			Vec2 mousePos = scaleVec2(translateVec2(app->camera.position, app->mouse.position), 1.0f / app->camera.zoom);
+			mousePos.y -= app->menubarHeight;
+			drawWiring(app, mousePos.x,
+							mousePos.y,
+							chips->array[app->editChipID].position.x,
+							chips->array[app->editChipID].position.y);
+			break;
 		}
 		default: {
 			break;

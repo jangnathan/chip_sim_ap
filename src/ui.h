@@ -38,6 +38,7 @@ typedef struct {
 	UIBox simulateButton;
 	UIBox editChipBox;
 	UIBox editChipMoveButton;
+	UIBox editChipLinkButton;
 
 	TextInputID activeTextInput;
 	UITextInput textInputs[NUM_TEXT_INPUTS];

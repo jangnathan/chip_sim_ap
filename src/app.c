@@ -94,6 +94,7 @@ void initApp(App *app) {
 	app->bgColor = newColor(220, 220, 220, 0);
 	app->menubarHeight = 80;
 	app->gridSize = 16;
+	app->selectBoxActive = 0;
 
 	app->mouse.cursorDefault =
 		SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT);
@@ -122,6 +123,8 @@ void initApp(App *app) {
 
 	ui->editChipMoveButton = newBox(newVec2(20.0f, 20.0f), newVec2(80.0f, 30.0f),
 																 newTextTexture(app->renderer, "Move", app->font, newColor(0, 0, 0, 0)), newColor(255, 255, 255, 0));
+	ui->editChipLinkButton = newBox(newVec2(0.0f, 0.0f), newVec2(80.0f, 30.0f),
+																 newTextTexture(app->renderer, "Link", app->font, newColor(0, 0, 0, 0)), newColor(255, 255, 255, 0));
 
 	ui->textInputs[textInputPositionX] = newUITextInput();
 	ui->textInputs[textInputPositionX].size = newVec2(70.0f, 25.0f);
@@ -148,7 +151,11 @@ void openEditChip(App *app, u32 ID) {
 
 void updateSimpleChip(App *app, Vec2 pos, u32 ID, SimpleChip *simpleChip) {
 	Vec2 size = {50.0f, 50.0f}; 
-	if (collideABB(app->mouse.position, pos, scaleVec2(size, app->camera.zoom))) {
+	if (collideABB(app->mouse.position, pos, scaleVec2(size, app->camera.zoom)) && app->selectBoxActive == 0) {
+		app->selectBoxActive = 1;
+		app->selectBoxPos = pos;
+		app->selectBoxSize = size;
+
 		if (app->mouse.rightClick) {
 			openEditChip(app, ID);
 		}
@@ -159,7 +166,11 @@ void updateSwitch(App *app, Vec2 pos, u32 ID, InputChip *inputChip) {
 	Vec2 switchSize = {50.0f, 120.0f};
 	Vec2 mouseSize = {0.0f, 0.0f};
 	if (collideAABB(pos, scaleVec2(switchSize, app->camera.zoom),
-								 app->mouse.position, mouseSize)) {
+								 app->mouse.position, mouseSize) && app->selectBoxActive == 0) {
+
+		app->selectBoxActive = 1;
+		app->selectBoxPos = pos;
+		app->selectBoxSize = switchSize;
 
 		if (app->mouse.leftClick) {
 			inputChip->out = !inputChip->out;
@@ -219,12 +230,20 @@ void updateUI(App *app) {
 															 (app->winHeight - app->menubarHeight) / 2 + app->menubarHeight - ui->editChipBox.size.y / 2);
 	ui->editChipBox.position = editChipBoxPos;
 	ui->editChipMoveButton.position = translateVec2(editChipBoxPos, newVec2(20.0f, 20.0f));
+	ui->editChipLinkButton.position = translateVec2(editChipBoxPos, newVec2(20.0f, 50.0f));
 	
-	// move mode
-	if (app->mouse.leftClick
-		&& collideABB(app->mouse.position, ui->editChipMoveButton.position, ui->editChipMoveButton.size) && app->editState == EDIT_SELECT_OPTION) {
-		app->mouse.leftClick = 0;
-		app->editState = EDIT_MOVE_CHIP;
+	// select modes
+	if (app->editState == EDIT_SELECT_OPTION) {
+		if (app->mouse.leftClick
+			&& collideABB(app->mouse.position, ui->editChipMoveButton.position, ui->editChipMoveButton.size)) {
+			app->mouse.leftClick = 0;
+			app->editState = EDIT_MOVE_CHIP;
+		}
+		if (app->mouse.leftClick
+			&& collideABB(app->mouse.position, ui->editChipLinkButton.position, ui->editChipLinkButton.size)) {
+			app->mouse.leftClick = 0;
+			app->editState = EDIT_LINK_CHIP;
+		}
 	}
 
 	if (app->mouse.leftClick && collideABB(app->mouse.position, ui->simulateButton.position, ui->simulateButton.size)) {
@@ -240,7 +259,7 @@ void updateUI(App *app) {
 
 	// update text inputs
 	for (u8 i = 0; i < textInputNone; i++) {
-		if (app->mouse.leftClick && collideABB(app->mouse.position, ui->textInputs[i].posiition, ui->textInputs[i].size)) {
+		if (app->mouse.leftClick && collideABB(app->mouse.position, ui->textInputs[i].position, ui->textInputs[i].size)) {
 			ui->activeTextInput = i;
 		}
 	}
@@ -253,6 +272,8 @@ void update(App *app) {
 	SDL_SetCursor(app->mouse.cursorDefault);
 	const bool *keystates = SDL_GetKeyboardState(NULL);
 	u8 isMovingCamera = 0;
+
+	app->selectBoxActive = 0;
 
 	if (keystates[SDL_SCANCODE_SPACE]) {
 		isMovingCamera = 1;
