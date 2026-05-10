@@ -10,17 +10,26 @@ typedef struct {
 	Color bgColor;
 } UIBox;
 
+#define UI_TEXT_INPUT_MAX 32
 typedef struct {
-	char text[32];
+	char text[UI_TEXT_INPUT_MAX];
 	u8 textLen;
 
 	Vec2 position;
 	Vec2 size;
-	Color color;
-	u8 fontSize;
-
 	SDL_Texture *texture;
+	Color color;
+	Color bgColor;
+	u8 fontSize;
 } UITextInput;
+
+
+#define NUM_TEXT_INPUTS 2
+typedef enum {
+	textInputPositionX,
+	textInputPositionY,
+	textInputNone
+} TextInputID;
 
 typedef struct {
 	SDL_Texture *stopSimulateTexture;
@@ -30,11 +39,11 @@ typedef struct {
 	UIBox editChipBox;
 	UIBox editChipMoveButton;
 
-	UITextInput inputPositionX;
-	UITextInput inputPositionY;
+	TextInputID activeTextInput;
+	UITextInput textInputs[NUM_TEXT_INPUTS];
 } UI;
 
 SDL_Texture *newTextTexture(SDL_Renderer *renderer, char *text, TTF_Font *font, Color color);
-UITextInput newUITextInput(Vec2 pos, Vec2 size, u8 fontSize, Color color);
+UITextInput newUITextInput();
 
 UIBox newBox(Vec2 pos, Vec2 size, SDL_Texture *texture, Color bgColor);

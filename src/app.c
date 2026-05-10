@@ -2,6 +2,7 @@
 #include "simulate.h"
 
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 
 #define WINDOW_WIDTH 1080
@@ -119,8 +120,20 @@ void initApp(App *app) {
 	app->editState = EDIT_NONE;
 	ui->editChipBox = newBox(newVec2(0.0f, 0.0f), newVec2(120.0f, 350.0f), 0, newColor(225, 225, 225, 0));
 
-	ui->editChipMoveButton = newBox(newVec2(20.0f, 20.0f), newVec2(50.0f, 20.0f),
+	ui->editChipMoveButton = newBox(newVec2(20.0f, 20.0f), newVec2(80.0f, 30.0f),
 																 newTextTexture(app->renderer, "Move", app->font, newColor(0, 0, 0, 0)), newColor(255, 255, 255, 0));
+
+	ui->textInputs[textInputPositionX] = newUITextInput();
+	ui->textInputs[textInputPositionX].size = newVec2(70.0f, 25.0f);
+	ui->textInputs[textInputPositionX].fontSize = 24;
+	ui->textInputs[textInputPositionX].color = newColor(0,0,0,0);
+	ui->textInputs[textInputPositionX].bgColor = newColor(255,255,255,0);
+
+	ui->textInputs[textInputPositionY] = newUITextInput();
+	ui->textInputs[textInputPositionY].size = newVec2(70.0f, 25.0f);
+	ui->textInputs[textInputPositionY].fontSize = 24;
+	ui->textInputs[textInputPositionY].color = newColor(0,0,0,0);
+	ui->textInputs[textInputPositionY].bgColor = newColor(255,255,255,0);
 }
 
 void openEditChip(App *app, u32 ID) {
@@ -188,13 +201,25 @@ void updateChip(App *app, u32 ID) {
 	}
 }
 
+
+void setUITextInputText(App *app, UITextInput *textInput, char *str) {
+	if (strcmp(textInput->text, str) == 0) {
+		return;
+	}
+	strcpy(textInput->text, str);
+	textInput->textLen = strlen(str);
+	textInput->texture = newTextTexture(app->renderer, textInput->text, app->font, textInput->color);
+}
+
 void updateUI(App *app) {
 	UI *ui = &app->ui;
 
+	// keep position according to window props
 	Vec2 editChipBoxPos = newVec2(app->winWidth - ui->editChipBox.size.x - 20.0f,
 															 (app->winHeight - app->menubarHeight) / 2 + app->menubarHeight - ui->editChipBox.size.y / 2);
 	ui->editChipBox.position = editChipBoxPos;
 	ui->editChipMoveButton.position = translateVec2(editChipBoxPos, newVec2(20.0f, 20.0f));
+
 
 	// move mode
 	if (app->mouse.leftClick
@@ -236,6 +261,19 @@ void update(App *app) {
 
 	if (isMovingCamera == 0) {
 		if (app->editState == EDIT_MOVE_CHIP) {
+			// position the position inputs
+			ui->textInputs[textInputPositionX].position = newVec2(app->winWidth - ui->textInputs[textInputPositionX].size.x - 80.0f,
+																												 app->winHeight / 2 - 140.0f);
+			ui->textInputs[textInputPositionY].position = newVec2(app->winWidth - ui->textInputs[textInputPositionX].size.x - 80.0f,
+																												 app->winHeight / 2 - 110.0f);
+
+			char buf[UI_TEXT_INPUT_MAX];
+			snprintf(buf, UI_TEXT_INPUT_MAX, "%.2f", chips->array[app->editChipID].position.x);
+			setUITextInputText(app, ui->textInputs + textInputPositionX, buf);
+			snprintf(buf, UI_TEXT_INPUT_MAX, "%.2f", chips->array[app->editChipID].position.y);
+			setUITextInputText(app, ui->textInputs + textInputPositionY, buf);
+
+			// positioning logic
 			Vec2 pos1 = translateVec2(app->camera.position, app->mouse.position);
 			pos1.y -= app->menubarHeight;
 			Vec2 pos = scaleVec2(pos1, 1.0f / app->camera.zoom);
@@ -243,7 +281,7 @@ void update(App *app) {
 			if (chips->array[app->editChipID].parentID != 0) {
 				u32 parentID = chips->array[app->editChipID].parentID;
 				chips->array[app->editChipID].attachPosition =
-					subtractVec2(pos1, chips->array[parentID].position);
+					subtractVec2(pos, chips->array[parentID].position);
 			} else {
 				chips->array[app->editChipID].position = pos;
 			}
@@ -264,6 +302,17 @@ void update(App *app) {
 }
 
 void handleKeyPress(App *app, SDL_KeyboardEvent event) {
+	if (app->ui.activeTextInput < textInputNone) {
+		UITextInput *textInput = app->ui.textInputs + (u32)app->ui.activeTextInput;
+
+		textInput->text[textInput->textLen] = '\0'; // null terminate
+
+		// convert keycode to add text to the active text input
+
+		setUITextInputText(app, textInput, "hello");
+		return;
+	}
+
 	switch (event.scancode) {
 		case SDL_SCANCODE_MINUS:
 			app->camera.zoom -= 0.1f;

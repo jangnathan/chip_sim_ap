@@ -2,6 +2,7 @@
 #include <math.h>
 
 SDL_FRect createRenderRect(App *app, float x, float y, float width, float height) {
+	Vec2 renderCoord = world2screenVec2(app, newVec2(x, y));
 	SDL_FRect rect = {(x - app->camera.position.x) * app->camera.zoom,
 		(y - app->camera.position.y) * app->camera.zoom + app->menubarHeight, width * app->camera.zoom, height * app->camera.zoom};
 	return rect;
@@ -128,16 +129,23 @@ void renderChip(App *app, u32 i) {
 	}
 }
 
-// has to do with refreshing the textures
-UITextInput setUITextInput(App *app, UITextInput textInput, char *str) {
-}
-
 void renderBox(SDL_Renderer *renderer, UIBox *box) {
 	SDL_FRect background = {box->position.x, box->position.y, box->size.x, box->size.y};
 	SDL_SetRenderDrawColor(renderer, box->bgColor.r, box->bgColor.g, box->bgColor.b,  box->bgColor.a);
 	SDL_RenderFillRect(renderer, &background);
 	if (box->texture != 0) {
 		SDL_RenderTexture(renderer, box->texture, NULL, &background);
+	}
+}
+
+void renderInputText(SDL_Renderer *renderer, UITextInput *input) {
+	SDL_FRect box = {input->position.x, input->position.y, input->size.x, input->size.y};
+	SDL_SetRenderDrawColor(renderer, input->bgColor.r, input->bgColor.g, input->bgColor.b,  input->bgColor.a);
+	SDL_RenderFillRect(renderer, &box);
+
+	SDL_FRect textbox = {input->position.x, input->position.y, input->textLen * input->fontSize * 0.5, input->size.y};
+	if (input->texture != 0) {
+		SDL_RenderTexture(renderer, input->texture, NULL, &textbox);
 	}
 }
 
@@ -184,10 +192,20 @@ void render(App *app) {
 	SDL_RenderFillRect(renderer, &menubarOutline);
 
 	renderBox(renderer, &ui->simulateButton);
-	if (app->editState == EDIT_SELECT_OPTION) {
-		renderBox(renderer, &ui->editChipBox);
-		renderBox(renderer, &ui->editChipMoveButton);
+	switch (app->editState) {
+		case EDIT_SELECT_OPTION: {
+			renderBox(renderer, &ui->editChipBox);
+			renderBox(renderer, &ui->editChipMoveButton);
+		}
+		case EDIT_MOVE_CHIP: {
+			renderInputText(renderer, ui->textInputs + textInputPositionX);
+			renderInputText(renderer, ui->textInputs + textInputPositionY);
+		}
+		default: {
+			break;
+		}
 	}
 
+	// render text inputs
 	SDL_RenderPresent(renderer);
 }

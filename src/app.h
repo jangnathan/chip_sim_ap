@@ -74,6 +74,8 @@ typedef struct {
 	u8 simulating;
 } App;
 
+Vec2 world2screenVec2(App *app, Vec2 a);
+
 void initApp(App *app);
 void update(App *app);
 void closeApp(App *app);

@@ -11,6 +11,14 @@ SDL_Texture *newTextTexture(SDL_Renderer *renderer, char *text, TTF_Font *font, 
 	return texture;
 }
 
+UITextInput newUITextInput() {
+	UITextInput x;
+	x.textLen = 0;
+	x.text[0] = '\0';
+	x.texture = 0;
+	return x;
+}
+
 UIBox newBox(Vec2 pos, Vec2 size, SDL_Texture *texture, Color bgColor) {
 	UIBox x;
 	x.position = pos;
