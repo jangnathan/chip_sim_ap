@@ -40,10 +40,9 @@ u8 deltaCycle(Chips *chips) {
 	while (stable == 0) {
 		stable = 1;
 		for (u32 i = 0; i < chips->simpleChipsLen; i++) {
-			simulateSimpleChip(chips, chips->simpleChipsArray + i);
-		}
-		for (u32 i = 0; i < chips->simpleChipsLen; i++) {
 			SimpleChip *simpleChip = chips->simpleChipsArray + i;
+			simulateSimpleChip(chips, simpleChip);
+
 			if (simpleChip->out != simpleChip->nextOut) {
 				simpleChip->out = simpleChip->nextOut;
 				stable = 0;
@@ -62,7 +61,7 @@ u8 deltaCycle(Chips *chips) {
 
 u8 simulate(Chips *chips) {
 	deltaCycle(chips);
-	
+
 	// we dont simulate input chips
 	return 1;
 }
