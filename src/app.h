@@ -11,8 +11,7 @@ typedef enum {
 	MS_BUTTON
 } MouseTarget;
 
-typedef struct {
-	Vec2 oldPosition;
+typedef struct { Vec2 oldPosition;
 	Vec2 position;
 	float zoom;
 } Camera;
@@ -51,6 +50,30 @@ typedef enum {
 } EditState;
 
 typedef struct {
+	SDL_Texture *stopSimulateTexture;
+	SDL_Texture *startSimulateTexture;
+
+	// menu bar
+	UIBox simulateButton;
+
+	// menu chip edit select menu
+	UIBox editChipBox;
+	UIBox editChipMoveButton;
+	UIBox editChipLinkButton;
+
+	// select input/output of linking chip
+	SDL_Texture *selectLinkInTitleTexture;
+	SDL_Texture *selectLinkOutTitleTexture;
+	UIBox title;
+	UIBox selectLinkChipBox;
+	UIBox selectLinkChipOption[4];
+	u8 selectLinkChipOptionsShown; // num shown
+
+	TextInputID activeTextInput;
+	UITextInput textInputs[NUM_TEXT_INPUTS];
+} UI;
+
+typedef struct {
 	Ctx ctx;
 	SDL_Window *window;
 	SDL_Renderer *renderer;
@@ -73,6 +96,8 @@ typedef struct {
 	Vec2 selectBoxSize;
 
 	u32 editChipID;
+	u8 editChipNumInputs;
+	u8 editChipSelectedIn;
 
 	Camera camera;
 

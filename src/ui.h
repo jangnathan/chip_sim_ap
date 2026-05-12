@@ -31,19 +31,6 @@ typedef enum {
 	textInputNone
 } TextInputID;
 
-typedef struct {
-	SDL_Texture *stopSimulateTexture;
-	SDL_Texture *startSimulateTexture;
-
-	UIBox simulateButton;
-	UIBox editChipBox;
-	UIBox editChipMoveButton;
-	UIBox editChipLinkButton;
-
-	TextInputID activeTextInput;
-	UITextInput textInputs[NUM_TEXT_INPUTS];
-} UI;
-
 SDL_Texture *newTextTexture(SDL_Renderer *renderer, char *text, TTF_Font *font, Color color);
 UITextInput newUITextInput();
 

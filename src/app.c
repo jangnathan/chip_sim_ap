@@ -137,6 +137,17 @@ void initApp(App *app) {
 	ui->textInputs[textInputPositionY].fontSize = 24;
 	ui->textInputs[textInputPositionY].color = newColor(0,0,0,0);
 	ui->textInputs[textInputPositionY].bgColor = newColor(255,255,255,0);
+
+	app->editChipNumInputs = 0;
+	ui->selectLinkChipBox = newBox(newVec2(0.0f, 0.0f), newVec2(120.0f, 350.0f), 0, newColor(225, 225, 225, 0));
+	for (u8 i = 0; i < 4; i++) {
+		// 2 is num digits, incase you want to scale >10
+		char buf[2];
+		snprintf(buf, 2, "%d", i);
+
+		ui->selectLinkChipOption[i] = newBox(newVec2(0.0f, 0.0f), newVec2(50.0f, 50.0f),
+																			 newTextTexture(app->renderer, buf, app->font, newColor(0,0,0,0)), newColor(255, 225, 225, 0));
+	}
 }
 
 void openEditChip(App *app, u32 ID) {
@@ -241,27 +252,68 @@ void setUITextInputText(App *app, UITextInput *textInput, char *str) {
 	textInput->texture = newTextTexture(app->renderer, textInput->text, app->font, textInput->color);
 }
 
+void updateEditSelectOption(App *app) {
+}
+
 void updateUI(App *app) {
 	UI *ui = &app->ui;
-
-	// keep position according to window props
-	Vec2 editChipBoxPos = newVec2(app->winWidth - ui->editChipBox.size.x - 20.0f,
-															 (app->winHeight - app->menubarHeight) / 2 + app->menubarHeight - ui->editChipBox.size.y / 2);
-	ui->editChipBox.position = editChipBoxPos;
-	ui->editChipMoveButton.position = translateVec2(editChipBoxPos, newVec2(20.0f, 20.0f));
-	ui->editChipLinkButton.position = translateVec2(editChipBoxPos, newVec2(20.0f, 50.0f));
+		Vec2 selectLinkChipBoxPos = newVec2((app->winWidth - ui->selectLinkChipBox.size.x) / 2,
+															 (app->winHeight + app->menubarHeight - ui->editChipBox.size.y) / 2);
+	ui->selectLinkChipBox.position = selectLinkChipBoxPos;
+	if (app->editState == EDIT_SELECT_IN_LINK_CHIP) {
+		for (u8 i = 0; i < app->editChipNumInputs; i++) {
+			ui->selectLinkChipOption[i].position = translateVec2(selectLinkChipBoxPos, newVec2(20.0f, i * 70.0f));
+		}
+	}
 
 	// select modes
-	if (app->editState == EDIT_SELECT_OPTION) {
-		if (app->mouse.leftClick
-			&& collideABB(app->mouse.position, ui->editChipMoveButton.position, ui->editChipMoveButton.size)) {
-			app->mouse.leftClick = 0;
-			app->editState = EDIT_MOVE_CHIP;
+	switch (app->editState) {
+		case EDIT_NONE:
+			break;
+		case EDIT_SELECT_OPTION: {
+			if (app->mouse.leftClick
+				&& collideABB(app->mouse.position, ui->editChipMoveButton.position, ui->editChipMoveButton.size)) {
+				app->mouse.leftClick = 0;
+				app->editState = EDIT_MOVE_CHIP;
+			}
+			if (app->mouse.leftClick
+				&& collideABB(app->mouse.position, ui->editChipLinkButton.position, ui->editChipLinkButton.size)) {
+				switch (app->ctx.chips.array[app->editChipID].type) {
+					case CE_NONE:
+						app->editChipNumInputs = 0;
+						return;
+					case CE_SIMPLE:
+						// has only two inputs
+						app->editChipNumInputs = 2;
+						break;
+					case CE_INPUT:
+						app->editChipNumInputs = 0;
+						return;
+				}
+				app->mouse.leftClick = 0;
+				app->editState = EDIT_SELECT_IN_LINK_CHIP;
+			}
+			break;
 		}
-		if (app->mouse.leftClick
-			&& collideABB(app->mouse.position, ui->editChipLinkButton.position, ui->editChipLinkButton.size)) {
-			app->mouse.leftClick = 0;
-			app->editState = EDIT_SELECT_IN_LINK_CHIP;
+		case EDIT_MOVE_CHIP: {
+			// keep position according to window props
+			Vec2 editChipBoxPos = newVec2(app->winWidth - ui->editChipBox.size.x - 20.0f,
+																 (app->winHeight + app->menubarHeight - ui->editChipBox.size.y) / 2);
+			ui->editChipBox.position = editChipBoxPos;
+			ui->editChipMoveButton.position = translateVec2(editChipBoxPos, newVec2(20.0f, 20.0f));
+			ui->editChipLinkButton.position = translateVec2(editChipBoxPos, newVec2(20.0f, 50.0f));
+
+
+			break;
+		}
+		case EDIT_SELECT_IN_LINK_CHIP: {
+			break;
+		}
+		case EDIT_FIND_LINK_CHIP: {
+			break;
+		}
+		case EDIT_SELECT_OUT_LINK_CHIP: {
+			break;
 		}
 	}
 

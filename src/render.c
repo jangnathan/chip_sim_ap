@@ -211,6 +211,13 @@ void render(App *app) {
 			renderInputText(renderer, ui->textInputs + textInputPositionY);
 			break;
 		}
+		case EDIT_SELECT_IN_LINK_CHIP: {
+			renderBox(renderer, &ui->selectLinkChipBox);
+			for (u8 i = 0; i < app->editChipNumInputs; i++) {
+				renderBox(renderer, ui->selectLinkChipOption + i);
+			}
+			break;
+		}
 		case EDIT_FIND_LINK_CHIP: {
 			Vec2 mousePos = scaleVec2(translateVec2(app->camera.position, app->mouse.position), 1.0f / app->camera.zoom);
 			mousePos.y -= app->menubarHeight;
