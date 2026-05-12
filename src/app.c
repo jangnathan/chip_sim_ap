@@ -252,7 +252,18 @@ void setUITextInputText(App *app, UITextInput *textInput, char *str) {
 	textInput->texture = newTextTexture(app->renderer, textInput->text, app->font, textInput->color);
 }
 
-void updateEditSelectOption(App *app) {
+void updateEditSelectInLinkChip(App *app) {
+	UI *ui = &app->ui;
+	for (u8 i = 0; i < app->editChipNumInputs; i++) {
+		if (app->mouse.leftClick &&
+			collideABB(app->mouse.position, ui->selectLinkChipOption[i].position, ui->selectLinkChipOption[i].size)) {
+			app->mouse.leftClick = 0;
+			app->editChipSelectedIn = i;
+
+			app->editState = EDIT_FIND_LINK_CHIP;
+			break;
+		}
+	}
 }
 
 void updateUI(App *app) {
@@ -271,6 +282,13 @@ void updateUI(App *app) {
 		case EDIT_NONE:
 			break;
 		case EDIT_SELECT_OPTION: {
+			// keep position according to window props
+			Vec2 editChipBoxPos = newVec2(app->winWidth - ui->editChipBox.size.x - 20.0f,
+																 (app->winHeight + app->menubarHeight - ui->editChipBox.size.y) / 2);
+			ui->editChipBox.position = editChipBoxPos;
+			ui->editChipMoveButton.position = translateVec2(editChipBoxPos, newVec2(20.0f, 20.0f));
+			ui->editChipLinkButton.position = translateVec2(editChipBoxPos, newVec2(20.0f, 50.0f));
+
 			if (app->mouse.leftClick
 				&& collideABB(app->mouse.position, ui->editChipMoveButton.position, ui->editChipMoveButton.size)) {
 				app->mouse.leftClick = 0;
@@ -296,17 +314,10 @@ void updateUI(App *app) {
 			break;
 		}
 		case EDIT_MOVE_CHIP: {
-			// keep position according to window props
-			Vec2 editChipBoxPos = newVec2(app->winWidth - ui->editChipBox.size.x - 20.0f,
-																 (app->winHeight + app->menubarHeight - ui->editChipBox.size.y) / 2);
-			ui->editChipBox.position = editChipBoxPos;
-			ui->editChipMoveButton.position = translateVec2(editChipBoxPos, newVec2(20.0f, 20.0f));
-			ui->editChipLinkButton.position = translateVec2(editChipBoxPos, newVec2(20.0f, 50.0f));
-
-
 			break;
 		}
 		case EDIT_SELECT_IN_LINK_CHIP: {
+			updateEditSelectInLinkChip(app);
 			break;
 		}
 		case EDIT_FIND_LINK_CHIP: {

@@ -95,8 +95,9 @@ typedef struct {
 	Vec2 selectBoxPos;
 	Vec2 selectBoxSize;
 
+	// editor logic
 	u32 editChipID;
-	u8 editChipNumInputs;
+	u8 editChipNumInputs; // the number of inputs the current chip has e.g. a switch is 0 because it is an input itself
 	u8 editChipSelectedIn;
 
 	Camera camera;
