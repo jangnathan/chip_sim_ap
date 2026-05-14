@@ -52,6 +52,16 @@ void loadWorldTextures(App *app) {
 	textures->simpleXNOR = newTextTexture(renderer, "XNOR", app->font, White);
 };
 
+void updateSimulateButton(UI *ui, u8 state) {
+	if (state) {
+		ui->simulateButton.texture = ui->stopSimulateTexture;
+		ui->simulateButton.bgColor = newColor(150, 50, 50, 0);
+	} else {
+		ui->simulateButton.texture = ui->startSimulateTexture;
+		ui->simulateButton.bgColor = newColor(50, 150, 50, 0);
+	}
+}
+
 void initApp(App *app) {
 	UI *ui = &app->ui;
 
@@ -151,6 +161,9 @@ void initApp(App *app) {
 }
 
 void openEditChip(App *app, u32 ID) {
+	app->simulating = 0;
+	updateSimulateButton(&app->ui, app->simulating);
+
 	if (app->editState == EDIT_SELECT_OPTION) {
 		app->editChipID = 0;
 		app->editState = EDIT_NONE;
@@ -159,11 +172,25 @@ void openEditChip(App *app, u32 ID) {
 		app->editState = EDIT_SELECT_OPTION;
 	}
 }
-
 void chipEditClicked(App *app, u32 ID) {
-	if (app->editState == EDIT_FIND_LINK_CHIP) {
-		// open link edit menu
-		app->editState = EDIT_SELECT_OUT_LINK_CHIP;
+	switch (app->editState) {
+		case EDIT_FIND_LINK_CHIP: {
+			u8 numOutputs = getNumOutputs(app->ctx.chips.array[ID].type);
+
+			// open link edit menu
+			if (numOutputs <= 1) {
+				app->editState = EDIT_NONE;
+
+				linkChipInsignal(&app->ctx.chips, app->editChipID, app->editChipInOption, ID, 0);
+			} else {
+				app->tempChipID = ID;
+				app->tempChipNumOutputs = numOutputs;
+				app->editState = EDIT_SELECT_OUT_LINK_CHIP;
+			}
+			break;
+		}
+		default:
+			break;
 	}
 }
 
@@ -242,7 +269,6 @@ void updateChip(App *app, u32 ID) {
 	}
 }
 
-
 void setUITextInputText(App *app, UITextInput *textInput, char *str) {
 	if (strcmp(textInput->text, str) == 0) {
 		return;
@@ -252,15 +278,26 @@ void setUITextInputText(App *app, UITextInput *textInput, char *str) {
 	textInput->texture = newTextTexture(app->renderer, textInput->text, app->font, textInput->color);
 }
 
-void updateEditSelectInLinkChip(App *app) {
+void updateEditSelectLinkChip(App *app, u8 isInLink) {
 	UI *ui = &app->ui;
-	for (u8 i = 0; i < app->editChipNumInputs; i++) {
+	u8 numOptions = 0;
+	if (isInLink) {
+		numOptions = app->editChipNumInputs;
+	} else {
+		numOptions = app->tempChipNumOutputs;
+	}
+	for (u8 i = 0; i < numOptions; i++) {
 		if (app->mouse.leftClick &&
 			collideABB(app->mouse.position, ui->selectLinkChipOption[i].position, ui->selectLinkChipOption[i].size)) {
 			app->mouse.leftClick = 0;
-			app->editChipSelectedIn = i;
 
-			app->editState = EDIT_FIND_LINK_CHIP;
+			if (isInLink) {
+				app->editChipInOption = i;
+				app->editState = EDIT_FIND_LINK_CHIP;
+			} else {
+				linkChipInsignal(&app->ctx.chips, app->editChipID, app->editChipInOption, app->tempChipID, i);
+				app->editState = EDIT_NONE;
+			}
 			break;
 		}
 	}
@@ -268,8 +305,8 @@ void updateEditSelectInLinkChip(App *app) {
 
 void updateUI(App *app) {
 	UI *ui = &app->ui;
-		Vec2 selectLinkChipBoxPos = newVec2((app->winWidth - ui->selectLinkChipBox.size.x) / 2,
-															 (app->winHeight + app->menubarHeight - ui->editChipBox.size.y) / 2);
+	Vec2 selectLinkChipBoxPos = newVec2((app->winWidth - ui->selectLinkChipBox.size.x) / 2,
+																		 (app->winHeight + app->menubarHeight - ui->editChipBox.size.y) / 2);
 	ui->selectLinkChipBox.position = selectLinkChipBoxPos;
 	if (app->editState == EDIT_SELECT_IN_LINK_CHIP) {
 		for (u8 i = 0; i < app->editChipNumInputs; i++) {
@@ -296,18 +333,11 @@ void updateUI(App *app) {
 			}
 			if (app->mouse.leftClick
 				&& collideABB(app->mouse.position, ui->editChipLinkButton.position, ui->editChipLinkButton.size)) {
-				switch (app->ctx.chips.array[app->editChipID].type) {
-					case CE_NONE:
-						app->editChipNumInputs = 0;
-						return;
-					case CE_SIMPLE:
-						// has only two inputs
-						app->editChipNumInputs = 2;
-						break;
-					case CE_INPUT:
-						app->editChipNumInputs = 0;
-						return;
-				}
+				// set number of inputs
+				u8 numInputs = getNumInputs(app->ctx.chips.array[app->editChipID].type);
+				if (numInputs == 0) return;
+				app->editChipNumInputs = numInputs;
+
 				app->mouse.leftClick = 0;
 				app->editState = EDIT_SELECT_IN_LINK_CHIP;
 			}
@@ -317,13 +347,14 @@ void updateUI(App *app) {
 			break;
 		}
 		case EDIT_SELECT_IN_LINK_CHIP: {
-			updateEditSelectInLinkChip(app);
+			updateEditSelectLinkChip(app, 1);
 			break;
 		}
 		case EDIT_FIND_LINK_CHIP: {
 			break;
 		}
 		case EDIT_SELECT_OUT_LINK_CHIP: {
+			updateEditSelectLinkChip(app, 0);
 			break;
 		}
 	}
@@ -331,12 +362,9 @@ void updateUI(App *app) {
 	if (app->mouse.leftClick && collideABB(app->mouse.position, ui->simulateButton.position, ui->simulateButton.size)) {
 		app->simulating = !app->simulating;
 		if (app->simulating) {
-			ui->simulateButton.texture = ui->stopSimulateTexture;
-			ui->simulateButton.bgColor = newColor(150, 50, 50, 0);
-		} else {
-			ui->simulateButton.texture = ui->startSimulateTexture;
-			ui->simulateButton.bgColor = newColor(50, 150, 50, 0);
+			app->editState = EDIT_NONE;
 		}
+		updateSimulateButton(&app->ui, app->simulating);
 	}
 
 	// update text inputs

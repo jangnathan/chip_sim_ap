@@ -138,3 +138,25 @@ InputChip *getInputChip(Chips *chips, u32 ID) {
 	}
 	return chips->inputChipsArray + chips->array[ID].typeID;
 }
+
+u8 getNumInputs(ChipEntityType type) {
+	switch (type) {
+		case CE_NONE:
+			return 0;
+		case CE_SIMPLE:
+			return 2;
+			// has only two inputs
+		case CE_INPUT:
+			return 0;
+	}
+}
+u8 getNumOutputs(ChipEntityType type) {
+	switch (type) {
+		case CE_NONE:
+			return 0;
+		case CE_SIMPLE:
+			return 1;
+		case CE_INPUT:
+			return 1;
+	}
+}

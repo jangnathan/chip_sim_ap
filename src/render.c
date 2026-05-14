@@ -1,4 +1,5 @@
 #include "render.h"
+#include "unit.h"
 #include <math.h>
 
 SDL_FRect createRenderRect(App *app, float x, float y, float width, float height) {
@@ -37,14 +38,14 @@ void drawClock(App *app, float x, float y) {
 }
 
 // a means input, b means the output which is used for out input
-void drawWiring(App *app, float ax, float ay, float bx, float by) {
+void drawWiring(App *app, float ax, float ay, float bx, float by, Color color) {
 	SDL_Renderer *renderer = app->renderer;
 
 	SDL_FRect vert = createRenderRect(app, ax, ay, 2.0f, by - ay - 2.0f);
 	SDL_FRect hor = createRenderRect(app, bx, by - 4.0f, ax - bx, 2.0f);
 	SDL_FRect nub = createRenderRect(app, bx, by - 4.0f, 2.0f, 4.0f);
 
-	SDL_SetRenderDrawColor(renderer, 25, 25, 120, 0);
+	SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
 	SDL_RenderFillRect(renderer, &vert);
 	SDL_RenderFillRect(renderer, &hor);
 	SDL_RenderFillRect(renderer, &nub);
@@ -62,8 +63,9 @@ void renderSimpleChip(App *app, Vec2 pos, SimpleChip *simpleChip) {
 	//Vec2 wireIn = translateVec2(pos, newVec2(10.0f, 0.0f));
 	Vec2 inAPos = chipsArray[simpleChip->inSignals[0].ID].position;
 	Vec2 inBPos = chipsArray[simpleChip->inSignals[1].ID].position;
-	drawWiring(app, inAPos.x, inAPos.y + 30, pos.x, pos.y);
-	drawWiring(app, inBPos.x, inBPos.y + 30, pos.x + 48.0f, pos.y);
+	Color color = newColor(25, 25, 125, 0);
+	drawWiring(app, inAPos.x, inAPos.y + 30, pos.x, pos.y, color);
+	drawWiring(app, inBPos.x, inBPos.y + 30, pos.x + 48.0f, pos.y, color);
 
 	SDL_FRect text = createRenderRect(app, pos.x + 5.0f, pos.y + 15.0f, 40.0f, 20.0f);
 	switch (simpleChip->type) {
@@ -221,10 +223,18 @@ void render(App *app) {
 		case EDIT_FIND_LINK_CHIP: {
 			Vec2 mousePos = scaleVec2(translateVec2(app->camera.position, app->mouse.position), 1.0f / app->camera.zoom);
 			mousePos.y -= app->menubarHeight;
+
 			drawWiring(app, mousePos.x,
 							mousePos.y,
 							chips->array[app->editChipID].position.x,
-							chips->array[app->editChipID].position.y);
+							chips->array[app->editChipID].position.y, newColor(255, 25, 25, 0));
+			break;
+		}
+		case EDIT_SELECT_OUT_LINK_CHIP: {
+			renderBox(renderer, &ui->selectLinkChipBox);
+			for (u8 i = 0; i < app->tempChipNumOutputs; i++) {
+				renderBox(renderer, ui->selectLinkChipOption + i);
+			}
 			break;
 		}
 		default: {

@@ -90,6 +90,9 @@ ChipEntity *getChip(Chips *chips, u32 ID);
 SimpleChip *getSimpleChip(Chips *chips, u32 ID);
 InputChip *getInputChip(Chips *chips, u32 ID);
 
+u8 getNumInputs(ChipEntityType type);
+u8 getNumOutputs(ChipEntityType type);
+
 // undoing / redoing
 typedef enum {
 	ACT_CREATE_CHIP,
