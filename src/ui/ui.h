@@ -35,3 +35,4 @@ SDL_Texture *newTextTexture(SDL_Renderer *renderer, char *text, TTF_Font *font, 
 UITextInput newUITextInput();
 
 UIBox newBox(Vec2 pos, Vec2 size, SDL_Texture *texture, Color bgColor);
+void setUITextInputText(SDL_Renderer *renderer, TTF_Font *font, UITextInput *textInput, char *str);

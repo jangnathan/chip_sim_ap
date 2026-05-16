@@ -28,3 +28,11 @@ UIBox newBox(Vec2 pos, Vec2 size, SDL_Texture *texture, Color bgColor) {
 	return x;
 }
 
+void setUITextInputText(SDL_Renderer *renderer, TTF_Font *font, UITextInput *textInput, char *str) {
+	if (strcmp(textInput->text, str) == 0) {
+		return;
+	}
+	strcpy(textInput->text, str);
+	textInput->textLen = strlen(str);
+	textInput->texture = newTextTexture(renderer, textInput->text, font, textInput->color);
+}

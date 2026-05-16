@@ -11,14 +11,19 @@ find_package(SDL3_ttf CONFIG REQUIRED)
 #set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIGURATION>")
 #set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIGURATION>")
 
+include_directories(src)
 add_executable(chipsim
 src/main.c
 src/app.c
 src/render.c
 src/chip.c
 src/simulate.c
+src/event.c
 src/unit.c
-src/ui.c
+src/camera.c
+src/input.c
+src/ui/ui.c
+src/ui/anchor.c
 )
 
 target_link_libraries(chipsim PRIVATE SDL3::SDL3)

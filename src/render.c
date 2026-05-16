@@ -3,9 +3,9 @@
 #include <math.h>
 
 SDL_FRect createRenderRect(App *app, float x, float y, float width, float height) {
-	Vec2 renderCoord = world2screenVec2(app, newVec2(x, y));
-	SDL_FRect rect = {(x - app->camera.position.x) * app->camera.zoom,
-		(y - app->camera.position.y) * app->camera.zoom + app->menubarHeight, width * app->camera.zoom, height * app->camera.zoom};
+	Vec2 renderCoord = world2screenVec2(app->camera, newVec2(x, y));
+	SDL_FRect rect = {renderCoord.x,
+		renderCoord.y, width * app->camera.zoom, height * app->camera.zoom};
 	return rect;
 }
 
@@ -35,6 +35,14 @@ void drawSwitch(App *app, u8 on, float x, float y) {
 }
 
 void drawClock(App *app, float x, float y) {
+	SDL_Renderer *renderer = app->renderer;
+
+	SDL_FRect background = createRenderRect(app, x, y, 50.0f, 50.0f);
+	SDL_FRect inside = createRenderRect(app, x + 2.0f, y + 2.0f, 46.0f, 46.0f);
+	SDL_SetRenderDrawColor(renderer, 50, 50, 50, 0);
+	SDL_RenderFillRect(renderer, &background);
+
+	// use a clock texture
 }
 
 // a means input, b means the output which is used for out input
@@ -180,6 +188,8 @@ void render(App *app) {
 	SDL_GetWindowSize(window, &app->winWidth, &app->winHeight);
 	renderGrid(app, 0, app->menubarHeight, app->winWidth, app->winHeight - app->menubarHeight);
 
+	app->camera.viewport = newVec2(app->winWidth, app->winHeight);
+
 	// render chips
 	for (u32 i = 1; i < chips->len; i++) {
 		renderChip(app, i);
@@ -221,7 +231,7 @@ void render(App *app) {
 			break;
 		}
 		case EDIT_FIND_LINK_CHIP: {
-			Vec2 mousePos = scaleVec2(translateVec2(app->camera.position, app->mouse.position), 1.0f / app->camera.zoom);
+			Vec2 mousePos = scaleVec2(translateVec2(app->camera.position, app->input.mouse.position), 1.0f / app->camera.zoom);
 			mousePos.y -= app->menubarHeight;
 
 			drawWiring(app, mousePos.x,

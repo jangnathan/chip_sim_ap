@@ -1,30 +1,12 @@
 #pragma once
 #include "chip.h"
-#include "ui.h"
+#include "ui/ui.h"
 #include "unit.h"
+#include "camera.h"
+#include "input.h"
 
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
-
-typedef enum {
-	MS_CHIP,
-	MS_BUTTON
-} MouseTarget;
-
-typedef struct { Vec2 oldPosition;
-	Vec2 position;
-	float zoom;
-} Camera;
-
-typedef struct {
-	SDL_Cursor *cursorDefault;
-	SDL_Cursor *cursorMove;
-	Vec2 oldPosition;
-	Vec2 position;
-	u8 leftClick;
-	u8 rightClick;
-	u8 leftKeyHeld;
-} Mouse;
 
 typedef struct {
 	Chips chips;
@@ -55,6 +37,8 @@ typedef struct {
 
 	// menu bar
 	UIBox simulateButton;
+	UIBox createButton;
+	UIBox createMenu;
 
 	// menu chip edit select menu
 	UIBox editChipBox;
@@ -104,14 +88,11 @@ typedef struct {
 
 	Camera camera;
 
-	Mouse mouse;
+	Input input;
 	u8 running;
 	u8 simulating;
 } App;
 
-Vec2 world2screenVec2(App *app, Vec2 a);
-
 void initApp(App *app);
 void update(App *app);
 void closeApp(App *app);
-void handleEvents(App *app);

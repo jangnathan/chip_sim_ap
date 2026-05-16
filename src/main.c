@@ -5,6 +5,7 @@
 #include "chip.h"
 #include "render.h"
 #include "app.h"
+#include "event.h"
 
 void createHalfAdder(Chips *chips, Vec2 position, u32 *carry_ptr) {
 	// just a blank chip / group
@@ -139,6 +140,9 @@ int main() {
 	chips->array[in6].position = newVec2(900.0f, 670.0f);
 	u32 carry4;
 	createFullAdder(chips, newVec2(900.0f, 550.0f), in5, in6, carry3, &carry4);
+
+	u32 clock = newInputChip(chips, CLOCK);
+	chips->array[clock].position = newVec2(600.0f, 650.0f);
 
 	app.running = 1;
 	while (app.running) {
