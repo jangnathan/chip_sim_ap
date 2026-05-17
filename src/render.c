@@ -4,18 +4,18 @@
 
 SDL_FRect createRenderRect(App *app, float x, float y, float width, float height) {
 	Vec2 renderCoord = world2screenVec2(app->camera, newVec2(x, y));
-	SDL_FRect rect = {renderCoord.x,
-		renderCoord.y, width * app->camera.zoom, height * app->camera.zoom};
+	SDL_FRect rect = {renderCoord.x - width * app->camera.zoom / 2,
+		renderCoord.y - height * app->camera.zoom / 2, width * app->camera.zoom, height * app->camera.zoom};
 	return rect;
 }
 
 void drawSwitch(App *app, u8 on, float x, float y) {
 	SDL_Renderer *renderer = app->renderer;
 
-	SDL_FRect indicator = createRenderRect(app, x, y, 50.0f, 20.0f);
-	SDL_FRect box = createRenderRect(app, x, y + 20.0f, 50.0f, 100.0f);
-	SDL_FRect switchPath = createRenderRect(app, x + 5.0f, y + 20.0f + 5.0f, 40.0f, 90.0f);
-	SDL_FRect switchBox = createRenderRect(app, x + 5.0f, y + 20.0f + 5.0f + (on * 45.0f), 40.0f, 45.0f);
+	SDL_FRect indicator = createRenderRect(app, x, y + 50.0f, 50.0f, 10.0f);
+	SDL_FRect box = createRenderRect(app, x, y, 50.0f, 90.0f);
+	SDL_FRect switchPath = createRenderRect(app, x, y, 40.0f, 80.0f);
+	SDL_FRect switchBox = createRenderRect(app, x, y - 20.0f + (on * 40.0f), 40.0f, 40.0f);
 
 	if (on) {
 		SDL_SetRenderDrawColor(renderer, 205, 20, 20, 0);
@@ -196,7 +196,7 @@ void render(App *app) {
 	}
 
 	if (app->selectBoxActive) {
-		SDL_FRect box = {app->selectBoxPos.x, app->selectBoxPos.y,
+		SDL_FRect box = {app->selectBoxPos.x - app->selectBoxSize.x / 2, app->selectBoxPos.y - app->selectBoxSize.y / 2,
 			app->selectBoxSize.x, app->selectBoxSize.y};
 		SDL_SetRenderDrawColor(renderer, 50, 50, 255, 0);
 		SDL_RenderRect(renderer, &box);

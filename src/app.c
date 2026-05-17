@@ -90,7 +90,7 @@ void initApp(App *app) {
 	input->mouse.leftClick = 0;
 	input->mouse.rightClick = 0;
 	input->mouse.leftKeyHeld = 0;
-	input->mouse.oldPosition = newVec2(0.0f, 0.0f);
+	input->mouse.oldCenterPosition = newVec2(0.0f, 0.0f);
 	input->mouse.position = newVec2(0.0f, 0.0f);
 
 	app->camera.zoom = 1.0f;
@@ -194,11 +194,11 @@ void chipEditClicked(App *app, u32 ID) {
 void updateSimpleChip(App *app, Vec2 pos, u32 ID, SimpleChip *simpleChip) {
 	Input *input = &app->input;
 
-	Vec2 size = {50.0f, 50.0f}; 
-	if (collideABB(input->mouse.position, pos, scaleVec2(size, app->camera.zoom)) && app->selectBoxActive == 0) {
+	Vec2 hitboxSize = {50.0f, 50.0f}; 
+	if (worldCollideABB(input->mouse.position, pos, scaleVec2(hitboxSize, app->camera.zoom)) && app->selectBoxActive == 0) {
 		app->selectBoxActive = 1;
 		app->selectBoxPos = pos;
-		app->selectBoxSize = scaleVec2(size, app->camera.zoom);
+		app->selectBoxSize = scaleVec2(hitboxSize, app->camera.zoom);
 
 		if (input->mouse.rightClick) {
 			openEditChip(app, ID);
@@ -216,14 +216,12 @@ void updateSimpleChip(App *app, Vec2 pos, u32 ID, SimpleChip *simpleChip) {
 void updateSwitch(App *app, Vec2 pos, u32 ID, InputChip *inputChip) {
 	Input *input = &app->input;
 
-	Vec2 switchSize = {50.0f, 120.0f};
-	Vec2 mouseSize = {0.0f, 0.0f};
-	if (collideAABB(pos, scaleVec2(switchSize, app->camera.zoom),
-								 input->mouse.position, mouseSize) && app->selectBoxActive == 0) {
+	Vec2 hitboxSize = {50.0f, 90.0f}; 
+	if (worldCollideABB(input->mouse.position, pos, scaleVec2(hitboxSize, app->camera.zoom)) && app->selectBoxActive == 0) {
 
 		app->selectBoxActive = 1;
 		app->selectBoxPos = pos;
-		app->selectBoxSize = scaleVec2(switchSize, app->camera.zoom);
+		app->selectBoxSize = scaleVec2(hitboxSize, app->camera.zoom);
 
 		if (input->mouse.rightClick) {
 			openEditChip(app, ID);
@@ -282,7 +280,7 @@ void updateEditSelectLinkChip(App *app, u8 isInLink) {
 	}
 	for (u8 i = 0; i < numOptions; i++) {
 		if (input->mouse.leftClick &&
-			collideABB(input->mouse.position, ui->selectLinkChipOption[i].position, ui->selectLinkChipOption[i].size)) {
+			worldCollideABB(input->mouse.position, ui->selectLinkChipOption[i].position, ui->selectLinkChipOption[i].size)) {
 			input->mouse.leftClick = 0;
 
 			if (isInLink) {
@@ -387,7 +385,7 @@ void update(App *app) {
 		SDL_SetCursor(input->mouse.cursorMove);
 		if (input->mouse.leftKeyHeld) {
 			app->camera.position = translateVec2(app->camera.oldPosition,
-																				scaleVec2(subtractVec2(input->mouse.oldPosition, input->mouse.position), 1.0f / app->camera.zoom));
+																				scaleVec2(subtractVec2(input->mouse.oldCenterPosition, input->mouse.centerPosition), 1.0f / app->camera.zoom));
 		}
 	}
 

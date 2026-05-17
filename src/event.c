@@ -51,10 +51,10 @@ void handleEvents(App *app) {
 				break;
 			case SDL_EVENT_MOUSE_BUTTON_DOWN:
 				if (event.button.button == SDL_BUTTON_LEFT) {
-					if (!input->mouse.leftKeyHeld) {
-						input->mouse.oldPosition = input->mouse.position;
-						app->camera.oldPosition = app->camera.position;
-					}
+					// for dragging logic
+					input->mouse.oldCenterPosition = input->mouse.centerPosition;
+					app->camera.oldPosition = app->camera.position;
+
 					input->mouse.leftKeyHeld = 1;
 				}
 				break;
