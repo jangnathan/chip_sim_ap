@@ -56,8 +56,8 @@ typedef struct {
 typedef struct {
 	u32 parentID;
 	u32 typeID;
-	Vec2 position;
-	Vec2 attachPosition;
+	Vec2f position;
+	Vec2f attachPosition;
 
 	ChipEntityType type;
 } ChipEntity;
@@ -102,7 +102,7 @@ typedef enum {
 
 // data needed to undo
 typedef struct {
-	Vec2 oldPos;
+	Vec2f oldPos;
 } UndoTranslateChip;
 
 typedef struct {

@@ -1,257 +1,47 @@
 #include "render.h"
+#include "editor/render.h"
 #include "unit.h"
 #include <math.h>
 
-SDL_FRect createRenderRect(App *app, float x, float y, float width, float height) {
-	Vec2 renderCoord = world2screenVec2(app->camera, newVec2(x, y));
-	SDL_FRect rect = {renderCoord.x - width * app->camera.zoom / 2,
-		renderCoord.y - height * app->camera.zoom / 2, width * app->camera.zoom, height * app->camera.zoom};
-	return rect;
-}
+// UI rendering
+void renderBox(SDL_Renderer *renderer, UIElement *element) {
+	SDL_FRect background = {element->position.x, element->position.y, element->size.x, element->size.y};
+	UIBox box = element->data.box;
 
-void drawSwitch(App *app, u8 on, float x, float y) {
-	SDL_Renderer *renderer = app->renderer;
-
-	SDL_FRect indicator = createRenderRect(app, x, y + 50.0f, 50.0f, 10.0f);
-	SDL_FRect box = createRenderRect(app, x, y, 50.0f, 90.0f);
-	SDL_FRect switchPath = createRenderRect(app, x, y, 40.0f, 80.0f);
-	SDL_FRect switchBox = createRenderRect(app, x, y - 20.0f + (on * 40.0f), 40.0f, 40.0f);
-
-	if (on) {
-		SDL_SetRenderDrawColor(renderer, 205, 20, 20, 0);
-	} else {
-		SDL_SetRenderDrawColor(renderer, 80, 30, 30, 0);
-	}
-	SDL_RenderFillRect(renderer, &indicator);
-
-	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 0);
-	SDL_RenderFillRect(renderer, &box);
-
-	SDL_SetRenderDrawColor(renderer, 205, 205, 205, 0);
-	SDL_RenderFillRect(renderer, &switchPath);
-
-	SDL_SetRenderDrawColor(renderer, 50, 50, 50, 0);
-	SDL_RenderFillRect(renderer, &switchBox);
-}
-
-void drawClock(App *app, float x, float y) {
-	SDL_Renderer *renderer = app->renderer;
-
-	SDL_FRect background = createRenderRect(app, x, y, 50.0f, 50.0f);
-	SDL_FRect inside = createRenderRect(app, x + 2.0f, y + 2.0f, 46.0f, 46.0f);
-	SDL_SetRenderDrawColor(renderer, 50, 50, 50, 0);
+	SDL_SetRenderDrawColor(renderer, box.bgColor.r, box.bgColor.g, box.bgColor.b,  box.bgColor.a);
 	SDL_RenderFillRect(renderer, &background);
-
-	// use a clock texture
+	if (element->texture != 0) {
+		SDL_RenderTexture(renderer, element->texture, NULL, &background);
+	}
 }
 
-// a means input, b means the output which is used for out input
-void drawWiring(App *app, float ax, float ay, float bx, float by, Color color) {
-	SDL_Renderer *renderer = app->renderer;
+void renderInputText(SDL_Renderer *renderer, UIElement *element) {
+	SDL_FRect box = {element->position.x, element->position.y, element->size.x, element->size.y};
 
-	SDL_FRect vert = createRenderRect(app, ax, ay, 2.0f, by - ay - 2.0f);
-	SDL_FRect hor = createRenderRect(app, bx, by - 4.0f, ax - bx, 2.0f);
-	SDL_FRect nub = createRenderRect(app, bx, by - 4.0f, 2.0f, 4.0f);
-
-	SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
-	SDL_RenderFillRect(renderer, &vert);
-	SDL_RenderFillRect(renderer, &hor);
-	SDL_RenderFillRect(renderer, &nub);
-}
-
-void renderSimpleChip(App *app, Vec2 pos, SimpleChip *simpleChip) {
-	ChipEntity* chipsArray = app->ctx.chips.array;
-	SDL_Renderer *renderer = app->renderer;
-	Textures *textures = &app->textures;
-
-	SDL_FRect box = createRenderRect(app, pos.x, pos.y, 50.0f, 50.0f);
-	SDL_SetRenderDrawColor(renderer, 25, 25, 25, 0);
+	UITextInput input = element->data.textInput;
+	SDL_SetRenderDrawColor(renderer, input.bgColor.r, input.bgColor.g, input.bgColor.b,  input.bgColor.a);
 	SDL_RenderFillRect(renderer, &box);
 
-	//Vec2 wireIn = translateVec2(pos, newVec2(10.0f, 0.0f));
-	Vec2 inAPos = chipsArray[simpleChip->inSignals[0].ID].position;
-	Vec2 inBPos = chipsArray[simpleChip->inSignals[1].ID].position;
-	Color color = newColor(25, 25, 125, 0);
-	drawWiring(app, inAPos.x, inAPos.y + 30, pos.x, pos.y, color);
-	drawWiring(app, inBPos.x, inBPos.y + 30, pos.x + 48.0f, pos.y, color);
+	/*SDL_FRect textbox = {element->position.x, element->position.y, input.textLen * input.fontSize * 0.5, input.size.y};
 
-	SDL_FRect text = createRenderRect(app, pos.x + 5.0f, pos.y + 15.0f, 40.0f, 20.0f);
-	switch (simpleChip->type) {
-		case AND:
-			SDL_RenderTexture(renderer, textures->simpleAND, NULL, &text);
-			break;
-		case OR:
-			SDL_RenderTexture(renderer, textures->simpleOR, NULL, &text);
-			break;
-		case NOT:
-			SDL_RenderTexture(renderer, textures->simpleNOT, NULL, &text);
-			break;
-		case NAND:
-			SDL_RenderTexture(renderer, textures->simpleNAND, NULL, &text);
-			break;
-		case NOR:
-			SDL_RenderTexture(renderer, textures->simpleNOR, NULL, &text);
-			break;
-		case XOR:
-			SDL_RenderTexture(renderer, textures->simpleXOR, NULL, &text);
-			break;
-		case XNOR:
-			SDL_RenderTexture(renderer, textures->simpleXNOR, NULL, &text);
-			break;
-	}
-
-	SDL_FRect indicator = createRenderRect(app, pos.x, pos.y + 50, 50.0f, 10.0f);
-
-	if (simpleChip->out) {
-		SDL_SetRenderDrawColor(renderer, 205, 20, 20, 0);
-	} else {
-		SDL_SetRenderDrawColor(renderer, 80, 30, 30, 0);
-	}
-	SDL_RenderFillRect(renderer, &indicator);
-}
-
-void renderInputChip(App *app, Vec2 pos, InputChip *inputChip) {
-	switch (inputChip->type) {
-		case CLOCK:
-			drawClock(app, pos.x, pos.y);
-			break;
-		case SWITCH:
-			drawSwitch(app, inputChip->out, pos.x, pos.y);
-			break;
-	}
-}
-
-void renderChip(App *app, u32 i) {
-	Ctx *ctx = &app->ctx;
-	Chips *chips = &ctx->chips;
-
-	u32 typeID = chips->array[i].typeID;
-
-	switch (chips->array[i].type) {
-		case CE_NONE:
-			break;
-		case CE_SIMPLE:
-			renderSimpleChip(app, chips->array[i].position, chips->simpleChipsArray + typeID);
-			break;
-		case CE_INPUT:
-			renderInputChip(app, chips->array[i].position, chips->inputChipsArray + typeID);
-			break;
-	}
-}
-
-void renderBox(SDL_Renderer *renderer, UIBox *box) {
-	SDL_FRect background = {box->position.x, box->position.y, box->size.x, box->size.y};
-	SDL_SetRenderDrawColor(renderer, box->bgColor.r, box->bgColor.g, box->bgColor.b,  box->bgColor.a);
-	SDL_RenderFillRect(renderer, &background);
-	if (box->texture != 0) {
-		SDL_RenderTexture(renderer, box->texture, NULL, &background);
-	}
-}
-
-void renderInputText(SDL_Renderer *renderer, UITextInput *input) {
-	SDL_FRect box = {input->position.x, input->position.y, input->size.x, input->size.y};
-	SDL_SetRenderDrawColor(renderer, input->bgColor.r, input->bgColor.g, input->bgColor.b,  input->bgColor.a);
-	SDL_RenderFillRect(renderer, &box);
-
-	SDL_FRect textbox = {input->position.x, input->position.y, input->textLen * input->fontSize * 0.5, input->size.y};
-	if (input->texture != 0) {
-		SDL_RenderTexture(renderer, input->texture, NULL, &textbox);
-	}
-}
-
-void renderGrid(App *app, float x, float y, float w, float h) {
-	SDL_Renderer *renderer = app->renderer;
-
-	SDL_SetRenderDrawColor(renderer, 180, 180, 180, app->bgColor.a);
-	for (u16 i = 0; i < h / app->gridSize; i++) {
-		// line across x axis
-		SDL_FRect lineX = {0, i * app->gridSize - fmodf(app->camera.position.y, app->gridSize) * app->camera.zoom + y, w, 1.0f};
-		SDL_RenderFillRect(renderer, &lineX);
-	}
-	for (u16 i = 0; i < w / app->gridSize; i++) {
-		SDL_FRect lineY = {i * app->gridSize - fmodf(app->camera.position.x, app->gridSize) * app->camera.zoom + x, y, 1.0f, h};
-		SDL_RenderFillRect(renderer, &lineY);
-	}
+	if (element->texture != 0) {
+		SDL_RenderTexture(renderer, element->texture, NULL, &textbox);
+	}*/
 }
 
 void render(App *app) {
 	Ctx *ctx = &app->ctx;
-	UI *ui = &app->ui;
 	Chips *chips = &ctx->chips;
 	SDL_Renderer *renderer = app->renderer;
 	SDL_Window *window = app->window;
 
-	Color bgColor = app->bgColor;
-	SDL_SetRenderDrawColor(renderer, bgColor.r, bgColor.g, bgColor.b,  bgColor.a);
-	SDL_RenderClear(renderer);
-
-	SDL_GetWindowSize(window, &app->winWidth, &app->winHeight);
-	renderGrid(app, 0, app->menubarHeight, app->winWidth, app->winHeight - app->menubarHeight);
-
-	app->camera.viewport = newVec2(app->winWidth, app->winHeight);
-
-	// render chips
-	for (u32 i = 1; i < chips->len; i++) {
-		renderChip(app, i);
+	switch (app->state) {
+		case ST_NONE:
+			break;
+		case ST_EDIT:
+			renderEditor(renderer, &app->textures, app->winWidth, &app->editor, chips);
+			break;
 	}
 
-	if (app->selectBoxActive) {
-		SDL_FRect box = {app->selectBoxPos.x - app->selectBoxSize.x / 2, app->selectBoxPos.y - app->selectBoxSize.y / 2,
-			app->selectBoxSize.x, app->selectBoxSize.y};
-		SDL_SetRenderDrawColor(renderer, 50, 50, 255, 0);
-		SDL_RenderRect(renderer, &box);
-	}
-
-	// render UI
-	SDL_FRect menubar = {0.0f, 0, app->winWidth, app->menubarHeight};
-	SDL_FRect menubarOutline = {0.0f, app->menubarHeight, app->winWidth, 1.0f};
-	SDL_SetRenderDrawColor(renderer, 245, 245, 245, 0);
-	SDL_RenderFillRect(renderer, &menubar);
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-	SDL_RenderFillRect(renderer, &menubarOutline);
-
-	renderBox(renderer, &ui->simulateButton);
-	switch (app->editState) {
-		case EDIT_SELECT_OPTION: {
-			renderBox(renderer, &ui->editChipBox);
-			renderBox(renderer, &ui->editChipMoveButton);
-			renderBox(renderer, &ui->editChipLinkButton);
-			break;
-		}
-		case EDIT_MOVE_CHIP: {
-			renderInputText(renderer, ui->textInputs + textInputPositionX);
-			renderInputText(renderer, ui->textInputs + textInputPositionY);
-			break;
-		}
-		case EDIT_SELECT_IN_LINK_CHIP: {
-			renderBox(renderer, &ui->selectLinkChipBox);
-			for (u8 i = 0; i < app->editChipNumInputs; i++) {
-				renderBox(renderer, ui->selectLinkChipOption + i);
-			}
-			break;
-		}
-		case EDIT_FIND_LINK_CHIP: {
-			Vec2 mousePos = scaleVec2(translateVec2(app->camera.position, app->input.mouse.position), 1.0f / app->camera.zoom);
-			mousePos.y -= app->menubarHeight;
-
-			drawWiring(app, mousePos.x,
-							mousePos.y,
-							chips->array[app->editChipID].position.x,
-							chips->array[app->editChipID].position.y, newColor(255, 25, 25, 0));
-			break;
-		}
-		case EDIT_SELECT_OUT_LINK_CHIP: {
-			renderBox(renderer, &ui->selectLinkChipBox);
-			for (u8 i = 0; i < app->tempChipNumOutputs; i++) {
-				renderBox(renderer, ui->selectLinkChipOption + i);
-			}
-			break;
-		}
-		default: {
-			break;
-		}
-	}
-
-	// render text inputs
 	SDL_RenderPresent(renderer);
 }

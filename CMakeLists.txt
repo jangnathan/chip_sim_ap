@@ -22,8 +22,9 @@ src/event.c
 src/unit.c
 src/camera.c
 src/input.c
-src/ui/ui.c
-src/ui/anchor.c
+src/editor/editor.c
+src/editor/render.c
+src/ui.c
 )
 
 target_link_libraries(chipsim PRIVATE SDL3::SDL3)

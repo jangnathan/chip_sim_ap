@@ -2,11 +2,12 @@
 #include "unit.h"
 
 typedef struct {
-	Vec2 oldPosition;
-	Vec2 position;
+	Vec2f oldPosition;
+	Vec2f position;
 	float zoom;
 
-	Vec2 viewport;
+	Vec2i viewportSize;
+	Vec2i viewportPos;
 } Camera;
 
-Vec2 world2screenVec2(Camera camera, Vec2 a);
+Vec2i world2screenVec2i(Camera camera, Vec2f a);

@@ -1,23 +1,23 @@
 #pragma once
-#include "ui/ui.h"
 #include "unit.h"
 #include <SDL3/SDL.h>
 
 typedef struct {
-	SDL_Cursor *cursorDefault;
+	SDL_Cursor *cursorDefault; // cursor icons
 	SDL_Cursor *cursorMove;
-	Vec2 position;
-	Vec2 oldCenterPosition;
-	Vec2 centerPosition;
+	Vec2i position;
+	Vec2i oldCenterPosition;
+	Vec2i centerPosition;
 
 	u8 leftClick;
 	u8 rightClick;
-	u8 leftKeyHeld;
+	u8 leftButtonHeld;
 } Mouse;
 
 typedef struct {
 	Mouse mouse;
 } Input;
 
-void resetInput(Input *input);
+void initInput(Input *input);
+void updateInput(Input *input);
 void closeInput(Input *input);
