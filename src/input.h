@@ -16,6 +16,8 @@ typedef struct {
 
 typedef struct {
 	Mouse mouse;
+
+	u16 focusedElementID;
 } Input;
 
 void initInput(Input *input);

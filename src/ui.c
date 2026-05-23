@@ -2,15 +2,10 @@
 #include <string.h>
 #include <stdlib.h>
 
-void initUI(UI *ui, u16 size) {
-	ui->size = size;
-	ui->len = 1; // to make 0 the root
-	ui->array = malloc(sizeof(UIElement) * size);
-}
-
-u16 newUIElement(UI *ui) {
+u32 newUIElement(UI *ui) {
 	ui->len++;
 
+	ui->array[ui->len].parentID = 0;
 	if (ui->len >= ui->size) {
 		ui->size *= 2;
 		ui->array = realloc(ui->array, sizeof(UIElement) * ui->size);
@@ -27,4 +22,53 @@ SDL_Texture *newTextTexture(SDL_Renderer *renderer, char *text, TTF_Font *font, 
 	SDL_DestroySurface(surface);
 
 	return texture;
+}
+
+void initUI(UI *ui, u32 size) {
+	ui->size = size;
+	ui->len = 1; // to make 0 the root
+	ui->array = malloc(sizeof(UIElement) * size);
+}
+
+void updateButton(UI* ui, UIElement *element) {
+}
+
+void updateUI(UI *ui) {
+	for (u32 i = 0; i < ui->len; i++) {
+		switch (ui->array[i].type) {
+			case UI_BUTTON:
+				updateButton(ui, ui->array + i);
+				break;
+			case UI_BOX:
+				break;
+			case UI_LABEL:
+				break;
+			case UI_TEXT_INPUT:
+				break;
+		}
+	}
+}
+
+void renderButton(UIElement *element) {
+	SDL_FRect border1 = {};
+	SDL_FRect border2 = {};
+	SDL_FRect border3 = {};
+	SDL_FRect border4 = {};
+	SDL_FRect background = {};
+}
+
+void renderUI(UI *ui) {
+	for (u32 i = 0; i < ui->len; i++) {
+		switch (ui->array[i].type) {
+			case UI_BUTTON:
+				renderButton(ui->array + i);
+				break;
+			case UI_BOX:
+				break;
+			case UI_LABEL:
+				break;
+			case UI_TEXT_INPUT:
+				break;
+		}
+	}
 }

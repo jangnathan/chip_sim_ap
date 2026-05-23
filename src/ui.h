@@ -78,23 +78,26 @@ typedef struct {
 } UIElement;
 
 typedef struct {
+	void *model;
+
 	UIElement *array;
 	u32 len;
 	u32 size;
 } UI;
 
+/*
 #define NUM_TEXT_INPUTS 2
 typedef enum {
 	textInputPositionX,
 	textInputPositionY,
 	textInputNone
 } TextInputID;
+*/
 
-void initUI(UI *ui, u16 size); // UI, prealloc size
-u16 newUIElement(UI *ui);
+u32 newUIElement(UI *ui);
 
 SDL_Texture *newTextTexture(SDL_Renderer *renderer, char *text, TTF_Font *font, Color color);
-UITextInput newUITextInput();
 
-UIBox newBox(Vec2i pos, Vec2i size, SDL_Texture *texture, Color bgColor);
-void setUITextInputText(SDL_Renderer *renderer, TTF_Font *font, UITextInput *textInput, char *str);
+void initUI(UI *ui, u32 size); // UI, prealloc size
+void updateUI(UI *ui);
+void renderUI(UI *ui);

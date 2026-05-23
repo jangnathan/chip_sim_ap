@@ -1,4 +1,5 @@
 #pragma once
+#include "ctx.h"
 #include "ui.h"
 #include "chip.h"
 #include "input.h"
@@ -15,6 +16,8 @@ typedef enum {
 
 typedef struct {
 	EditState state;
+	Ctx *ctx;
+	UI *ui;
 
 	u16 menubarHeight;
 
@@ -42,6 +45,7 @@ typedef struct {
 } Editor;
 
 void initEditor(Editor *editor);
+void createEditorUI(UI *ui);
 void updateEditor(Editor *editor, Input *input, Chips *chips);
 
 void editorLeftClicked(Editor *editor);

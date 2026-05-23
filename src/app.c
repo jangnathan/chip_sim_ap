@@ -74,7 +74,10 @@ void initApp(App *app) {
 	initInput(input);
 
 	app->state = ST_EDIT;
+
+	app->editor.ctx = &app->ctx;
 	initEditor(&app->editor);
+	createEditorUI(&app->editorUI);
 
 	input->mouse.cursorDefault =
 		SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT);

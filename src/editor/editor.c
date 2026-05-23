@@ -1,6 +1,8 @@
 #include "editor.h"
 #include "simulate.h"
 
+#include <stdio.h>
+
 void editorLeftClicked(Editor *editor) {
 	editor->camera.oldPosition = editor->camera.position;
 }
@@ -216,6 +218,8 @@ void initEditor(Editor *editor) {
 	editor->state = EDIT_NONE;
 	editor->simulating = 0;
 
+	editor->ui->model = editor;
+
 	editor->camera.zoom = 1.0f;
 	editor->camera.position = newVec2f(0.0f, 0.0f);
 	editor->camera.oldPosition = newVec2f(0.0f, 0.0f);
@@ -232,4 +236,16 @@ void initEditor(Editor *editor) {
 	// keys control
 	editor->zoomOutKey = SDL_SCANCODE_MINUS;
 	editor->zoomInKey = SDL_SCANCODE_EQUALS;
+}
+
+void simulateButtonOnClick(void *ptr) {
+	printf("Hello\n");
+}
+
+void createEditorUI(UI *ui) {
+	u32 simulateButton = newUIElement(ui);
+	ui->array[simulateButton].type = UI_BUTTON;
+	ui->array[simulateButton].position = newVec2i(50, 50);
+	ui->array[simulateButton].data.button.bgColor = newColor(50, 220, 50, 0);
+	ui->array[simulateButton].data.button.onClick = &simulateButtonOnClick;
 }

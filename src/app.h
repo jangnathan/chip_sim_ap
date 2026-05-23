@@ -1,4 +1,5 @@
 #pragma once
+#include "ctx.h"
 #include "chip.h"
 #include "ui.h"
 #include "editor/editor.h"
@@ -8,10 +9,6 @@
 
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
-
-typedef struct {
-	Chips chips;
-} Ctx;
 
 typedef struct {
 	SDL_Texture *simpleAND;
