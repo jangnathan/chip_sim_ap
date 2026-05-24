@@ -2,23 +2,14 @@
 #include "ctx.h"
 #include "chip.h"
 #include "ui.h"
-#include "editor/editor.h"
 #include "unit.h"
 #include "camera.h"
 #include "input.h"
+#include "textures.h"
+#include "editor/editor.h"
 
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
-
-typedef struct {
-	SDL_Texture *simpleAND;
-	SDL_Texture *simpleOR;
-	SDL_Texture *simpleNOT;
-	SDL_Texture *simpleNAND;
-	SDL_Texture *simpleNOR;
-	SDL_Texture *simpleXOR;
-	SDL_Texture *simpleXNOR;
-} Textures;
 
 typedef enum {
 	ST_NONE,
@@ -50,5 +41,4 @@ typedef struct {
 } App;
 
 void initApp(App *app);
-void update(App *app);
-void closeApp(App *app);
+void runApp(App *app);

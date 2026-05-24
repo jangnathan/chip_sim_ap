@@ -15,7 +15,6 @@ include_directories(src)
 add_executable(chipsim
 src/main.c
 src/app.c
-src/render.c
 src/chip.c
 src/simulate.c
 src/event.c
@@ -24,6 +23,7 @@ src/camera.c
 src/input.c
 src/editor/editor.c
 src/editor/render.c
+src/textures.c
 src/ui.c
 )
 

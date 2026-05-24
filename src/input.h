@@ -10,8 +10,9 @@ typedef struct {
 	Vec2i centerPosition;
 
 	u8 leftClick;
+	u8 leftHeld;
+	u8 leftDown;
 	u8 rightClick;
-	u8 leftButtonHeld;
 } Mouse;
 
 typedef struct {

@@ -1,19 +1,17 @@
+#include "chip.h"
+#include "app.h"
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <SDL3/SDL.h>
-#include "chip.h"
-#include "render.h"
-#include "app.h"
-#include "event.h"
 
 void createHalfAdder(Chips *chips, Vec2f position, u32 *carry_ptr) {
 	// just a blank chip / group
 	u32 halfAdder = newChipEntity(chips, 0, CE_NONE);
 	chips->array[halfAdder].position = position;
-	
-	u32 in1 = newInputChip(chips, SWITCH);
-	chips->array[in1].attachPosition = newVec2f(0.0f, 0.0f);
+
+	u32 in1 = newInputChip(chips, SWITCH); chips->array[in1].attachPosition = newVec2f(0.0f, 0.0f);
 	chips->array[in1].parentID = halfAdder;
 	u32 in2 = newInputChip(chips, SWITCH);
 	chips->array[in2].attachPosition = newVec2f(0.0f, 140.0f);
@@ -144,15 +142,6 @@ int main() {
 	u32 clock = newInputChip(chips, CLOCK);
 	chips->array[clock].position = newVec2f(600.0f, 650.0f);
 
-	app.running = 1;
-	while (app.running) {
-		handleEvents(&app);
-		update(&app);
-
-		render(&app);
-		SDL_Delay(33);
-	}
-
-	closeApp(&app);
+	runApp(&app);
 	return 0;
 }

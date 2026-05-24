@@ -1,6 +1,8 @@
 #include "app.h"
 #include "simulate.h"
 #include "input.h"
+#include "event.h"
+#include "editor/render.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -15,7 +17,7 @@ SDL_Window *createWindow() {
 		fprintf(stderr, "failed to open window: %s", SDL_GetError());
 		exit(1);
 	}
-	 return window;
+	return window;
 }
 
 SDL_Renderer *createRenderer(SDL_Window *window) {
@@ -30,21 +32,6 @@ SDL_Renderer *createRenderer(SDL_Window *window) {
 void initCtx(Ctx *ctx) {
 	chipsInit(&ctx->chips);
 }
-
-void loadWorldTextures(App *app) {
-	SDL_Renderer *renderer = app->renderer;
-	Textures *textures = &app->textures;
-	Color White = {255, 255, 255, 0};
-
-	// AND,OR,NOT,NAND,NOR,XOR,XNOR
-	textures->simpleAND = newTextTexture(renderer, "AND", app->font, White);
-	textures->simpleOR = newTextTexture(renderer, "OR", app->font, White);
-	textures->simpleNOT = newTextTexture(renderer, "NOT", app->font, White);
-	textures->simpleNAND = newTextTexture(renderer, "NAND", app->font, White);
-	textures->simpleNOR = newTextTexture(renderer, "NOR", app->font, White);
-	textures->simpleXOR = newTextTexture(renderer, "XOR", app->font, White);
-	textures->simpleXNOR = newTextTexture(renderer, "XNOR", app->font, White);
-};
 
 void initApp(App *app) {
 	initCtx(&app->ctx);
@@ -85,7 +72,7 @@ void initApp(App *app) {
 		SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_MOVE);
 	SDL_SetCursor(input->mouse.cursorDefault);
 
-	loadWorldTextures(app);
+	loadTextures(app->renderer, &app->textures, app->font);
 }
 
 void update(App *app) {
@@ -95,6 +82,8 @@ void update(App *app) {
 		case ST_NONE:
 			break;
 		case ST_EDIT:
+			uiHandleInput(&app->input, &app->editorUI);
+
 			app->editor.camera.viewportSize = newVec2i(app->winWidth, app->winHeight - app->editor.menubarHeight);
 			app->editor.camera.viewportPos = newVec2i(0, app->editor.menubarHeight);
 
@@ -103,13 +92,39 @@ void update(App *app) {
 	}
 }
 
-void runApp(App *app) {
+void render(App *app) {
+	Ctx *ctx = &app->ctx;
+	Chips *chips = &ctx->chips;
+	SDL_Renderer *renderer = app->renderer;
+	SDL_Window *window = app->window;
+
+	switch (app->state) {
+		case ST_NONE:
+			break;
+		case ST_EDIT:
+			renderEditor(renderer, &app->textures, app->winWidth, &app->editor, chips);
+			break;
+	}
+
+	SDL_RenderPresent(renderer);
 }
 
 void closeApp(App *app) {
 	closeInput(&app->input);
-
 	SDL_DestroyRenderer(app->renderer);
 	SDL_DestroyWindow(app->window);
 	SDL_Quit();
+}
+
+void runApp(App *app) {
+	app->running = 1;
+
+	while (app->running) {
+		handleEvents(app);
+		update(app);
+		render(app);
+		SDL_Delay(33);
+	}
+
+	closeApp(app);
 }

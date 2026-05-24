@@ -48,6 +48,4 @@ void initEditor(Editor *editor);
 void createEditorUI(UI *ui);
 void updateEditor(Editor *editor, Input *input, Chips *chips);
 
-void editorLeftClicked(Editor *editor);
-void editorZoomIn(Editor *editor);
-void editorZoomOut(Editor *editor);
+void editorHandleKeypress(Editor *editor, SDL_KeyboardEvent event);

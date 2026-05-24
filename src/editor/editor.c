@@ -3,10 +3,6 @@
 
 #include <stdio.h>
 
-void editorLeftClicked(Editor *editor) {
-	editor->camera.oldPosition = editor->camera.position;
-}
-
 void editorZoomOut(Editor *editor) {
 	editor->camera.zoom += 0.1f;
 
@@ -19,6 +15,15 @@ void editorZoomIn(Editor *editor) {
 
 	if (editor->camera.zoom <= 0.1f) {
 		editor->camera.zoom = 0.1f;
+	}
+}
+
+void editorHandleKeypress(Editor *editor, SDL_KeyboardEvent event) {
+	SDL_Scancode code = event.scancode;
+	if (code == editor->zoomInKey) {
+			editorZoomIn(editor);
+	} else if (code == editor->zoomOutKey) {
+			editorZoomOut(editor);
 	}
 }
 
@@ -164,7 +169,12 @@ void updateEditor(Editor *editor, Input *input, Chips *chips) {
 	if (keystates[SDL_SCANCODE_SPACE]) {
 		isMovingCamera = 1;
 		SDL_SetCursor(input->mouse.cursorMove);
-		if (input->mouse.leftButtonHeld) {
+
+		if (input->mouse.leftDown) {
+			editor->camera.oldPosition = editor->camera.position;
+		}
+
+		if (input->mouse.leftHeld) {
 			editor->camera.position = translateVec2f(editor->camera.oldPosition,
 																							scaleVec2f(vec2ItoF(subtractVec2i(input->mouse.oldCenterPosition, input->mouse.centerPosition)),
 																	1.0f / editor->camera.zoom));
@@ -226,6 +236,7 @@ void initEditor(Editor *editor) {
 	editor->camera.viewportSize.x = 1;
 	editor->camera.viewportSize.y = 1;
 
+	editor->menubarHeight = 80;
 	editor->bgColor = newColor(220, 220, 220, 0);
 	editor->gridSize = 16;
 	editor->selectBoxActive = 0;
@@ -243,6 +254,8 @@ void simulateButtonOnClick(void *ptr) {
 }
 
 void createEditorUI(UI *ui) {
+	initUI(ui, 8);
+
 	u32 simulateButton = newUIElement(ui);
 	ui->array[simulateButton].type = UI_BUTTON;
 	ui->array[simulateButton].position = newVec2i(50, 50);

@@ -123,7 +123,7 @@ void renderGrid(SDL_Renderer *renderer, Editor *editor, i32 x, i32 y, i32 w, i32
 void renderEditor(SDL_Renderer *renderer, Textures *textures, i32 winWidth, Editor *editor, Chips *chips) {
 	Camera camera = editor->camera;
 	Color bgColor = editor->bgColor;
-	SDL_SetRenderDrawColor(renderer, bgColor.r, bgColor.g, bgColor.b,  bgColor.a);
+	SDL_SetRenderDrawColor(renderer, bgColor.r, bgColor.g, bgColor.b, bgColor.a);
 	SDL_RenderClear(renderer);
 
 	renderGrid(renderer, editor, 0, editor->menubarHeight, camera.viewportSize.x, camera.viewportSize.y);

@@ -3,13 +3,14 @@
 #include <stdlib.h>
 
 u32 newUIElement(UI *ui) {
-	ui->len++;
-
 	ui->array[ui->len].parentID = 0;
+
 	if (ui->len >= ui->size) {
 		ui->size *= 2;
 		ui->array = realloc(ui->array, sizeof(UIElement) * ui->size);
 	}
+
+	ui->len++;
 
 	return ui->len - 1;
 }
@@ -33,6 +34,15 @@ void initUI(UI *ui, u32 size) {
 void updateButton(UI* ui, UIElement *element) {
 }
 
+void updateBox(UI* ui, UIElement *element) {
+}
+
+void updateLabel(UI* ui, UIElement *element) {
+}
+
+void updateTextInput(UI* ui, UIElement *element) {
+}
+
 void updateUI(UI *ui) {
 	for (u32 i = 0; i < ui->len; i++) {
 		switch (ui->array[i].type) {
@@ -49,7 +59,10 @@ void updateUI(UI *ui) {
 	}
 }
 
-void renderButton(UIElement *element) {
+void uiHandleInput(Input *input, UI *ui) {
+}
+
+void renderButton(SDL_Renderer *renderer, UIElement *element) {
 	SDL_FRect border1 = {};
 	SDL_FRect border2 = {};
 	SDL_FRect border3 = {};
@@ -57,13 +70,17 @@ void renderButton(UIElement *element) {
 	SDL_FRect background = {};
 }
 
-void renderUI(UI *ui) {
+void renderBox(SDL_Renderer *renderer, UIElement *element) {
+}
+
+void renderUI(SDL_Renderer *renderer, UI *ui) {
 	for (u32 i = 0; i < ui->len; i++) {
 		switch (ui->array[i].type) {
 			case UI_BUTTON:
-				renderButton(ui->array + i);
+				renderButton(renderer, ui->array + i);
 				break;
 			case UI_BOX:
+				renderBox(renderer, ui->array + i);
 				break;
 			case UI_LABEL:
 				break;

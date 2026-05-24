@@ -1,5 +1,6 @@
 #pragma once
 #include "unit.h"
+#include "input.h"
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
@@ -100,4 +101,5 @@ SDL_Texture *newTextTexture(SDL_Renderer *renderer, char *text, TTF_Font *font, 
 
 void initUI(UI *ui, u32 size); // UI, prealloc size
 void updateUI(UI *ui);
-void renderUI(UI *ui);
+void renderUI(SDL_Renderer *renderer, UI *ui);
+void uiHandleInput(Input *input, UI *ui);

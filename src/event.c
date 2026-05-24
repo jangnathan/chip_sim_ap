@@ -3,15 +3,6 @@
 #include "input.h"
 #include <stdio.h>
 
-void editorHandleKeypress(Editor *editor, SDL_KeyboardEvent event) {
-	SDL_Scancode code = event.scancode;
-	if (code == editor->zoomInKey) {
-			editorZoomIn(editor);
-	} else if (code == editor->zoomOutKey) {
-			editorZoomOut(editor);
-	}
-}
-
 void handleKeyPress(App *app, SDL_KeyboardEvent event) {
 	/* OLD
 	if (app->ui.activeTextInput < textInputNone) {
@@ -52,26 +43,19 @@ void handleEvents(App *app) {
 				if (event.button.button == SDL_BUTTON_LEFT) {
 					// for dragging logic
 					input->mouse.oldCenterPosition = input->mouse.centerPosition;
-					switch (app->state) {
-						case ST_NONE:
-							break;
-						case ST_EDIT:
-							editorLeftClicked(&app->editor);
-							break;
-					}
-
-					input->mouse.leftButtonHeld = 1;
+					input->mouse.leftDown = 1;
+					input->mouse.leftHeld = 1;
 				}
 				break;
 			case SDL_EVENT_MOUSE_BUTTON_UP:
 				if (event.button.button == SDL_BUTTON_LEFT) {
-					input->mouse.leftButtonHeld = 1;
+					input->mouse.leftHeld = 1;
 					input->mouse.leftClick = 1;
 				}
 				if (event.button.button == SDL_BUTTON_RIGHT) {
 					input->mouse.rightClick = 1;
 				}
-				input->mouse.leftButtonHeld = 0;
+				input->mouse.leftHeld = 0;
 				break;
 			case SDL_EVENT_KEY_DOWN:
 				if (event.key.repeat) {
