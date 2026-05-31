@@ -140,7 +140,8 @@ void renderEditor(SDL_Renderer *renderer, Textures *textures, i32 winWidth, Edit
 		SDL_RenderRect(renderer, &box);
 	}
 
-	// render UI
+
+	// old code
 	SDL_FRect menubar = {0.0f, 0, winWidth, editor->menubarHeight};
 	SDL_FRect menubarOutline = {0.0f, editor->menubarHeight, winWidth, 1.0f};
 	SDL_SetRenderDrawColor(renderer, 245, 245, 245, 0);

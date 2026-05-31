@@ -228,8 +228,6 @@ void initEditor(Editor *editor) {
 	editor->state = EDIT_NONE;
 	editor->simulating = 0;
 
-	editor->ui->model = editor;
-
 	editor->camera.zoom = 1.0f;
 	editor->camera.position = newVec2f(0.0f, 0.0f);
 	editor->camera.oldPosition = newVec2f(0.0f, 0.0f);
@@ -253,12 +251,20 @@ void simulateButtonOnClick(void *ptr) {
 	printf("Hello\n");
 }
 
-void createEditorUI(UI *ui) {
-	initUI(ui, 8);
+void editorUI(Editor *editor) {
+
+	/*u32 menubar = newUIElement(ui);
+	ui->array[menubar].type = UI_BOX;
+	ui->array[menubar].attachPosition = newVec2i(0,0);
+	ui->array[menubar].size.y = editor->menubarHeight;
+	ui->array[menubar].data.box.sizing.width = BOX_SIZING_WINDOW;
+	ui->array[menubar].data.box.bgColor = newColor(225, 225, 225, 255);
 
 	u32 simulateButton = newUIElement(ui);
+	ui->array[simulateButton].parentID = menubar;
 	ui->array[simulateButton].type = UI_BUTTON;
-	ui->array[simulateButton].position = newVec2i(50, 50);
-	ui->array[simulateButton].data.button.bgColor = newColor(50, 220, 50, 0);
-	ui->array[simulateButton].data.button.onClick = &simulateButtonOnClick;
+	ui->array[simulateButton].attachPosition = newVec2i(50, 50);
+	ui->array[simulateButton].size = newVec2i(80, 40);
+	ui->array[simulateButton].data.button.bgColor = newColor(50, 200, 50, 255);
+	ui->array[simulateButton].data.button.onClick = &simulateButtonOnClick;*/
 }

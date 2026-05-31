@@ -60,11 +60,11 @@ void initApp(App *app) {
 	Input *input = &app->input;
 	initInput(input);
 
-	app->state = ST_EDIT;
+	uiInitCtx(&app->uiCtx, app->renderer);
 
+	app->state = ST_EDIT;
 	app->editor.ctx = &app->ctx;
 	initEditor(&app->editor);
-	createEditorUI(&app->editorUI);
 
 	input->mouse.cursorDefault =
 		SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT);
@@ -82,8 +82,6 @@ void update(App *app) {
 		case ST_NONE:
 			break;
 		case ST_EDIT:
-			uiHandleInput(&app->input, &app->editorUI);
-
 			app->editor.camera.viewportSize = newVec2i(app->winWidth, app->winHeight - app->editor.menubarHeight);
 			app->editor.camera.viewportPos = newVec2i(0, app->editor.menubarHeight);
 

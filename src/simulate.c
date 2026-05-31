@@ -46,13 +46,13 @@ u8 deltaCycle(Chips *chips) {
 			if (simpleChip->out != simpleChip->nextOut) {
 				simpleChip->out = simpleChip->nextOut;
 				stable = 0;
-			}
-		}
 
-		iter++;
-		if (iter > 5000) {
-			printf("Race condition\n");
-			break;
+				iter++;
+				if (iter > 5000) {
+					printf("Race condition\n");
+					break;
+				}
+			}
 		}
 	}
 

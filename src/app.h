@@ -29,10 +29,9 @@ typedef struct {
 	i32 winWidth;
 	i32 winHeight;
 
-	AppState state;
+	UICtx uiCtx;
 
-	// ui
-	UI editorUI;
+	AppState state;
 
 	// state structures
 	Editor editor;

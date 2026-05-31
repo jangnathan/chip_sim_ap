@@ -26,65 +26,40 @@
 //	u8 fontSize;
 //} UITextInput;
 
+#define MAX_LAYOUT_STACK 32
+
 typedef enum {
-	UI_BUTTON,
-	UI_BOX,
-	UI_LABEL,
-	UI_TEXT_INPUT
-} UIType;
+	UI_HORIZONTAL,
+	UI_VERTICAL,
+} UIOrientation;
+
+typedef enum {
+	UI_FILL_WIDTH,
+	UI_FILL_HEIGHT,
+} UISizing;
+
+typedef enum {
+	UI_ALIGN_LEFT,
+	UI_ALIGN_RIGHT,
+	UI_ALIGN_TOP,
+	UI_ALIGN_BOTTOM,
+} UIAlignment;
 
 typedef struct {
-	Color bgColor;
-	Color borderColor;
-
-	// function pointer
-	void (*onClick)(void *state);
-} UIButton;
-
-typedef struct {
-	Color bgColor;
-	Color borderColor;
-} UIBox;
-
-typedef struct {
-	Color color;
-	Color bgColor;
-	Color borderColor;
-} UILabel;
-
-typedef struct {
-	Color color;
-	Color bgColor;
-	Color borderColor;
-
-	void (*onChange)(void *state);
-} UITextInput;
-
-typedef struct {
-	u32 parentID;
-	UIType type;
-
 	Vec2i position;
-	Vec2i attachPosition;
 	Vec2i size;
-
-	SDL_Texture *texture;
-
-	union {
-		UIButton button;
-		UIBox box;
-		UILabel label;
-		UITextInput textInput;
-	} data;
-} UIElement;
+	Rect2i container;
+	Color bgColor;
+	UIOrientation orientation;
+} UILayout;
 
 typedef struct {
-	void *model;
+	SDL_Renderer *renderer;
+	Vec2i windowSize;
 
-	UIElement *array;
-	u32 len;
-	u32 size;
-} UI;
+	UILayout layoutStack[MAX_LAYOUT_STACK];
+	u8 layoutDepth;
+} UICtx;
 
 /*
 #define NUM_TEXT_INPUTS 2
@@ -95,11 +70,19 @@ typedef enum {
 } TextInputID;
 */
 
-u32 newUIElement(UI *ui);
+void uiInitCtx(UICtx *ctx, SDL_Renderer *renderer);
+
+typedef struct {
+	Vec2i position;
+	Vec2i size;
+	Rect2i padding;
+	Color bgColor;
+	UIOrientation orientation;
+	UISizing sizing;
+	UIAlignment alignment;
+} UILayoutOptions;
+
+void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options);
+void uiEndLayout(UICtx *ctx);
 
 SDL_Texture *newTextTexture(SDL_Renderer *renderer, char *text, TTF_Font *font, Color color);
-
-void initUI(UI *ui, u32 size); // UI, prealloc size
-void updateUI(UI *ui);
-void renderUI(SDL_Renderer *renderer, UI *ui);
-void uiHandleInput(Input *input, UI *ui);

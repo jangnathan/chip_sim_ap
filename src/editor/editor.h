@@ -17,7 +17,6 @@ typedef enum {
 typedef struct {
 	EditState state;
 	Ctx *ctx;
-	UI *ui;
 
 	u16 menubarHeight;
 
@@ -45,7 +44,7 @@ typedef struct {
 } Editor;
 
 void initEditor(Editor *editor);
-void createEditorUI(UI *ui);
+void editorUI(Editor *editor);
 void updateEditor(Editor *editor, Input *input, Chips *chips);
 
 void editorHandleKeypress(Editor *editor, SDL_KeyboardEvent event);

@@ -53,6 +53,9 @@ Vec2i subtractVec2i(Vec2i a, Vec2i b) {
 Vec2i scaleVec2i(Vec2i a, float scale) {
 	return newVec2i(a.x * scale, a.y * scale);
 }
+u8 equalVec2i(Vec2i a, Vec2i b) {
+	return (a.x == b.x) && (a.y == b.y);
+}
 
 u8 collideABB(Vec2i a_pos, Vec2i b_pos, Vec2i b_size) {
 	if (a_pos.x >= b_pos.x && a_pos.x <= b_pos.x + b_size.x &&
@@ -82,4 +85,13 @@ u8 worldCollideAABB(Vec2f a_pos, Vec2f a_size, Vec2f b_pos, Vec2f b_size) {
 		return 1;
 	}
 	return 0;
+}
+
+Rect2i newRect2i(i32 t, i32 r, i32 b, i32 l) {
+	Rect2i rect;
+	rect.t = t;
+	rect.r = r;
+	rect.b = b;
+	rect.l = l;
+	return rect;
 }
