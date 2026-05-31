@@ -123,8 +123,6 @@ void renderGrid(SDL_Renderer *renderer, Editor *editor, i32 x, i32 y, i32 w, i32
 void renderEditor(SDL_Renderer *renderer, Textures *textures, i32 winWidth, Editor *editor, Chips *chips) {
 	Camera camera = editor->camera;
 	Color bgColor = editor->bgColor;
-	SDL_SetRenderDrawColor(renderer, bgColor.r, bgColor.g, bgColor.b, bgColor.a);
-	SDL_RenderClear(renderer);
 
 	renderGrid(renderer, editor, 0, editor->menubarHeight, camera.viewportSize.x, camera.viewportSize.y);
 
@@ -142,12 +140,12 @@ void renderEditor(SDL_Renderer *renderer, Textures *textures, i32 winWidth, Edit
 
 
 	// old code
-	SDL_FRect menubar = {0.0f, 0, winWidth, editor->menubarHeight};
+	/*SDL_FRect menubar = {0.0f, 0, winWidth, editor->menubarHeight};
 	SDL_FRect menubarOutline = {0.0f, editor->menubarHeight, winWidth, 1.0f};
 	SDL_SetRenderDrawColor(renderer, 245, 245, 245, 0);
 	SDL_RenderFillRect(renderer, &menubar);
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-	SDL_RenderFillRect(renderer, &menubarOutline);
+	SDL_RenderFillRect(renderer, &menubarOutline);*/
 
 	//renderBox(renderer, &ui->simulateButton);
 	switch (editor->state) {

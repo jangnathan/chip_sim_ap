@@ -44,7 +44,7 @@ typedef struct {
 } Editor;
 
 void initEditor(Editor *editor);
-void editorUI(Editor *editor);
+void editorUI(UICtx *ctx, Editor *editor);
 void updateEditor(Editor *editor, Input *input, Chips *chips);
 
 void editorHandleKeypress(Editor *editor, SDL_KeyboardEvent event);

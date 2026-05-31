@@ -29,33 +29,35 @@
 #define MAX_LAYOUT_STACK 32
 
 typedef enum {
-	UI_HORIZONTAL,
-	UI_VERTICAL,
+	UI_ORIENT_NONE = 0,
+	UI_HORIZONTAL = 1 << 1,
+	UI_VERTICAL = 1 << 2,
 } UIOrientation;
 
 typedef enum {
-	UI_FILL_WIDTH,
-	UI_FILL_HEIGHT,
+	UI_SIZING_NONE = 0,
+	UI_FILL_WIDTH = 1 << 1,
+	UI_FILL_HEIGHT = 1 << 2,
 } UISizing;
 
 typedef enum {
-	UI_ALIGN_LEFT,
-	UI_ALIGN_RIGHT,
-	UI_ALIGN_TOP,
-	UI_ALIGN_BOTTOM,
+	UI_ALIGN_NONE = 0,
+	UI_ALIGN_LEFT = 1 << 1,
+	UI_ALIGN_RIGHT = 1 << 2,
+	UI_ALIGN_TOP = 1 << 3,
+	UI_ALIGN_BOTTOM = 1 << 4,
 } UIAlignment;
 
 typedef struct {
 	Vec2i position;
 	Vec2i size;
-	Rect2i container;
+	Vec4i container;
 	Color bgColor;
 	UIOrientation orientation;
 } UILayout;
 
 typedef struct {
 	SDL_Renderer *renderer;
-	Vec2i windowSize;
 
 	UILayout layoutStack[MAX_LAYOUT_STACK];
 	u8 layoutDepth;
@@ -75,13 +77,14 @@ void uiInitCtx(UICtx *ctx, SDL_Renderer *renderer);
 typedef struct {
 	Vec2i position;
 	Vec2i size;
-	Rect2i padding;
+	Vec4i padding;
 	Color bgColor;
 	UIOrientation orientation;
 	UISizing sizing;
 	UIAlignment alignment;
 } UILayoutOptions;
 
+void uiRoot(UICtx *ctx, i32 winWidth, i32 winHeight);
 void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options);
 void uiEndLayout(UICtx *ctx);
 

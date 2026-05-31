@@ -251,7 +251,14 @@ void simulateButtonOnClick(void *ptr) {
 	printf("Hello\n");
 }
 
-void editorUI(Editor *editor) {
+void editorUI(UICtx *uiCtx, Editor *editor) {
+	uiBeginLayout(uiCtx, &(UILayoutOptions) {
+		.size.y = editor->menubarHeight,
+		.sizing = UI_FILL_WIDTH,
+		.bgColor = newColor(255, 255, 255, 255)
+	});
+
+	uiEndLayout(uiCtx);
 
 	/*u32 menubar = newUIElement(ui);
 	ui->array[menubar].type = UI_BOX;

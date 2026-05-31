@@ -95,12 +95,21 @@ void render(App *app) {
 	Chips *chips = &ctx->chips;
 	SDL_Renderer *renderer = app->renderer;
 	SDL_Window *window = app->window;
+	UICtx *uiCtx = &app->uiCtx;
+
+	SDL_SetRenderDrawColor(renderer, app->editor.bgColor.r,
+												app->editor.bgColor.g,
+												app->editor.bgColor.b, app->editor.bgColor.a);
+	SDL_RenderClear(renderer);
+
+	uiRoot(uiCtx, app->winWidth, app->winHeight);
 
 	switch (app->state) {
 		case ST_NONE:
 			break;
 		case ST_EDIT:
 			renderEditor(renderer, &app->textures, app->winWidth, &app->editor, chips);
+			editorUI(uiCtx, &app->editor);
 			break;
 	}
 
