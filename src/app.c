@@ -60,7 +60,7 @@ void initApp(App *app) {
 	Input *input = &app->input;
 	initInput(input);
 
-	uiInitCtx(&app->uiCtx, app->renderer);
+	uiInitCtx(&app->uiCtx, app->renderer, input);
 
 	app->state = ST_EDIT;
 	app->editor.ctx = &app->ctx;

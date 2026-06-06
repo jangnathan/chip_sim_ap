@@ -12,8 +12,9 @@ SDL_Texture *newTextTexture(SDL_Renderer *renderer, char *text, TTF_Font *font, 
 	return texture;
 }
 
-void uiInitCtx(UICtx *ctx, SDL_Renderer *renderer) {
+void uiInitCtx(UICtx *ctx, SDL_Renderer *renderer, Input *input) {
 	ctx->renderer = renderer;
+	ctx->input = input;
 	ctx->layoutDepth = 1;
 }
 
@@ -32,25 +33,14 @@ void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options) {
 	UILayout *layout = ctx->layoutStack + (ctx->layoutDepth - 1);
 	UILayout *prevLayout = ctx->layoutStack + (ctx->layoutDepth - 2);
 
-	if (isNullVec2i(options->size)) {
-		layout->size = newVec2i(0, 0);
-	} else {
-		layout->size = options->size;
-	}
-	if (isNullVec2i(options->position)) {
-		layout->position = newVec2i(0, 0);
-	} else {
-		layout->position = options->position;
-	}
-	if (isNullVec4i(options->padding)) {
-		layout->container = newVec4i(0, 0, 0, 0);
-	} else {
-		// calculate container bounds
-		// layout->container = ...
-	}
+	layout->size = options->size;
+
 	if (options->sizing & UI_FILL_WIDTH) {
 		layout->size.x = prevLayout->size.x;
 	}
+
+	layout->position = options->position;
+	layout->padding = options->padding;
 
 	if (options->bgColor.a > 0) {
 		layout->bgColor = options->bgColor;
@@ -60,6 +50,22 @@ void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options) {
 
 		SDL_SetRenderDrawColor(ctx->renderer, layout->bgColor.r, layout->bgColor.g, layout->bgColor.b, layout->bgColor.a);
 		SDL_RenderFillRect(ctx->renderer, &background);
+	}
+	layout->cursorPos = newVec2i(layout->position.x + layout->padding.t, layout->position.y + layout->padding.l);
+
+	// handle events
+	Input *input = ctx->input;
+
+	if (collideABB(input->mouse.position, layout->position, layout->size)) {
+		if (options->onHover != NULL) {
+			options->onHover(options->eventStateObject);
+		}
+
+		if (input->mouse.leftClick) {
+			if (options->onClick != NULL) {
+				options->onClick(options->eventStateObject);
+			}
+		}
 	}
 }
 

@@ -31,6 +31,8 @@ typedef struct {
 	u8 tempChipID;
 	u8 tempChipNumOutputs;
 
+	// textures
+
 	Camera camera;
 
 	Color bgColor;

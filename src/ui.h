@@ -4,28 +4,6 @@
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
-//typedef struct {
-//	Vec2i position;
-//	Vec2i attachPosition;
-//	Vec2i size;
-//	SDL_Texture *texture;
-//	Color bgColor;
-//} UIBox;
-//
-//#define UI_TEXT_INPUT_MAX 32
-//typedef struct {
-//	char text[UI_TEXT_INPUT_MAX];
-//	u8 textLen;
-//
-//	Vec2i position;
-//	Vec2i attachPosition;
-//	Vec2i size;
-//	SDL_Texture *texture;
-//	Color color;
-//	Color bgColor;
-//	u8 fontSize;
-//} UITextInput;
-
 #define MAX_LAYOUT_STACK 32
 
 typedef enum {
@@ -49,31 +27,28 @@ typedef enum {
 } UIAlignment;
 
 typedef struct {
+	Vec2i cursorPos;
 	Vec2i position;
 	Vec2i size;
-	Vec4i container;
+	Vec4i padding;
 	Color bgColor;
+
 	UIOrientation orientation;
+	u8 wrap;
 } UILayout;
 
 typedef struct {
 	SDL_Renderer *renderer;
+	Input *input;
 
 	UILayout layoutStack[MAX_LAYOUT_STACK];
 	u8 layoutDepth;
 } UICtx;
 
-/*
-#define NUM_TEXT_INPUTS 2
-typedef enum {
-	textInputPositionX,
-	textInputPositionY,
-	textInputNone
-} TextInputID;
-*/
+void uiInitCtx(UICtx *ctx, SDL_Renderer *renderer, Input *input);
+void uiRoot(UICtx *ctx, i32 winWidth, i32 winHeight);
 
-void uiInitCtx(UICtx *ctx, SDL_Renderer *renderer);
-
+// layout stack push / pop
 typedef struct {
 	Vec2i position;
 	Vec2i size;
@@ -82,9 +57,12 @@ typedef struct {
 	UIOrientation orientation;
 	UISizing sizing;
 	UIAlignment alignment;
+
+	void *eventStateObject;
+	void (*onClick)(void *state);
+	void (*onHover)(void *state);
 } UILayoutOptions;
 
-void uiRoot(UICtx *ctx, i32 winWidth, i32 winHeight);
 void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options);
 void uiEndLayout(UICtx *ctx);
 

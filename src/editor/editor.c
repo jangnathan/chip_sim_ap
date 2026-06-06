@@ -251,11 +251,21 @@ void simulateButtonOnClick(void *ptr) {
 	printf("Hello\n");
 }
 
+void menubarClicked(void *state) {
+	Editor *editor = (Editor*)state;
+
+	editor->menubarHeight++;
+}
+
 void editorUI(UICtx *uiCtx, Editor *editor) {
 	uiBeginLayout(uiCtx, &(UILayoutOptions) {
 		.size.y = editor->menubarHeight,
+		.padding = newVec4i(10, 10, 10, 10),
 		.sizing = UI_FILL_WIDTH,
-		.bgColor = newColor(255, 255, 255, 255)
+		.bgColor = newColor(255, 255, 255, 255),
+
+		.eventStateObject = editor,
+		.onClick = &menubarClicked
 	});
 
 	uiEndLayout(uiCtx);
