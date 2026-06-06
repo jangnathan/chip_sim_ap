@@ -43,10 +43,15 @@ typedef struct {
 
 	UILayout layoutStack[MAX_LAYOUT_STACK];
 	u8 layoutDepth;
+
+	void *eventStateObject;
+	void (*onClick)(void *state);
+	void (*onHover)(void *state);
 } UICtx;
 
 void uiInitCtx(UICtx *ctx, SDL_Renderer *renderer, Input *input);
-void uiRoot(UICtx *ctx, i32 winWidth, i32 winHeight);
+void uiBeginRoot(UICtx *ctx, i32 winWidth, i32 winHeight);
+void uiEndRoot(UICtx *ctx);
 
 // layout stack push / pop
 typedef struct {
@@ -65,5 +70,14 @@ typedef struct {
 
 void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options);
 void uiEndLayout(UICtx *ctx);
+
+typedef struct {
+	SDL_Texture *texture;
+	u16 textlen;
+	u8 fontSize;
+} UILabel;
+
+// needs UILabel pointer so it doesnt need to redraw texture every frame
+void uiLabel(UICtx *ctx, UILabel *label);
 
 SDL_Texture *newTextTexture(SDL_Renderer *renderer, char *text, TTF_Font *font, Color color);

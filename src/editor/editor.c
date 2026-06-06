@@ -160,7 +160,6 @@ void updateEditSelectLinkChip(Editor *editor, Input *input, Chips *chips, u8 isI
 }
 
 void updateEditor(Editor *editor, Input *input, Chips *chips) {
-	SDL_SetCursor(input->mouse.cursorDefault);
 	const bool *keystates = SDL_GetKeyboardState(NULL);
 	u8 isMovingCamera = 0;
 
@@ -168,7 +167,7 @@ void updateEditor(Editor *editor, Input *input, Chips *chips) {
 
 	if (keystates[SDL_SCANCODE_SPACE]) {
 		isMovingCamera = 1;
-		SDL_SetCursor(input->mouse.cursorMove);
+		input->mouse.cursorIcon =  CURSOR_MOVE;
 
 		if (input->mouse.leftDown) {
 			editor->camera.oldPosition = editor->camera.position;
@@ -247,14 +246,16 @@ void initEditor(Editor *editor) {
 	editor->zoomInKey = SDL_SCANCODE_EQUALS;
 }
 
-void simulateButtonOnClick(void *ptr) {
-	printf("Hello\n");
-}
-
 void menubarClicked(void *state) {
 	Editor *editor = (Editor*)state;
 
-	editor->menubarHeight++;
+	editor->menubarHeight += 4;
+}
+
+void simulateButtonClicked(void *state) {
+	Editor *editor = (Editor*)state;
+
+	editor->menubarHeight -= 4;
 }
 
 void editorUI(UICtx *uiCtx, Editor *editor) {
@@ -268,6 +269,16 @@ void editorUI(UICtx *uiCtx, Editor *editor) {
 		.onClick = &menubarClicked
 	});
 
+	uiBeginLayout(uiCtx, &(UILayoutOptions) {
+		.size = newVec2i(100, 50),
+		.padding = newVec4i(10, 10, 10, 10),
+		.bgColor = newColor(50, 200, 50, 255),
+
+		.eventStateObject = editor,
+		.onClick = &simulateButtonClicked
+	});
+
+	uiEndLayout(uiCtx);
 	uiEndLayout(uiCtx);
 
 	/*u32 menubar = newUIElement(ui);

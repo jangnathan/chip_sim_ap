@@ -18,9 +18,22 @@ void uiInitCtx(UICtx *ctx, SDL_Renderer *renderer, Input *input) {
 	ctx->layoutDepth = 1;
 }
 
-void uiRoot(UICtx *ctx, i32 winWidth, i32 winHeight) {
+void uiBeginRoot(UICtx *ctx, i32 winWidth, i32 winHeight) {
 	ctx->layoutStack[0].size = newVec2i(winWidth, winHeight);
+	ctx->layoutStack[0].cursorPos = newVec2i(0, 0);
 	ctx->layoutDepth = 1;
+
+	ctx->onHover = NULL;
+	ctx->onClick = NULL;
+}
+
+void uiEndRoot(UICtx *ctx) {
+	if (ctx->onHover != NULL) {
+		ctx->onHover(ctx->eventStateObject);
+	}
+	if (ctx->onClick != NULL) {
+		ctx->onClick(ctx->eventStateObject);
+	}
 }
 
 void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options) {
@@ -39,7 +52,7 @@ void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options) {
 		layout->size.x = prevLayout->size.x;
 	}
 
-	layout->position = options->position;
+	layout->position = translateVec2i(options->position, prevLayout->cursorPos);
 	layout->padding = options->padding;
 
 	if (options->bgColor.a > 0) {
@@ -55,16 +68,14 @@ void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options) {
 
 	// handle events
 	Input *input = ctx->input;
+	ctx->eventStateObject = options->eventStateObject;
 
 	if (collideABB(input->mouse.position, layout->position, layout->size)) {
-		if (options->onHover != NULL) {
-			options->onHover(options->eventStateObject);
-		}
+		ctx->onHover = options->onHover;
+		input->mouse.cursorIcon = CURSOR_POINTER;
 
 		if (input->mouse.leftClick) {
-			if (options->onClick != NULL) {
-				options->onClick(options->eventStateObject);
-			}
+			ctx->onClick = options->onClick;
 		}
 	}
 }
@@ -75,4 +86,7 @@ void uiEndLayout(UICtx *ctx) {
 		exit(1);
 	}
 	ctx->layoutDepth--;
+}
+
+void uiLabel(UICtx *ctx, UILabel *label) {
 }

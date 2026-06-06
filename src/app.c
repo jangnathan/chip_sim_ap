@@ -66,12 +66,6 @@ void initApp(App *app) {
 	app->editor.ctx = &app->ctx;
 	initEditor(&app->editor);
 
-	input->mouse.cursorDefault =
-		SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT);
-	input->mouse.cursorMove =
-		SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_MOVE);
-	SDL_SetCursor(input->mouse.cursorDefault);
-
 	loadTextures(app->renderer, &app->textures, app->font);
 }
 
@@ -102,7 +96,7 @@ void render(App *app) {
 												app->editor.bgColor.b, app->editor.bgColor.a);
 	SDL_RenderClear(renderer);
 
-	uiRoot(uiCtx, app->winWidth, app->winHeight);
+	uiBeginRoot(uiCtx, app->winWidth, app->winHeight);
 
 	switch (app->state) {
 		case ST_NONE:
@@ -112,6 +106,8 @@ void render(App *app) {
 			editorUI(uiCtx, &app->editor);
 			break;
 	}
+
+	uiEndRoot(uiCtx);
 
 	SDL_RenderPresent(renderer);
 }

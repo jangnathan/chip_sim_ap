@@ -2,9 +2,20 @@
 #include "unit.h"
 #include <SDL3/SDL.h>
 
+typedef enum {
+	CURSOR_DEFAULT,
+	CURSOR_MOVE,
+	CURSOR_POINTER
+} CursorIcon;
+
 typedef struct {
+	CursorIcon cursorIcon;
+	CursorIcon prevCursorIcon;
+
 	SDL_Cursor *cursorDefault; // cursor icons
 	SDL_Cursor *cursorMove;
+	SDL_Cursor *cursorPointer;
+
 	Vec2i position;
 	Vec2i oldCenterPosition;
 	Vec2i centerPosition;
