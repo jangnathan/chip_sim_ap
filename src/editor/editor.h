@@ -18,7 +18,10 @@ typedef struct {
 	EditState state;
 	Ctx *ctx;
 
+	// ui
 	u16 menubarHeight;
+	UICachedText startSimulationText;
+	UICachedText stopSimulationText;
 
 	// selection box
 	Vec2i selectBoxPos;
@@ -30,8 +33,6 @@ typedef struct {
 	u8 editChipInOption;
 	u8 tempChipID;
 	u8 tempChipNumOutputs;
-
-	// textures
 
 	Camera camera;
 
@@ -48,5 +49,6 @@ typedef struct {
 void initEditor(Editor *editor);
 void editorUI(UICtx *ctx, Editor *editor);
 void updateEditor(Editor *editor, Input *input, Chips *chips);
+void initEditorUI(Editor *editor, UICtx *ctx);
 
 void editorHandleKeypress(Editor *editor, SDL_KeyboardEvent event);

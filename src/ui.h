@@ -39,6 +39,7 @@ typedef struct {
 
 typedef struct {
 	SDL_Renderer *renderer;
+	TTF_Font *font;
 	Input *input;
 
 	UILayout layoutStack[MAX_LAYOUT_STACK];
@@ -49,19 +50,18 @@ typedef struct {
 	void (*onHover)(void *state);
 } UICtx;
 
-void uiInitCtx(UICtx *ctx, SDL_Renderer *renderer, Input *input);
+void initUICtx(UICtx *ctx);
 void uiBeginRoot(UICtx *ctx, i32 winWidth, i32 winHeight);
 void uiEndRoot(UICtx *ctx);
 
 // layout stack push / pop
 typedef struct {
-	Vec2i position;
 	Vec2i size;
+	Vec4i margin;
 	Vec4i padding;
 	Color bgColor;
 	UIOrientation orientation;
 	UISizing sizing;
-	UIAlignment alignment;
 
 	void *eventStateObject;
 	void (*onClick)(void *state);
@@ -71,13 +71,21 @@ typedef struct {
 void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options);
 void uiEndLayout(UICtx *ctx);
 
+// text rendering
+#define MAX_TEXT_LEN 128
+
 typedef struct {
+	char text[MAX_TEXT_LEN];
 	SDL_Texture *texture;
-	u16 textlen;
+	u8 textLen;
+} UICachedText;
+
+typedef struct {
+	UICachedText *cachedText;
 	u8 fontSize;
-} UILabel;
+} UILabelOptions;
 
-// needs UILabel pointer so it doesnt need to redraw texture every frame
-void uiLabel(UICtx *ctx, UILabel *label);
+void uiLabel(UICtx *ctx, const UILabelOptions *options);
 
+void setUICachedText(UICachedText *cachedText, SDL_Renderer *renderer, TTF_Font *font, char *text, Color color);
 SDL_Texture *newTextTexture(SDL_Renderer *renderer, char *text, TTF_Font *font, Color color);

@@ -64,10 +64,10 @@ void createFullAdder(Chips *chips, Vec2f position, u32 in1, u32 in2, u32 in3, u3
 
 int main() {
 	// init
-	App app;
-	initApp(&app);
+	App *app = malloc(sizeof(App));
+	initApp(app);
 
-	Ctx *ctx = &app.ctx;
+	Ctx *ctx = &app->ctx;
 	Chips *chips = &ctx->chips;
 
 	u32 a = newInputChip(chips, SWITCH);
@@ -142,6 +142,6 @@ int main() {
 	u32 clock = newInputChip(chips, CLOCK);
 	chips->array[clock].position = newVec2f(600.0f, 650.0f);
 
-	runApp(&app);
+	runApp(app);
 	return 0;
 }

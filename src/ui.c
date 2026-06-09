@@ -12,9 +12,16 @@ SDL_Texture *newTextTexture(SDL_Renderer *renderer, char *text, TTF_Font *font, 
 	return texture;
 }
 
-void uiInitCtx(UICtx *ctx, SDL_Renderer *renderer, Input *input) {
-	ctx->renderer = renderer;
-	ctx->input = input;
+void initUICtx(UICtx *ctx) {
+	if (ctx->renderer == NULL) {
+		fprintf(stderr, "UICtx.renderer must be set before calling uiInitCtx()");
+	}
+	if (ctx->font == NULL) {
+		fprintf(stderr, "UICtx.font must be set before calling uiInitCtx()");
+	}
+	if (ctx->input == NULL) {
+		fprintf(stderr, "UICtx.input must be set before calling uiInitCtx()");
+	}
 	ctx->layoutDepth = 1;
 }
 
@@ -34,6 +41,11 @@ void uiEndRoot(UICtx *ctx) {
 	if (ctx->onClick != NULL) {
 		ctx->onClick(ctx->eventStateObject);
 	}
+
+	if (ctx->layoutDepth != 1) {
+		fprintf(stderr, "not enough end layouts");
+		exit(1);
+	}
 }
 
 void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options) {
@@ -52,7 +64,7 @@ void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options) {
 		layout->size.x = prevLayout->size.x;
 	}
 
-	layout->position = translateVec2i(options->position, prevLayout->cursorPos);
+	layout->position = prevLayout->cursorPos;
 	layout->padding = options->padding;
 
 	if (options->bgColor.a > 0) {
@@ -88,5 +100,35 @@ void uiEndLayout(UICtx *ctx) {
 	ctx->layoutDepth--;
 }
 
-void uiLabel(UICtx *ctx, UILabel *label) {
+// only margin and font size
+void uiLabel(UICtx *ctx, const UILabelOptions *options) {
+	if (options->cachedText == NULL) {
+		return;
+	}
+
+	UILayout *layout = ctx->layoutStack + ctx->layoutDepth - 1;
+
+	u32 width = options->cachedText->textLen * options->fontSize * 0.5f;
+
+	SDL_FRect dest = {layout->cursorPos.x, layout->cursorPos.y, width, options->fontSize};
+	SDL_RenderTexture(ctx->renderer, options->cachedText->texture, NULL, &dest);
+
+	layout->cursorPos.x += width;
+	layout->cursorPos.y += options->fontSize;
+}
+
+void setUICachedText(UICachedText *cachedText, SDL_Renderer *renderer, TTF_Font *font, char *text, Color color) {
+	u8 textLen = strlen(text);
+	if (textLen == 0) return;
+	if (textLen > MAX_TEXT_LEN) {
+		fprintf(stderr, "");
+	}
+
+	// if identical, skip
+	if (strncmp(text, cachedText->text, MAX_TEXT_LEN) == 0) {
+		return;
+	}
+
+	cachedText->textLen = textLen;
+	cachedText->texture = newTextTexture(renderer, text, font, color);
 }

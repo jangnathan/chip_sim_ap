@@ -233,7 +233,6 @@ void initEditor(Editor *editor) {
 	editor->camera.viewportSize.x = 1;
 	editor->camera.viewportSize.y = 1;
 
-	editor->menubarHeight = 80;
 	editor->bgColor = newColor(220, 220, 220, 0);
 	editor->gridSize = 16;
 	editor->selectBoxActive = 0;
@@ -244,6 +243,12 @@ void initEditor(Editor *editor) {
 	// keys control
 	editor->zoomOutKey = SDL_SCANCODE_MINUS;
 	editor->zoomInKey = SDL_SCANCODE_EQUALS;
+}
+
+void initEditorUI(Editor *editor, UICtx *ctx) {
+	editor->menubarHeight = 80;
+	setUICachedText(&editor->startSimulationText, ctx->renderer, ctx->font, "Simulate", newColor(0, 0, 0, 255));
+	setUICachedText(&editor->stopSimulationText, ctx->renderer, ctx->font, "Stop", newColor(0, 0, 0, 255));
 }
 
 void menubarClicked(void *state) {
@@ -269,16 +274,24 @@ void editorUI(UICtx *uiCtx, Editor *editor) {
 		.onClick = &menubarClicked
 	});
 
-	uiBeginLayout(uiCtx, &(UILayoutOptions) {
-		.size = newVec2i(100, 50),
-		.padding = newVec4i(10, 10, 10, 10),
-		.bgColor = newColor(50, 200, 50, 255),
+	if (1) {
+		uiBeginLayout(uiCtx, &(UILayoutOptions) {
+			.size = newVec2i(120, 50),
+			.padding = newVec4i(10, 10, 10, 10),
+			.bgColor = newColor(50, 200, 50, 255),
 
-		.eventStateObject = editor,
-		.onClick = &simulateButtonClicked
-	});
+			.eventStateObject = editor,
+			.onClick = &simulateButtonClicked
+		});
 
-	uiEndLayout(uiCtx);
+		uiLabel(uiCtx, &(UILabelOptions) {
+			.cachedText = &editor->startSimulationText,
+			.fontSize = 24
+		});
+
+		uiEndLayout(uiCtx);
+	}
+
 	uiEndLayout(uiCtx);
 
 	/*u32 menubar = newUIElement(ui);

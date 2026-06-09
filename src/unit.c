@@ -10,6 +10,13 @@ Color newColor(u8 r, u8 g, u8 b, u8 a) {
 	return color;
 }
 
+u8 equalColor(Color a, Color b) {
+	if ((a.r == b.r) && (a.g == b.g) && (a.b == b.b) && (a.a == b.a)) {
+		return 1;
+	}
+	return 0;
+}
+
 Vec2f newVec2f(float x, float y) {
 	Vec2f vec2;
 	vec2.x = x;

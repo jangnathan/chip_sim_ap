@@ -60,11 +60,15 @@ void initApp(App *app) {
 	Input *input = &app->input;
 	initInput(input);
 
-	uiInitCtx(&app->uiCtx, app->renderer, input);
+	app->uiCtx.renderer = app->renderer;
+	app->uiCtx.input = input;
+	app->uiCtx.font = app->font;
+	initUICtx(&app->uiCtx);
 
 	app->state = ST_EDIT;
 	app->editor.ctx = &app->ctx;
 	initEditor(&app->editor);
+	initEditorUI(&app->editor, &app->uiCtx);
 
 	loadTextures(app->renderer, &app->textures, app->font);
 }
