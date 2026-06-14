@@ -70,8 +70,8 @@ void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options) {
 	if (options->bgColor.a > 0) {
 		layout->bgColor = options->bgColor;
 
-		SDL_FRect background = {layout->position.x, layout->position.y,
-			layout->size.x, layout->size.y};
+		SDL_FRect background = {(float)layout->position.x, (float)layout->position.y,
+			(float)layout->size.x, (float)layout->size.y};
 
 		SDL_SetRenderDrawColor(ctx->renderer, layout->bgColor.r, layout->bgColor.g, layout->bgColor.b, layout->bgColor.a);
 		SDL_RenderFillRect(ctx->renderer, &background);
@@ -108,12 +108,12 @@ void uiLabel(UICtx *ctx, const UILabelOptions *options) {
 
 	UILayout *layout = ctx->layoutStack + ctx->layoutDepth - 1;
 
-	u32 width = options->cachedText->textLen * options->fontSize * 0.5f;
+	float width = options->cachedText->textLen * options->fontSize * 0.5f;
 
-	SDL_FRect dest = {layout->cursorPos.x, layout->cursorPos.y, width, options->fontSize};
+	SDL_FRect dest = {(float)layout->cursorPos.x, (float)layout->cursorPos.y, width, (float)options->fontSize};
 	SDL_RenderTexture(ctx->renderer, options->cachedText->texture, NULL, &dest);
 
-	layout->cursorPos.x += width;
+	layout->cursorPos.x += (i32)width;
 	layout->cursorPos.y += options->fontSize;
 }
 

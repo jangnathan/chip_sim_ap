@@ -63,6 +63,7 @@ void createFullAdder(Chips *chips, Vec2f position, u32 in1, u32 in2, u32 in3, u3
 }
 
 int main() {
+	printf("Hello World!");
 	// init
 	App *app = malloc(sizeof(App));
 	initApp(app);
@@ -143,5 +144,7 @@ int main() {
 	chips->array[clock].position = newVec2f(600.0f, 650.0f);
 
 	runApp(app);
+	free(app);
+
 	return 0;
 }

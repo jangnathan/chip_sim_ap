@@ -214,7 +214,7 @@ void updateEditor(Editor *editor, Input *input, Chips *chips) {
 		}
 	}
 
-	for (u32 i = 0; i < chips->len; i++) {
+	for (u32 i = 1; i < chips->len; i++) {
 		updateChip(editor, input, chips, i);
 	}
 
