@@ -5,3 +5,6 @@ plan
 test/build
 build
 vendored/SDL
+out
+.vs
+.vscode
