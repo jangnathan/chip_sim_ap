@@ -7,9 +7,8 @@
 #define MAX_LAYOUT_STACK 32
 
 typedef enum {
-	UI_ORIENT_NONE = 0,
-	UI_HORIZONTAL = 1 << 1,
-	UI_VERTICAL = 1 << 2,
+	UI_VERTICAL,
+	UI_HORIZONTAL,
 } UIOrientation;
 
 typedef enum {
@@ -18,12 +17,11 @@ typedef enum {
 	UI_FILL_HEIGHT = 1 << 2,
 } UISizing;
 
-typedef enum {
-	UI_ALIGN_NONE = 0,
-	UI_ALIGN_LEFT = 1 << 1,
-	UI_ALIGN_RIGHT = 1 << 2,
-	UI_ALIGN_TOP = 1 << 3,
-	UI_ALIGN_BOTTOM = 1 << 4,
+typedef enum { // by default is top left, cannot have both top and bottom or right and left
+	UI_ALIGN_TOP = 0,
+	UI_ALIGN_RIGHT = 1 << 1,
+	UI_ALIGN_BOTTOM = 1 << 2,
+	UI_ALIGN_LEFT = 0,
 } UIAlignment;
 
 typedef struct {
@@ -50,7 +48,7 @@ typedef struct {
 	void (*onHover)(void *state);
 } UICtx;
 
-void initUICtx(UICtx *ctx);
+void initUICtx(UICtx *ctx, void *eventStateObject);
 void uiBeginRoot(UICtx *ctx, i32 winWidth, i32 winHeight);
 void uiEndRoot(UICtx *ctx);
 
@@ -61,9 +59,9 @@ typedef struct {
 	Vec4i padding;
 	Color bgColor;
 	UIOrientation orientation;
+	UIAlignment alignment;
 	UISizing sizing;
 
-	void *eventStateObject;
 	void (*onClick)(void *state);
 	void (*onHover)(void *state);
 } UILayoutOptions;

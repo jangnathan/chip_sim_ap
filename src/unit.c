@@ -40,6 +40,13 @@ Vec2f vec2ItoF(Vec2i vec2i) {
 	return vec2f;
 }
 
+Vec2i vec2FtoI(Vec2f vec2f) {
+	Vec2i vec2i;
+	vec2i.x = (u32)vec2f.x;
+	vec2i.y = (u32)vec2f.y;
+	return vec2i;
+}
+
 // vec2f 
 Vec2f translateVec2f(Vec2f a, Vec2f b) {
 	return newVec2f(a.x + b.x, a.y + b.y);

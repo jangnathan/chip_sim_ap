@@ -29,6 +29,7 @@ Color newColor(u8 r, u8 g, u8 b, u8 a);
 Vec2f newVec2f(float x, float y);
 Vec2i newVec2i(i32 x, i32 y);
 Vec2f vec2ItoF(Vec2i vec2);
+Vec2i vec2FtoI(Vec2f vec2);
 
 Vec2f translateVec2f(Vec2f a, Vec2f b);
 Vec2f subtractVec2f(Vec2f a, Vec2f b);

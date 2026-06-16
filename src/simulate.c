@@ -39,7 +39,7 @@ u8 deltaCycle(Chips *chips) {
 
 	while (stable == 0) {
 		stable = 1;
-		for (u32 i = 0; i < chips->simpleChipsLen; i++) {
+		for (u32 i = 1; i < chips->simpleChipsLen; i++) {
 			SimpleChip *simpleChip = chips->simpleChipsArray + i;
 			simulateSimpleChip(chips, simpleChip);
 

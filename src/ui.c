@@ -1,134 +1,188 @@
 #include "ui.h"
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
-SDL_Texture *newTextTexture(SDL_Renderer *renderer, char *text, TTF_Font *font, Color color) {
-	SDL_Surface* surface;
-	SDL_Color sdl_color = {color.r, color.g, color.b, color.a};
-	surface = TTF_RenderText_Blended(font, text, 0, sdl_color);
-	SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
-	SDL_DestroySurface(surface);
+SDL_Texture *newTextTexture(SDL_Renderer *renderer, char *text, TTF_Font *font,
+                            Color color) {
+  SDL_Surface *surface;
+  SDL_Color sdl_color = {color.r, color.g, color.b, color.a};
+  surface = TTF_RenderText_Blended(font, text, 0, sdl_color);
+  SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+  SDL_DestroySurface(surface);
 
-	return texture;
+  return texture;
 }
 
-void initUICtx(UICtx *ctx) {
-	if (ctx->renderer == NULL) {
-		fprintf(stderr, "UICtx.renderer must be set before calling uiInitCtx()");
-	}
-	if (ctx->font == NULL) {
-		fprintf(stderr, "UICtx.font must be set before calling uiInitCtx()");
-	}
-	if (ctx->input == NULL) {
-		fprintf(stderr, "UICtx.input must be set before calling uiInitCtx()");
-	}
-	ctx->layoutDepth = 1;
+void initUICtx(UICtx *ctx, void *eventStateObject) {
+  if (ctx->renderer == NULL) {
+    fprintf(stderr, "UICtx.renderer must be set before calling uiInitCtx()");
+  }
+  if (ctx->font == NULL) {
+    fprintf(stderr, "UICtx.font must be set before calling uiInitCtx()");
+  }
+  if (ctx->input == NULL) {
+    fprintf(stderr, "UICtx.input must be set before calling uiInitCtx()");
+  }
+  ctx->layoutDepth = 1;
+  ctx->eventStateObject = eventStateObject;
 }
 
 void uiBeginRoot(UICtx *ctx, i32 winWidth, i32 winHeight) {
-	ctx->layoutStack[0].size = newVec2i(winWidth, winHeight);
-	ctx->layoutStack[0].cursorPos = newVec2i(0, 0);
-	ctx->layoutDepth = 1;
+  UILayout *container = ctx->layoutStack + 0;
+  container->size = newVec2i(winWidth, winHeight);
+  container->position = newVec2i(0, 0);
+  container->padding = newVec4i(0, 0, 0, 0);
+  container->orientation = UI_VERTICAL;
+  container->cursorPos = newVec2i(0, 0);
+  ctx->layoutDepth = 1;
 
-	ctx->onHover = NULL;
-	ctx->onClick = NULL;
+  ctx->onHover = NULL;
+  ctx->onClick = NULL;
 }
 
 void uiEndRoot(UICtx *ctx) {
-	if (ctx->onHover != NULL) {
-		ctx->onHover(ctx->eventStateObject);
-	}
-	if (ctx->onClick != NULL) {
-		ctx->onClick(ctx->eventStateObject);
-	}
+  if (ctx->onHover != NULL) {
+    ctx->onHover(ctx->eventStateObject);
+  }
+  if (ctx->onClick != NULL) {
+    printf("Hello2\n");
+    ctx->onClick(ctx->eventStateObject);
+  }
 
-	if (ctx->layoutDepth != 1) {
-		fprintf(stderr, "not enough end layouts");
-		exit(1);
-	}
+  if (ctx->layoutDepth != 1) {
+    fprintf(stderr, "not enough end layouts");
+    exit(1);
+  }
 }
 
 void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options) {
-	ctx->layoutDepth++;
-	if (ctx->layoutDepth >= MAX_LAYOUT_STACK) {
-		fprintf(stderr, "num layouts exceeded");
-		exit(1);
-	}
+  if (ctx->layoutDepth >= MAX_LAYOUT_STACK) {
+    fprintf(stderr, "num layouts exceeded");
+    exit(1);
+  }
 
-	UILayout *layout = ctx->layoutStack + (ctx->layoutDepth - 1);
-	UILayout *prevLayout = ctx->layoutStack + (ctx->layoutDepth - 2);
+  UILayout *layout = ctx->layoutStack + ctx->layoutDepth;
+  UILayout *prevLayout = ctx->layoutStack + ctx->layoutDepth - 1;
+  ctx->layoutDepth++;
 
-	layout->size = options->size;
+  layout->size = options->size;
 
-	if (options->sizing & UI_FILL_WIDTH) {
-		layout->size.x = prevLayout->size.x;
-	}
+  if (options->sizing & UI_FILL_WIDTH) {
+    layout->size.x = prevLayout->size.x;
+  }
 
-	layout->position = prevLayout->cursorPos;
-	layout->padding = options->padding;
+  layout->position = prevLayout->cursorPos;
+  layout->padding = options->padding;
+  layout->orientation = options->orientation;
 
-	if (options->bgColor.a > 0) {
-		layout->bgColor = options->bgColor;
+  if (options->alignment & UI_ALIGN_BOTTOM) {
+    layout->position.y = prevLayout->position.y + prevLayout->size.y -
+                         prevLayout->padding.b - layout->size.y -
+                         options->margin.b;
+  } else { // UI ALIGN TOP
+    layout->position.y = prevLayout->cursorPos.y + prevLayout->padding.t;
+  }
+  if (options->alignment & UI_ALIGN_RIGHT) {
+    layout->position.x = prevLayout->position.x + prevLayout->size.x -
+                         layout->size.x - options->margin.r;
+  }
 
-		SDL_FRect background = {(float)layout->position.x, (float)layout->position.y,
-			(float)layout->size.x, (float)layout->size.y};
+  // adjust cursor position
 
-		SDL_SetRenderDrawColor(ctx->renderer, layout->bgColor.r, layout->bgColor.g, layout->bgColor.b, layout->bgColor.a);
-		SDL_RenderFillRect(ctx->renderer, &background);
-	}
-	layout->cursorPos = newVec2i(layout->position.x + layout->padding.t, layout->position.y + layout->padding.l);
+  layout->cursorPos = newVec2i(layout->position.x + layout->padding.t,
+                               layout->position.y + layout->padding.l);
 
-	// handle events
-	Input *input = ctx->input;
-	ctx->eventStateObject = options->eventStateObject;
+  switch (prevLayout->orientation) {
+  case UI_HORIZONTAL:
+    prevLayout->cursorPos.x += layout->size.x;
+    break;
 
-	if (collideABB(input->mouse.position, layout->position, layout->size)) {
-		ctx->onHover = options->onHover;
-		input->mouse.cursorIcon = CURSOR_POINTER;
+  case UI_VERTICAL:
+    prevLayout->cursorPos.y += layout->size.y;
+    break;
+  default:
+    break;
+  }
 
-		if (input->mouse.leftClick) {
-			ctx->onClick = options->onClick;
-		}
-	}
+  // render
+
+  if (options->bgColor.a > 0) {
+    layout->bgColor = options->bgColor;
+
+    SDL_FRect background = {(float)layout->position.x,
+                            (float)layout->position.y, (float)layout->size.x,
+                            (float)layout->size.y};
+
+    SDL_SetRenderDrawColor(ctx->renderer, layout->bgColor.r, layout->bgColor.g,
+                           layout->bgColor.b, layout->bgColor.a);
+    SDL_RenderFillRect(ctx->renderer, &background);
+  }
+
+  // handle events
+  Input *input = ctx->input;
+
+  if (collideABB(input->mouse.position, layout->position, layout->size)) {
+    ctx->onHover = options->onHover;
+
+    if (options->onClick != NULL) {
+      input->mouse.cursorIcon = CURSOR_POINTER;
+
+      if (input->mouse.leftClick) {
+        ctx->onClick = options->onClick;
+      }
+    }
+  }
 }
 
 void uiEndLayout(UICtx *ctx) {
-	if (ctx->layoutDepth == 1) {
-		fprintf(stderr, "too many end layouts");
-		exit(1);
-	}
-	ctx->layoutDepth--;
+  if (ctx->layoutDepth == 1) {
+    fprintf(stderr, "too many end layouts");
+    exit(1);
+  }
+
+  ctx->layoutDepth--;
 }
 
 // only margin and font size
 void uiLabel(UICtx *ctx, const UILabelOptions *options) {
-	if (options->cachedText == NULL) {
-		return;
-	}
+  if (options->cachedText == NULL) {
+    return;
+  }
 
-	UILayout *layout = ctx->layoutStack + ctx->layoutDepth - 1;
+  UILayout *layout = ctx->layoutStack + ctx->layoutDepth - 1;
 
-	float width = options->cachedText->textLen * options->fontSize * 0.5f;
+  float width = options->cachedText->textLen * options->fontSize * 0.5f;
 
-	SDL_FRect dest = {(float)layout->cursorPos.x, (float)layout->cursorPos.y, width, (float)options->fontSize};
-	SDL_RenderTexture(ctx->renderer, options->cachedText->texture, NULL, &dest);
+  SDL_FRect dest = {(float)layout->cursorPos.x, (float)layout->cursorPos.y,
+                    width, (float)options->fontSize};
+  SDL_RenderTexture(ctx->renderer, options->cachedText->texture, NULL, &dest);
 
-	layout->cursorPos.x += (i32)width;
-	layout->cursorPos.y += options->fontSize;
+  switch (layout->orientation) {
+  case UI_HORIZONTAL:
+    layout->cursorPos.x += (i32)width;
+    break;
+  case UI_VERTICAL:
+    layout->cursorPos.y += options->fontSize;
+    break;
+  default:
+    break;
+  }
 }
 
-void setUICachedText(UICachedText *cachedText, SDL_Renderer *renderer, TTF_Font *font, char *text, Color color) {
-	u8 textLen = strlen(text);
-	if (textLen == 0) return;
-	if (textLen > MAX_TEXT_LEN) {
-		fprintf(stderr, "");
-	}
+void setUICachedText(UICachedText *cachedText, SDL_Renderer *renderer,
+                     TTF_Font *font, char *text, Color color) {
+  u8 textLen = strlen(text);
+  if (textLen == 0)
+    return;
+  if (textLen > MAX_TEXT_LEN) {
+    fprintf(stderr, "");
+  }
 
-	// if identical, skip
-	if (strncmp(text, cachedText->text, MAX_TEXT_LEN) == 0) {
-		return;
-	}
+  // if identical, skip
+  if (strncmp(text, cachedText->text, MAX_TEXT_LEN) == 0) {
+    return;
+  }
 
-	cachedText->textLen = textLen;
-	cachedText->texture = newTextTexture(renderer, text, font, color);
+  cachedText->textLen = textLen;
+  cachedText->texture = newTextTexture(renderer, text, font, color);
 }

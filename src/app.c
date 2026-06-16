@@ -63,7 +63,7 @@ void initApp(App *app) {
 	app->uiCtx.renderer = app->renderer;
 	app->uiCtx.input = input;
 	app->uiCtx.font = app->font;
-	initUICtx(&app->uiCtx);
+	initUICtx(&app->uiCtx, app);
 
 	app->state = ST_EDIT;
 	app->editor.ctx = &app->ctx;
