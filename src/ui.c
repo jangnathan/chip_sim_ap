@@ -75,18 +75,6 @@ void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options) {
   layout->padding = options->padding;
   layout->orientation = options->orientation;
 
-  if (options->alignment & UI_ALIGN_BOTTOM) {
-    layout->position.y = prevLayout->position.y + prevLayout->size.y -
-                         prevLayout->padding.b - layout->size.y -
-                         options->margin.b;
-  } else { // UI ALIGN TOP
-    layout->position.y = prevLayout->cursorPos.y + prevLayout->padding.t;
-  }
-  if (options->alignment & UI_ALIGN_RIGHT) {
-    layout->position.x = prevLayout->position.x + prevLayout->size.x -
-                         layout->size.x - options->margin.r;
-  }
-
   // adjust cursor position
 
   layout->cursorPos = newVec2i(layout->position.x + layout->padding.t,
@@ -141,6 +129,23 @@ void uiEndLayout(UICtx *ctx) {
   }
 
   ctx->layoutDepth--;
+}
+
+UILayout *uiThisLayout(UICtx *ctx) {
+  return ctx->layoutStack + ctx->layoutDepth - 1;
+}
+
+void uiMoveLayoutCursor(UICtx *ctx, i32 x, i32 y) {
+  UILayout *layout = ctx->layoutStack + ctx->layoutDepth - 1;
+
+  layout->cursorPos.x += x;
+  layout->cursorPos.y += y;
+}
+
+void uiResetLayoutCursorX(UICtx *ctx) {
+  UILayout *layout = ctx->layoutStack + ctx->layoutDepth - 1;
+
+  layout->cursorPos.x = layout->position.x + layout->padding.l;
 }
 
 // only margin and font size

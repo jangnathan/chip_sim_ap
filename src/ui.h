@@ -55,11 +55,9 @@ void uiEndRoot(UICtx *ctx);
 // layout stack push / pop
 typedef struct {
 	Vec2i size;
-	Vec4i margin;
 	Vec4i padding;
 	Color bgColor;
 	UIOrientation orientation;
-	UIAlignment alignment;
 	UISizing sizing;
 
 	void (*onClick)(void *state);
@@ -68,6 +66,10 @@ typedef struct {
 
 void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options);
 void uiEndLayout(UICtx *ctx);
+
+UILayout *uiThisLayout(UICtx *ctx);
+void uiMoveLayoutCursor(UICtx *ctx, i32 x, i32 y);
+void uiResetLayoutCursorX(UICtx *ctx);
 
 // text rendering
 #define MAX_TEXT_LEN 128

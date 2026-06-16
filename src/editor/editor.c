@@ -105,7 +105,7 @@ void updateSwitch(Editor *editor, Input *input, Chips *chips, Vec2i pos, u32 ID,
     }
     if (input->mouse.leftClick) {
       if (editor->simulating) {
-        //inputChip->out = !inputChip->out;
+        // inputChip->out = !inputChip->out;
       } else {
         chipEditClicked(editor, chips, ID);
       }
@@ -241,8 +241,8 @@ void updateEditor(Editor *editor, Input *input, Chips *chips) {
     updateChip(editor, input, chips, i);
   }
 
-if (editor->simulating) {
-    //simulate(chips);
+  if (editor->simulating) {
+    // simulate(chips);
   }
 }
 
@@ -282,6 +282,12 @@ void simulateButtonClicked(void *eventStateObject) {
 
   editor->simulating = !editor->simulating;
 }
+void closeEditChipMenu(void *eventStateObject) {
+  App *app = (App *)eventStateObject;
+  Editor *editor = &app->editor;
+
+  editor->state = EDIT_NONE;
+}
 
 void editorUI(UICtx *uiCtx, Editor *editor) {
   uiBeginLayout(uiCtx,
@@ -309,23 +315,27 @@ void editorUI(UICtx *uiCtx, Editor *editor) {
   uiEndLayout(uiCtx);
   uiEndLayout(uiCtx);
 
+  if (editor->state == EDIT_SELECT_OPTION) {
+    uiMoveLayoutCursor(uiCtx, uiThisLayout(uiCtx)->size.x - 200, 15);
+    // edit options dashboard
+    uiBeginLayout(uiCtx,
+                  &(UILayoutOptions){.size = newVec2i(180, 500),
+                                     .padding = newVec4i(10, 10, 10, 10),
+                                     .bgColor = newColor(200, 200, 200, 255)});
 
-  // edit options dashboard
-  uiBeginLayout(uiCtx, &(UILayoutOptions){.size = newVec2i(180, 500),
-                                          .padding = newVec4i(10, 10, 10, 10),
-                                          .margin = newVec4i(10, 10, 0, 0),
-                                          .alignment = UI_ALIGN_RIGHT,
-                                          .bgColor = newColor(200, 200, 200, 255)});
+    uiMoveLayoutCursor(uiCtx, uiThisLayout(uiCtx)->size.x - 45, 0);
+    uiBeginLayout(uiCtx, &(UILayoutOptions){.size = newVec2i(30, 30), .bgColor = newColor(200, 50, 50, 255), .onClick = &closeEditChipMenu});
+    uiEndLayout(uiCtx);
+    uiResetLayoutCursorX(uiCtx);
 
-  uiLabel(uiCtx,
-          &(UILabelOptions){.cachedText = simulateButtonText, .fontSize = 24});
-    
-  uiLabel(uiCtx,
-          &(UILabelOptions){.cachedText = simulateButtonText, .fontSize = 24});
+    uiLabel(uiCtx, &(UILabelOptions){.cachedText = simulateButtonText,
+                                     .fontSize = 24});
 
-		  
-  uiEndLayout(uiCtx);
+    uiLabel(uiCtx, &(UILabelOptions){.cachedText = simulateButtonText,
+                                     .fontSize = 24});
 
+    uiEndLayout(uiCtx);
+  }
 
   /*u32 menubar = newUIElement(ui);
   ui->array[menubar].type = UI_BOX;
