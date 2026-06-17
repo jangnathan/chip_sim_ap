@@ -274,6 +274,9 @@ void initEditorUI(Editor *editor, UICtx *ctx) {
                   "Simulate", newColor(0, 0, 0, 255));
   setUICachedText(&editor->stopSimulationText, ctx->renderer, ctx->font, "Stop",
                   newColor(0, 0, 0, 255));
+
+  setUICachedText(&editor->switchText, ctx->renderer, ctx->font, "Switch",
+                  newColor(0, 0, 0, 255));
 }
 
 void simulateButtonClicked(void *eventStateObject) {
@@ -289,13 +292,20 @@ void closeEditChipMenu(void *eventStateObject) {
   editor->state = EDIT_NONE;
 }
 
+void createSwitchChip(void *eventStateObject) {
+  
+}
+
 void editorUI(UICtx *uiCtx, Editor *editor) {
+  // <navbar>
   uiBeginLayout(uiCtx,
                 &(UILayoutOptions){.size.y = editor->menubarHeight,
                                    .padding = newVec4i(10, 10, 10, 10),
                                    .sizing = UI_FILL_WIDTH,
+                                   .orientation = UI_HORIZONTAL,
                                    .bgColor = newColor(255, 255, 255, 255)});
 
+  // <simulate button>
   Color simulateButtonColor = newColor(50, 200, 50, 255);
   UICachedText *simulateButtonText = &editor->startSimulationText;
   if (editor->simulating) {
@@ -313,10 +323,36 @@ void editorUI(UICtx *uiCtx, Editor *editor) {
           &(UILabelOptions){.cachedText = simulateButtonText, .fontSize = 24});
 
   uiEndLayout(uiCtx);
+  // </simulate button>
+
+  // </navbar>
+
   uiEndLayout(uiCtx);
 
+  // <left sidebar>
+  uiBeginLayout(uiCtx,
+                &(UILayoutOptions){.size = newVec2i(90, 500),
+                                   .padding = newVec4i(10, 10, 10, 10),
+                                   .bgColor = newColor(200, 200, 200, 255)});
+
+  // <create switch>
+  uiBeginLayout(uiCtx,
+                &(UILayoutOptions){.size = newVec2i(90, 22),
+                                   .bgColor = newColor(255, 255, 255, 255),
+                                   .padding = newVec4i(2, 2, 2, 2)},
+                                  .onClick = &createSwitchChip);
+  uiLabel(uiCtx,
+          &(UILabelOptions){.cachedText = &editor->switchText, .fontSize = 18});
+  uiEndLayout(uiCtx);
+  // </create switch>
+
+  uiEndLayout(uiCtx);
+  // </left sidebar>
+
   if (editor->state == EDIT_SELECT_OPTION) {
-    uiMoveLayoutCursor(uiCtx, uiThisLayout(uiCtx)->size.x - 200, 15);
+    uiSetLayoutCursorPos(uiCtx, uiRootLayout(uiCtx)->size.x - 200,
+                         15 + editor->menubarHeight);
+
     // edit options dashboard
     uiBeginLayout(uiCtx,
                   &(UILayoutOptions){.size = newVec2i(180, 500),
@@ -324,7 +360,10 @@ void editorUI(UICtx *uiCtx, Editor *editor) {
                                      .bgColor = newColor(200, 200, 200, 255)});
 
     uiMoveLayoutCursor(uiCtx, uiThisLayout(uiCtx)->size.x - 45, 0);
-    uiBeginLayout(uiCtx, &(UILayoutOptions){.size = newVec2i(30, 30), .bgColor = newColor(200, 50, 50, 255), .onClick = &closeEditChipMenu});
+    uiBeginLayout(uiCtx,
+                  &(UILayoutOptions){.size = newVec2i(30, 30),
+                                     .bgColor = newColor(200, 50, 50, 255),
+                                     .onClick = &closeEditChipMenu});
     uiEndLayout(uiCtx);
     uiResetLayoutCursorX(uiCtx);
 

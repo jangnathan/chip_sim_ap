@@ -55,6 +55,8 @@ void initApp(App *app) {
 
 	app->running = 1;
 	app->window = createWindow();
+	SDL_SetWindowMinimumSize(app->window, 500, 300);
+
 	app->renderer = createRenderer(app->window);
 
 	Input *input = &app->input;

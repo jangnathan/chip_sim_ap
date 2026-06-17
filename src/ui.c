@@ -55,6 +55,10 @@ void uiEndRoot(UICtx *ctx) {
   }
 }
 
+UILayout *uiRootLayout(UICtx *ctx) {
+  return ctx->layoutStack + 0;
+}
+
 void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options) {
   if (ctx->layoutDepth >= MAX_LAYOUT_STACK) {
     fprintf(stderr, "num layouts exceeded");
@@ -68,7 +72,7 @@ void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options) {
   layout->size = options->size;
 
   if (options->sizing & UI_FILL_WIDTH) {
-    layout->size.x = prevLayout->size.x;
+    layout->size.x = prevLayout->size.x - (prevLayout->cursorPos.x - prevLayout->position.x);
   }
 
   layout->position = prevLayout->cursorPos;
@@ -140,6 +144,13 @@ void uiMoveLayoutCursor(UICtx *ctx, i32 x, i32 y) {
 
   layout->cursorPos.x += x;
   layout->cursorPos.y += y;
+}
+
+void uiSetLayoutCursorPos(UICtx *ctx, i32 x, i32 y) {
+  UILayout *layout = ctx->layoutStack + ctx->layoutDepth - 1;
+
+  layout->cursorPos.x = x;
+  layout->cursorPos.y = y;
 }
 
 void uiResetLayoutCursorX(UICtx *ctx) {

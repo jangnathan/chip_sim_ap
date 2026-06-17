@@ -22,6 +22,7 @@ typedef struct {
 	u16 menubarHeight;
 	UICachedText startSimulationText;
 	UICachedText stopSimulationText;
+	UICachedText switchText;
 
 	// selection box
 	Vec2i selectBoxPos;

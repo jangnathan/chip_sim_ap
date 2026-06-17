@@ -51,6 +51,7 @@ typedef struct {
 void initUICtx(UICtx *ctx, void *eventStateObject);
 void uiBeginRoot(UICtx *ctx, i32 winWidth, i32 winHeight);
 void uiEndRoot(UICtx *ctx);
+UILayout *uiRootLayout(UICtx *ctx);
 
 // layout stack push / pop
 typedef struct {
@@ -69,6 +70,7 @@ void uiEndLayout(UICtx *ctx);
 
 UILayout *uiThisLayout(UICtx *ctx);
 void uiMoveLayoutCursor(UICtx *ctx, i32 x, i32 y);
+void uiSetLayoutCursorPos(UICtx *ctx, i32 x, i32 y);
 void uiResetLayoutCursorX(UICtx *ctx);
 
 // text rendering
