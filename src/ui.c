@@ -14,8 +14,8 @@ SDL_Texture *newTextTexture(SDL_Renderer *renderer, char *text, TTF_Font *font,
 }
 
 void initUICtx(UICtx *ctx, void *eventStateObject) {
-  if (ctx->renderer == NULL) {
-    fprintf(stderr, "UICtx.renderer must be set before calling uiInitCtx()");
+  if (ctx->window == NULL) {
+    fprintf(stderr, "UICtx.window must be set before calling uiInitCtx()");
   }
   if (ctx->font == NULL) {
     fprintf(stderr, "UICtx.font must be set before calling uiInitCtx()");
@@ -27,9 +27,9 @@ void initUICtx(UICtx *ctx, void *eventStateObject) {
   ctx->eventStateObject = eventStateObject;
 }
 
-void uiBeginRoot(UICtx *ctx, i32 winWidth, i32 winHeight) {
+void uiBeginRoot(UICtx *ctx) {
   UILayout *container = ctx->layoutStack + 0;
-  container->size = newVec2i(winWidth, winHeight);
+  container->size = ctx->window->size;
   container->position = newVec2i(0, 0);
   container->padding = newVec4i(0, 0, 0, 0);
   container->orientation = UI_VERTICAL;
@@ -97,7 +97,7 @@ void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options) {
   }
 
   // render
-
+  SDL_Renderer *renderer = ctx->window->renderer;
   if (options->bgColor.a > 0) {
     layout->bgColor = options->bgColor;
 
@@ -105,9 +105,9 @@ void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options) {
                             (float)layout->position.y, (float)layout->size.x,
                             (float)layout->size.y};
 
-    SDL_SetRenderDrawColor(ctx->renderer, layout->bgColor.r, layout->bgColor.g,
+    SDL_SetRenderDrawColor(renderer, layout->bgColor.r, layout->bgColor.g,
                            layout->bgColor.b, layout->bgColor.a);
-    SDL_RenderFillRect(ctx->renderer, &background);
+    SDL_RenderFillRect(renderer, &background);
   }
 
   // handle events
@@ -165,13 +165,14 @@ void uiLabel(UICtx *ctx, const UILabelOptions *options) {
     return;
   }
 
+  SDL_Renderer *renderer = ctx->window->renderer;
   UILayout *layout = ctx->layoutStack + ctx->layoutDepth - 1;
 
   float width = options->cachedText->textLen * options->fontSize * 0.5f;
 
   SDL_FRect dest = {(float)layout->cursorPos.x, (float)layout->cursorPos.y,
                     width, (float)options->fontSize};
-  SDL_RenderTexture(ctx->renderer, options->cachedText->texture, NULL, &dest);
+  SDL_RenderTexture(renderer, options->cachedText->texture, NULL, &dest);
 
   switch (layout->orientation) {
   case UI_HORIZONTAL:

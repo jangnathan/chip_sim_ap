@@ -1,12 +1,13 @@
 #pragma once
-#include "ctx.h"
-#include "chip.h"
+#include "simulation/ctx.h"
+#include "simulation/chip.h"
 #include "ui.h"
 #include "unit.h"
-#include "camera.h"
-#include "input.h"
+#include "core/camera.h"
+#include "core/input.h"
 #include "textures.h"
 #include "editor/editor.h"
+#include "core/window.h"
 
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
@@ -17,20 +18,15 @@ typedef enum {
 } AppState;
 
 typedef struct {
-	Ctx ctx;
-	SDL_Window *window;
-	SDL_Renderer *renderer;
-
-	Input input;
-
+	tWindow window;
 	Textures textures;
 	TTF_Font *font;
 
-	i32 winWidth;
-	i32 winHeight;
+	Input input;
 
 	UICtx uiCtx;
 
+	Ctx ctx;
 	AppState state;
 
 	// state structures

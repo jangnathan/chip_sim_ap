@@ -1,6 +1,6 @@
-#include "event.h"
+#include "core/event.h"
 #include "ui.h"
-#include "input.h"
+#include "core/input.h"
 #include <stdio.h>
 
 void handleKeyPress(App *app, SDL_KeyboardEvent event) {
@@ -37,7 +37,8 @@ void handleEvents(App *app) {
 				break;
 			case SDL_EVENT_MOUSE_MOTION:
 				input->mouse.position = newVec2i(event.motion.x, event.motion.y);
-				input->mouse.centerPosition = newVec2i(event.motion.x - app->winWidth / 2, app->winHeight / 2 - event.motion.y);
+				input->mouse.centerPosition = newVec2i(event.motion.x - app->window.size.x / 2, app->window
+					.size.y / 2 - event.motion.y);
 				break;
 			case SDL_EVENT_MOUSE_BUTTON_DOWN:
 				if (event.button.button == SDL_BUTTON_LEFT) {

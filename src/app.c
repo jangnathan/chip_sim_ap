@@ -1,7 +1,7 @@
 #include "app.h"
-#include "simulate.h"
-#include "input.h"
-#include "event.h"
+#include "simulation/simulate.h"
+#include "core/input.h"
+#include "core/event.h"
 #include "editor/render.h"
 
 #include <stdio.h>
@@ -10,24 +10,6 @@
 
 #define WINDOW_WIDTH 1080
 #define WINDOW_HEIGHT 720
-
-SDL_Window *createWindow() {
-	SDL_Window *window = SDL_CreateWindow("ChipSim", WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE);
-	if (!window) {
-		fprintf(stderr, "failed to open window: %s", SDL_GetError());
-		exit(1);
-	}
-	return window;
-}
-
-SDL_Renderer *createRenderer(SDL_Window *window) {
-	SDL_Renderer *renderer = SDL_CreateRenderer(window, NULL);
-	if (!renderer) {
-		fprintf(stderr, "failed to create renderer: %s", SDL_GetError());
-		exit(1);
-	}
-	return renderer;
-}
 
 void initCtx(Ctx *ctx) {
 	chipsInit(&ctx->chips);
@@ -54,15 +36,13 @@ void initApp(App *app) {
 	}
 
 	app->running = 1;
-	app->window = createWindow();
-	SDL_SetWindowMinimumSize(app->window, 500, 300);
-
-	app->renderer = createRenderer(app->window);
+	createWindow(&app->window, newVec2i(WINDOW_WIDTH, WINDOW_HEIGHT));
+	windowSetMinSize(&app->window, newVec2i(500, 300));
 
 	Input *input = &app->input;
 	initInput(input);
 
-	app->uiCtx.renderer = app->renderer;
+	app->uiCtx.window = &app->window;
 	app->uiCtx.input = input;
 	app->uiCtx.font = app->font;
 	initUICtx(&app->uiCtx, app);
@@ -72,17 +52,19 @@ void initApp(App *app) {
 	initEditor(&app->editor);
 	initEditorUI(&app->editor, &app->uiCtx);
 
-	loadTextures(app->renderer, &app->textures, app->font);
+	loadTextures(app->window.renderer, &app->textures, app->font);
 }
 
 void update(App *app) {
-	SDL_GetWindowSize(app->window, &app->winWidth, &app->winHeight);
+	updateWindow(&app->window);
 
 	switch (app->state) {
 		case ST_NONE:
 			break;
 		case ST_EDIT:
-			app->editor.camera.viewportSize = newVec2i(app->winWidth, app->winHeight - app->editor.menubarHeight);
+			Vec2i viewportSize = app->window.size;
+			viewportSize.y -= app->editor.menubarHeight;
+			app->editor.camera.viewportSize = viewportSize;
 			app->editor.camera.viewportPos = newVec2i(0, app->editor.menubarHeight);
 
 			updateEditor(&app->editor, &app->input, &app->ctx.chips);
@@ -93,8 +75,7 @@ void update(App *app) {
 void render(App *app) {
 	Ctx *ctx = &app->ctx;
 	Chips *chips = &ctx->chips;
-	SDL_Renderer *renderer = app->renderer;
-	SDL_Window *window = app->window;
+	SDL_Renderer *renderer = app->window.renderer;
 	UICtx *uiCtx = &app->uiCtx;
 
 	SDL_SetRenderDrawColor(renderer, app->editor.bgColor.r,
@@ -102,13 +83,13 @@ void render(App *app) {
 												app->editor.bgColor.b, app->editor.bgColor.a);
 	SDL_RenderClear(renderer);
 
-	uiBeginRoot(uiCtx, app->winWidth, app->winHeight);
+	uiBeginRoot(uiCtx);
 
 	switch (app->state) {
 		case ST_NONE:
 			break;
 		case ST_EDIT:
-			renderEditor(renderer, &app->textures, app->winWidth, &app->editor, chips);
+			renderEditor(renderer, &app->textures, &app->editor);
 			editorUI(uiCtx, &app->editor);
 			break;
 	}
@@ -120,8 +101,7 @@ void render(App *app) {
 
 void closeApp(App *app) {
 	closeInput(&app->input);
-	SDL_DestroyRenderer(app->renderer);
-	SDL_DestroyWindow(app->window);
+	closeWindow(&app->window);
 	SDL_Quit();
 }
 

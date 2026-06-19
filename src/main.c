@@ -1,4 +1,4 @@
-#include "chip.h"
+#include "simulation/chip.h"
 #include "app.h"
 
 #include <stdio.h>

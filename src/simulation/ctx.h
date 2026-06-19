@@ -1,5 +1,5 @@
 #pragma once
-#include "chip.h"
+#include "simulation/chip.h"
 
 typedef struct {
 	Chips chips;

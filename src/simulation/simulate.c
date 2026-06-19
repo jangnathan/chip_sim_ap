@@ -1,4 +1,4 @@
-#include "simulate.h"
+#include "simulation/simulate.h"
 #include <stdio.h>
 
 u8 simulateSimpleChip(Chips *chips, SimpleChip *simpleChip) {

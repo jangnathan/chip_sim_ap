@@ -1,4 +1,4 @@
-#include "input.h"
+#include "core/input.h"
 
 void initInput(Input *input) {
 	input->mouse.leftClick = 0;

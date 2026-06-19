@@ -1,4 +1,4 @@
-#include "camera.h"
+#include "core/camera.h"
 
 // to account for camera, zoom, offset etc
 Vec2i world2screenVec2i(Camera camera, Vec2f in) {

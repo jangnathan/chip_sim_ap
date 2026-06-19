@@ -1,9 +1,9 @@
 #pragma once
-#include "ctx.h"
+#include "simulation/ctx.h"
 #include "ui.h"
-#include "chip.h"
-#include "input.h"
-#include "camera.h"
+#include "simulation/chip.h"
+#include "core/input.h"
+#include "core/camera.h"
 
 typedef enum {
 	EDIT_NONE,

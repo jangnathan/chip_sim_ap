@@ -1,5 +1,5 @@
 #include "editor.h"
-#include "simulate.h"
+#include "simulation/simulate.h"
 
 #include "app.h"
 
@@ -105,7 +105,7 @@ void updateSwitch(Editor *editor, Input *input, Chips *chips, Vec2i pos, u32 ID,
     }
     if (input->mouse.leftClick) {
       if (editor->simulating) {
-        // inputChip->out = !inputChip->out;
+        inputChip->out = !inputChip->out;
       } else {
         chipEditClicked(editor, chips, ID);
       }
@@ -242,7 +242,7 @@ void updateEditor(Editor *editor, Input *input, Chips *chips) {
   }
 
   if (editor->simulating) {
-    // simulate(chips);
+    simulate(chips);
   }
 }
 
@@ -271,7 +271,7 @@ void initEditor(Editor *editor) {
 void initEditorUI(Editor *editor, UICtx *ctx) {
   editor->menubarHeight = 80;
   setUICachedText(&editor->startSimulationText, ctx->renderer, ctx->font,
-                  "Simulate", newColor(0, 0, 0, 255));
+                  "simulation", newColor(0, 0, 0, 255));
   setUICachedText(&editor->stopSimulationText, ctx->renderer, ctx->font, "Stop",
                   newColor(0, 0, 0, 255));
 
@@ -292,9 +292,7 @@ void closeEditChipMenu(void *eventStateObject) {
   editor->state = EDIT_NONE;
 }
 
-void createSwitchChip(void *eventStateObject) {
-  
-}
+void createSwitchChip(void *eventStateObject) {}
 
 void editorUI(UICtx *uiCtx, Editor *editor) {
   // <navbar>
@@ -339,8 +337,8 @@ void editorUI(UICtx *uiCtx, Editor *editor) {
   uiBeginLayout(uiCtx,
                 &(UILayoutOptions){.size = newVec2i(90, 22),
                                    .bgColor = newColor(255, 255, 255, 255),
-                                   .padding = newVec4i(2, 2, 2, 2)},
-                                  .onClick = &createSwitchChip);
+                                   .padding = newVec4i(2, 2, 2, 2),
+                                   .onClick = &createSwitchChip});
   uiLabel(uiCtx,
           &(UILabelOptions){.cachedText = &editor->switchText, .fontSize = 18});
   uiEndLayout(uiCtx);

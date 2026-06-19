@@ -1,6 +1,8 @@
 #pragma once
 #include "unit.h"
-#include "input.h"
+#include "core/input.h"
+#include "core/window.h"
+
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
@@ -36,7 +38,7 @@ typedef struct {
 } UILayout;
 
 typedef struct {
-	SDL_Renderer *renderer;
+	tWindow *window;
 	TTF_Font *font;
 	Input *input;
 
@@ -49,7 +51,7 @@ typedef struct {
 } UICtx;
 
 void initUICtx(UICtx *ctx, void *eventStateObject);
-void uiBeginRoot(UICtx *ctx, i32 winWidth, i32 winHeight);
+void uiBeginRoot(UICtx *ctx);
 void uiEndRoot(UICtx *ctx);
 UILayout *uiRootLayout(UICtx *ctx);
 
