@@ -269,13 +269,14 @@ void initEditor(Editor *editor) {
 }
 
 void initEditorUI(Editor *editor, UICtx *ctx) {
+  SDL_Renderer *renderer = ctx->window->renderer;
   editor->menubarHeight = 80;
-  setUICachedText(&editor->startSimulationText, ctx->renderer, ctx->font,
+  setUICachedText(&editor->startSimulationText, renderer, ctx->font,
                   "simulation", newColor(0, 0, 0, 255));
-  setUICachedText(&editor->stopSimulationText, ctx->renderer, ctx->font, "Stop",
+  setUICachedText(&editor->stopSimulationText, renderer, ctx->font, "Stop",
                   newColor(0, 0, 0, 255));
 
-  setUICachedText(&editor->switchText, ctx->renderer, ctx->font, "Switch",
+  setUICachedText(&editor->switchText, renderer, ctx->font, "Switch",
                   newColor(0, 0, 0, 255));
 }
 

@@ -37,10 +37,17 @@ typedef struct {
 	u8 wrap;
 } UILayout;
 
+
+typedef struct {
+	SDL_Texture *x;
+} UIDefaultIcons;
+
 typedef struct {
 	tWindow *window;
 	TTF_Font *font;
 	Input *input;
+
+	UIDefaultIcons *defaultIcons;
 
 	UILayout layoutStack[MAX_LAYOUT_STACK];
 	u8 layoutDepth;
@@ -75,7 +82,8 @@ void uiMoveLayoutCursor(UICtx *ctx, i32 x, i32 y);
 void uiSetLayoutCursorPos(UICtx *ctx, i32 x, i32 y);
 void uiResetLayoutCursorX(UICtx *ctx);
 
-// text rendering
+// text / texture rendering
+
 #define MAX_TEXT_LEN 128
 
 typedef struct {

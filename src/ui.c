@@ -13,6 +13,27 @@ SDL_Texture *newTextTexture(SDL_Renderer *renderer, char *text, TTF_Font *font,
   return texture;
 }
 
+void generateIcons(UICtx *ctx) {
+  SDL_Renderer *renderer = ctx->window->renderer;
+  UIDefaultIcons *icons = &ctx->defaultIcons;
+
+  // X Icon
+  icons->x = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888,
+                               SDL_TEXTUREACCESS_TARGET, 32, 32);
+
+  SDL_SetRenderTarget(renderer, icons->x);
+  // clear texture to transparent
+  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+  SDL_RenderClear(renderer);
+
+  // draw cross
+  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+  SDL_RenderLine(renderer, 0, 0, 32, 32);
+  SDL_RenderLine(renderer, 0, 32, 32, 0);
+
+  SDL_SetRenderTarget(renderer, NULL);
+}
+
 void initUICtx(UICtx *ctx, void *eventStateObject) {
   if (ctx->window == NULL) {
     fprintf(stderr, "UICtx.window must be set before calling uiInitCtx()");
@@ -25,6 +46,8 @@ void initUICtx(UICtx *ctx, void *eventStateObject) {
   }
   ctx->layoutDepth = 1;
   ctx->eventStateObject = eventStateObject;
+
+  generateIcons(ctx);
 }
 
 void uiBeginRoot(UICtx *ctx) {
@@ -55,9 +78,7 @@ void uiEndRoot(UICtx *ctx) {
   }
 }
 
-UILayout *uiRootLayout(UICtx *ctx) {
-  return ctx->layoutStack + 0;
-}
+UILayout *uiRootLayout(UICtx *ctx) { return ctx->layoutStack + 0; }
 
 void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options) {
   if (ctx->layoutDepth >= MAX_LAYOUT_STACK) {
@@ -72,7 +93,8 @@ void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options) {
   layout->size = options->size;
 
   if (options->sizing & UI_FILL_WIDTH) {
-    layout->size.x = prevLayout->size.x - (prevLayout->cursorPos.x - prevLayout->position.x);
+    layout->size.x =
+        prevLayout->size.x - (prevLayout->cursorPos.x - prevLayout->position.x);
   }
 
   layout->position = prevLayout->cursorPos;
