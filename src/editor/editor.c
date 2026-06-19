@@ -272,7 +272,7 @@ void initEditorUI(Editor *editor, UICtx *ctx) {
   SDL_Renderer *renderer = ctx->window->renderer;
   editor->menubarHeight = 80;
   setUICachedText(&editor->startSimulationText, renderer, ctx->font,
-                  "simulation", newColor(0, 0, 0, 255));
+                  "Simulate", newColor(0, 0, 0, 255));
   setUICachedText(&editor->stopSimulationText, renderer, ctx->font, "Stop",
                   newColor(0, 0, 0, 255));
 
@@ -358,13 +358,17 @@ void editorUI(UICtx *uiCtx, Editor *editor) {
                                      .padding = newVec4i(10, 10, 10, 10),
                                      .bgColor = newColor(200, 200, 200, 255)});
 
+    // <close button>
     uiMoveLayoutCursor(uiCtx, uiThisLayout(uiCtx)->size.x - 45, 0);
     uiBeginLayout(uiCtx,
-                  &(UILayoutOptions){.size = newVec2i(30, 30),
+                  &(UILayoutOptions){.size = newVec2i(32, 32),
+                    .padding = newVec4i(4, 4, 4, 4),
                                      .bgColor = newColor(200, 50, 50, 255),
                                      .onClick = &closeEditChipMenu});
+                                     uiDecal(uiCtx, &(UIDecalOptions){.size = newVec2i(24, 24), .texture = uiCtx->defaultIcons.x});
     uiEndLayout(uiCtx);
     uiResetLayoutCursorX(uiCtx);
+    // </close button>
 
     uiLabel(uiCtx, &(UILabelOptions){.cachedText = simulateButtonText,
                                      .fontSize = 24});

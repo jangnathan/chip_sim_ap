@@ -28,8 +28,13 @@ void generateIcons(UICtx *ctx) {
 
   // draw cross
   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-  SDL_RenderLine(renderer, 0, 0, 32, 32);
-  SDL_RenderLine(renderer, 0, 32, 32, 0);
+  SDL_RenderLine(renderer, 0, 1, 31, 32);
+  for (i8 i = -3; i < 3; i++) {
+    // y = mx + c
+    // x = (y - c) / m
+    SDL_RenderLine(renderer, 0, i, (32 - i), 32);
+    SDL_RenderLine(renderer, 32, i, i, 32);
+  }
 
   SDL_SetRenderTarget(renderer, NULL);
 }
@@ -202,6 +207,26 @@ void uiLabel(UICtx *ctx, const UILabelOptions *options) {
     break;
   case UI_VERTICAL:
     layout->cursorPos.y += options->fontSize;
+    break;
+  default:
+    break;
+  }
+}
+
+void uiDecal(UICtx *ctx, const UIDecalOptions *options) {
+  SDL_Renderer *renderer = ctx->window->renderer;
+  UILayout *layout = ctx->layoutStack + ctx->layoutDepth - 1;
+
+  SDL_FRect dest = {(float)layout->cursorPos.x, (float)layout->cursorPos.y,
+                    (float)options->size.x, (float)options->size.y};
+  SDL_RenderTexture(renderer, options->texture, NULL, &dest);
+
+  switch (layout->orientation) {
+  case UI_HORIZONTAL:
+    layout->cursorPos.x += options->size.x;
+    break;
+  case UI_VERTICAL:
+    layout->cursorPos.y += options->size.y;
     break;
   default:
     break;

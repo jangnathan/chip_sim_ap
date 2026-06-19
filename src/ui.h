@@ -47,7 +47,7 @@ typedef struct {
 	TTF_Font *font;
 	Input *input;
 
-	UIDefaultIcons *defaultIcons;
+	UIDefaultIcons defaultIcons;
 
 	UILayout layoutStack[MAX_LAYOUT_STACK];
 	u8 layoutDepth;
@@ -98,6 +98,12 @@ typedef struct {
 } UILabelOptions;
 
 void uiLabel(UICtx *ctx, const UILabelOptions *options);
+
+typedef struct {
+	SDL_Texture *texture;
+	Vec2i size;
+} UIDecalOptions;
+void uiDecal(UICtx *ctx, const UIDecalOptions *options);
 
 void setUICachedText(UICachedText *cachedText, SDL_Renderer *renderer, TTF_Font *font, char *text, Color color);
 SDL_Texture *newTextTexture(SDL_Renderer *renderer, char *text, TTF_Font *font, Color color);
