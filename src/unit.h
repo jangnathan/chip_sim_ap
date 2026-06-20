@@ -26,6 +26,8 @@ typedef struct { // top right bottom left
 } Vec4i;
 
 Color newColor(u8 r, u8 g, u8 b, u8 a);
+u8 equalColor(Color a, Color b);
+
 Vec2f newVec2f(float x, float y);
 Vec2i newVec2i(i32 x, i32 y);
 Vec2f vec2ItoF(Vec2i vec2);

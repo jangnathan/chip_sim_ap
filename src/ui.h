@@ -32,6 +32,7 @@ typedef struct {
 	Vec2i size;
 	Vec4i padding;
 	Color bgColor;
+	u32 spacing;
 
 	UIOrientation orientation;
 	u8 wrap;
@@ -69,6 +70,7 @@ typedef struct {
 	Color bgColor;
 	UIOrientation orientation;
 	UISizing sizing;
+	u32 spacing;
 
 	void (*onClick)(void *state);
 	void (*onHover)(void *state);
@@ -90,6 +92,7 @@ typedef struct {
 	char text[MAX_TEXT_LEN];
 	SDL_Texture *texture;
 	u8 textLen;
+	Color color;
 } UICachedText;
 
 typedef struct {

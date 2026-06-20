@@ -271,9 +271,15 @@ void initEditor(Editor *editor) {
 void initEditorUI(Editor *editor, UICtx *ctx) {
   SDL_Renderer *renderer = ctx->window->renderer;
   editor->menubarHeight = 80;
-  setUICachedText(&editor->startSimulationText, renderer, ctx->font,
-                  "Simulate", newColor(0, 0, 0, 255));
+  setUICachedText(&editor->startSimulationText, renderer, ctx->font, "Simulate",
+                  newColor(0, 0, 0, 255));
   setUICachedText(&editor->stopSimulationText, renderer, ctx->font, "Stop",
+                  newColor(0, 0, 0, 255));
+
+  setUICachedText(&editor->pivotText, renderer, ctx->font, "Pivot",
+                  newColor(0, 0, 0, 255));
+
+  setUICachedText(&editor->wireText, renderer, ctx->font, "Wire",
                   newColor(0, 0, 0, 255));
 
   setUICachedText(&editor->switchText, renderer, ctx->font, "Switch",
@@ -291,6 +297,24 @@ void closeEditChipMenu(void *eventStateObject) {
   Editor *editor = &app->editor;
 
   editor->state = EDIT_NONE;
+}
+
+void createPivot(void *eventStateObject) {
+  App *app = (App *)eventStateObject;
+  Editor *editor = &app->editor;
+  Ctx *ctx = editor->ctx;
+  Pivots *pivots = &ctx->pivots;
+
+  pivotsNew(pivots);
+}
+
+void createWire(void *eventStateObject) {
+  App *app = (App *)eventStateObject;
+  Editor *editor = &app->editor;
+  Ctx *ctx = editor->ctx;
+  Wires *wires = &ctx->wires;
+
+  wiresNew(wires);
 }
 
 void createSwitchChip(void *eventStateObject) {}
@@ -332,7 +356,30 @@ void editorUI(UICtx *uiCtx, Editor *editor) {
   uiBeginLayout(uiCtx,
                 &(UILayoutOptions){.size = newVec2i(90, 500),
                                    .padding = newVec4i(10, 10, 10, 10),
-                                   .bgColor = newColor(200, 200, 200, 255)});
+                                   .bgColor = newColor(200, 200, 200, 255),
+                                  .spacing = 8});
+
+  // <create pivot>
+  uiBeginLayout(uiCtx,
+                &(UILayoutOptions){.size = newVec2i(90, 22),
+                                   .bgColor = newColor(255, 255, 255, 255),
+                                   .padding = newVec4i(2, 2, 2, 2),
+                                   .onClick = &createPivot});
+  uiLabel(uiCtx,
+          &(UILabelOptions){.cachedText = &editor->pivotText, .fontSize = 18});
+  uiEndLayout(uiCtx);
+  // </create pivot>
+  
+  // <create wire>
+  uiBeginLayout(uiCtx,
+                &(UILayoutOptions){.size = newVec2i(90, 22),
+                                   .bgColor = newColor(255, 255, 255, 255),
+                                   .padding = newVec4i(2, 2, 2, 2),
+                                   .onClick = &createWire});
+  uiLabel(uiCtx,
+          &(UILabelOptions){.cachedText = &editor->wireText, .fontSize = 18});
+  uiEndLayout(uiCtx);
+  // </create wire>
 
   // <create switch>
   uiBeginLayout(uiCtx,
@@ -362,10 +409,11 @@ void editorUI(UICtx *uiCtx, Editor *editor) {
     uiMoveLayoutCursor(uiCtx, uiThisLayout(uiCtx)->size.x - 45, 0);
     uiBeginLayout(uiCtx,
                   &(UILayoutOptions){.size = newVec2i(32, 32),
-                    .padding = newVec4i(4, 4, 4, 4),
+                                     .padding = newVec4i(4, 4, 4, 4),
                                      .bgColor = newColor(200, 50, 50, 255),
                                      .onClick = &closeEditChipMenu});
-                                     uiDecal(uiCtx, &(UIDecalOptions){.size = newVec2i(24, 24), .texture = uiCtx->defaultIcons.x});
+    uiDecal(uiCtx, &(UIDecalOptions){.size = newVec2i(24, 24),
+                                     .texture = uiCtx->defaultIcons.x});
     uiEndLayout(uiCtx);
     uiResetLayoutCursorX(uiCtx);
     // </close button>

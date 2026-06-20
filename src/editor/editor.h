@@ -22,6 +22,9 @@ typedef struct {
 	u16 menubarHeight;
 	UICachedText startSimulationText;
 	UICachedText stopSimulationText;
+
+	UICachedText pivotText;
+	UICachedText wireText;
 	UICachedText switchText;
 
 	// selection box

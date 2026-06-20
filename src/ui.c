@@ -62,6 +62,7 @@ void uiBeginRoot(UICtx *ctx) {
   container->padding = newVec4i(0, 0, 0, 0);
   container->orientation = UI_VERTICAL;
   container->cursorPos = newVec2i(0, 0);
+  container->spacing = 0;
   ctx->layoutDepth = 1;
 
   ctx->onHover = NULL;
@@ -105,6 +106,7 @@ void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options) {
   layout->position = prevLayout->cursorPos;
   layout->padding = options->padding;
   layout->orientation = options->orientation;
+  layout->spacing = options->spacing;
 
   // adjust cursor position
 
@@ -113,11 +115,11 @@ void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options) {
 
   switch (prevLayout->orientation) {
   case UI_HORIZONTAL:
-    prevLayout->cursorPos.x += layout->size.x;
+    prevLayout->cursorPos.x += layout->size.x + prevLayout->spacing;
     break;
 
   case UI_VERTICAL:
-    prevLayout->cursorPos.y += layout->size.y;
+    prevLayout->cursorPos.y += layout->size.y + prevLayout->spacing;
     break;
   default:
     break;
@@ -203,10 +205,10 @@ void uiLabel(UICtx *ctx, const UILabelOptions *options) {
 
   switch (layout->orientation) {
   case UI_HORIZONTAL:
-    layout->cursorPos.x += (i32)width;
+    layout->cursorPos.x += (i32)width + layout->spacing;
     break;
   case UI_VERTICAL:
-    layout->cursorPos.y += options->fontSize;
+    layout->cursorPos.y += options->fontSize + layout->spacing;
     break;
   default:
     break;
@@ -223,10 +225,10 @@ void uiDecal(UICtx *ctx, const UIDecalOptions *options) {
 
   switch (layout->orientation) {
   case UI_HORIZONTAL:
-    layout->cursorPos.x += options->size.x;
+    layout->cursorPos.x += options->size.x + layout->spacing;
     break;
   case UI_VERTICAL:
-    layout->cursorPos.y += options->size.y;
+    layout->cursorPos.y += options->size.y + layout->spacing;
     break;
   default:
     break;
@@ -243,10 +245,11 @@ void setUICachedText(UICachedText *cachedText, SDL_Renderer *renderer,
   }
 
   // if identical, skip
-  if (strncmp(text, cachedText->text, MAX_TEXT_LEN) == 0) {
+  if (strncmp(text, cachedText->text, MAX_TEXT_LEN) == 0 && equalColor(color, cachedText->color)) {
     return;
   }
 
+  cachedText->color = color;
   cachedText->textLen = textLen;
   cachedText->texture = newTextTexture(renderer, text, font, color);
 }
