@@ -3,4 +3,6 @@
 
 typedef struct {
 	Chips chips;
+	Pivots pivots;
+	Wires wires;
 } Ctx;

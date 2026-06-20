@@ -160,3 +160,39 @@ u8 getNumOutputs(ChipEntityType type) {
 			return 1;
 	}
 }
+
+// pivots and wires
+void pivotsInit(Pivots *pivots) {
+	pivots->len = 0;
+	pivots->size = 256;
+	pivots->array = malloc(sizeof(Pivot) * pivots->size);
+}
+u32 pivotsNew(Pivots *pivots) {
+	pivots->len++;
+	u32 pivotsLen = pivots->len;
+
+	if (pivotsLen >= pivots->size) {
+		pivots->size *= 2;
+		pivots->array = realloc(pivots->array, sizeof(Pivot) * pivots->size);
+	}
+
+	// 0 is reserved as NULL, Doesnt need - 1
+	return pivotsLen;
+};
+
+void wiresInit(Wires *wires) {
+	wires->len = 0;
+	wires->size = 256;
+	wires->array = malloc(sizeof(Wire) * wires->size);
+}
+u32 wiresNew(Wires *wires) {
+	wires->len++;
+	u32 wiresLen = wires->len;
+
+	if (wiresLen >= wires->size) {
+		wires->size *= 2;
+		wires->array = realloc(wires->array, sizeof(Wire) * wires->size);
+	}
+
+	return wiresLen;
+}

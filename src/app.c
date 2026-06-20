@@ -13,6 +13,8 @@
 
 void initCtx(Ctx *ctx) {
 	chipsInit(&ctx->chips);
+	pivotsInit(&ctx->pivots);
+	wiresInit(&ctx->wires);
 }
 
 void initApp(App *app) {

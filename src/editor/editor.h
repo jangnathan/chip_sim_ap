@@ -53,3 +53,24 @@ void updateEditor(Editor *editor, Input *input, Chips *chips);
 void initEditorUI(Editor *editor, UICtx *ctx);
 
 void editorHandleKeypress(Editor *editor, SDL_KeyboardEvent event);
+
+
+// undoing / redoing
+typedef enum {
+	ACT_CREATE_CHIP,
+	ACT_DELETE_CHIP,
+	ACT_TRANSLATE_CHIP,
+} ActionType;
+
+// data needed to undo
+typedef struct {
+	Vec2f oldPos;
+} UndoTranslateChip;
+
+typedef struct {
+	ActionType type;
+	u32 ID;
+	union {
+		UndoTranslateChip translate;
+	} data;
+} Undo;

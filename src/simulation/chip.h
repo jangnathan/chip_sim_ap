@@ -93,22 +93,31 @@ InputChip *getInputChip(Chips *chips, u32 ID);
 u8 getNumInputs(ChipEntityType type);
 u8 getNumOutputs(ChipEntityType type);
 
-// undoing / redoing
-typedef enum {
-	ACT_CREATE_CHIP,
-	ACT_DELETE_CHIP,
-	ACT_TRANSLATE_CHIP,
-} ActionType;
-
-// data needed to undo
+// WIRING
 typedef struct {
-	Vec2f oldPos;
-} UndoTranslateChip;
+	u32 connectionID;
+	Vec2f position;
+} Pivot;
 
 typedef struct {
-	ActionType type;
-	u32 ID;
-	union {
-		UndoTranslateChip translate;
-	} data;
-} Undo;
+	u32 pivotID1;
+	u32 pivotID2;
+} Wire;
+
+typedef struct {
+	Pivot *array;
+	u32 len;
+	u32 size;
+} Pivots;
+
+typedef struct {
+	Wire *array;
+	u32 len;
+	u32 size;
+} Wires;
+
+void pivotsInit(Pivots *pivots);
+u32 pivotsNew(Pivots *pivots);
+
+void wiresInit(Wires *wires);
+u32 wiresNew(Wires *wires);
