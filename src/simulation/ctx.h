@@ -1,8 +1,6 @@
 #pragma once
-#include "simulation/chip.h"
+#include "simulation/circuit.h"
 
 typedef struct {
-	Chips chips;
-	Pivots pivots;
-	Wires wires;
+	Circuit circuit;
 } Ctx;

@@ -1,6 +1,6 @@
 #pragma once
 #include "simulation/ctx.h"
-#include "simulation/chip.h"
+#include "simulation/circuit.h"
 #include "ui.h"
 #include "unit.h"
 #include "core/camera.h"

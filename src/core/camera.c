@@ -9,10 +9,7 @@ Vec2i world2screenVec2i(Camera camera, Vec2f in) {
 	b.y *= -1;
 
 	Vec2i out = scaleVec2i(b, camera.zoom);
-	out.x += camera.viewportSize.x / 2;
-	out.y += camera.viewportSize.y / 2;
-
-	out.x += camera.viewportPos.x;
-	out.y += camera.viewportPos.y;
+	out.x += (camera.viewportSize.x + camera.viewportPos.x) / 2;
+	out.y += (camera.viewportSize.y + camera.viewportPos.y) / 2;
 	return out;
 }

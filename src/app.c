@@ -1,5 +1,6 @@
 #include "app.h"
 #include "simulation/simulate.h"
+#include "simulation/circuit.h"
 #include "core/input.h"
 #include "core/event.h"
 #include "editor/render.h"
@@ -12,14 +13,10 @@
 #define WINDOW_HEIGHT 720
 
 void initCtx(Ctx *ctx) {
-	chipsInit(&ctx->chips);
-	pivotsInit(&ctx->pivots);
-	wiresInit(&ctx->wires);
+	circuitInit(&ctx->circuit);
 }
 
 void initApp(App *app) {
-	initCtx(&app->ctx);
-
 	u8 sucess = SDL_Init(SDL_INIT_VIDEO);
 	if (!sucess) {
 		fprintf(stderr, "error initializing SDL3");
@@ -55,6 +52,10 @@ void initApp(App *app) {
 	initEditorUI(&app->editor, &app->uiCtx);
 
 	loadTextures(app->window.renderer, &app->textures, app->font);
+
+	// init logic Ctx
+	initCtx(&app->ctx);
+	//app->ctx.circuit.len = 0;
 }
 
 void update(App *app) {
@@ -69,14 +70,13 @@ void update(App *app) {
 			app->editor.camera.viewportSize = viewportSize;
 			app->editor.camera.viewportPos = newVec2i(0, app->editor.menubarHeight);
 
-			updateEditor(&app->editor, &app->input, &app->ctx.chips);
+			updateEditor(&app->editor, &app->input);
 			break;
 	}
 }
 
 void render(App *app) {
 	Ctx *ctx = &app->ctx;
-	Chips *chips = &ctx->chips;
 	SDL_Renderer *renderer = app->window.renderer;
 	UICtx *uiCtx = &app->uiCtx;
 
