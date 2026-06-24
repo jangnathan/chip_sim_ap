@@ -94,8 +94,10 @@ void updateEditor(Editor *editor, Input *input) {
   }
   case EDIT_CREATE_WIRE: {
     if (editor->hoveredCE_ID != 0 && input->mouse.leftClick == 1) {
-      if (circuit->array[editor->hoveredCE_ID].typeID == CE_PIVOT) {
-        printf("Connected!");
+      if (circuit->array[editor->hoveredCE_ID].type == CE_PIVOT) {
+        circuit->wires.array[editor->tempCE_ID].pivotID1 = editor->hoveredCE_ID;
+        editor->state = EDIT_SELECT_WIRE_PIVOT2;
+        printf("Connected! %d ", editor->hoveredCE_ID);
       }
     }
   }

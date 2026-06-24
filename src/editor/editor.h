@@ -10,6 +10,9 @@ typedef enum {
 	EDIT_SELECT_OPTION,
 	EDIT_MOVE_CE,
 	EDIT_CREATE_WIRE,
+	EDIT_SELECT_WIRE_PIVOT1,
+	EDIT_SELECT_WIRE_PIVOT2,
+
 	EDIT_SELECT_IN_LINK_CHIP,	
 	EDIT_FIND_LINK_CHIP,	
 	EDIT_SELECT_OUT_LINK_CHIP
@@ -47,12 +50,12 @@ typedef struct {
 
 	u32 tempChipID;
 	u8 tempChipNumOutputs;
+	// }
 
 	Camera camera;
 
 	Color bgColor;
 	u16 gridSize;
-	// }
 
 	// input options
 	SDL_Scancode zoomOutKey;
