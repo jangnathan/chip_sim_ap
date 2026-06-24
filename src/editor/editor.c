@@ -91,6 +91,7 @@ void updateEditor(Editor *editor, Input *input) {
       input->mouse.leftClick = 0;
       editor->state = EDIT_NONE;
     }
+    break;
   }
   case EDIT_CREATE_WIRE: {
     if (editor->hoveredCE_ID != 0 && input->mouse.leftClick == 1) {
@@ -100,6 +101,10 @@ void updateEditor(Editor *editor, Input *input) {
         printf("Connected! %d ", editor->hoveredCE_ID);
       }
     }
+    break;
+  }
+  case EDIT_SELECT_WIRE_PIVOT2: {
+    break;
   }
   }
 
