@@ -20,6 +20,8 @@ typedef struct {
 	Vec2i oldCenterPosition;
 	Vec2i centerPosition;
 
+	u8 positionUpdated;
+
 	u8 leftClick;
 	u8 leftHeld;
 	u8 leftDown;

@@ -10,14 +10,18 @@ void editorZoomOut(Editor *editor) {
 
   if (editor->camera.zoom >= 3.0f) {
     editor->camera.zoom = 3.0f;
+    return;
   }
+  editor->collisionStep = 1;
 }
 void editorZoomIn(Editor *editor) {
   editor->camera.zoom -= 0.1f;
 
   if (editor->camera.zoom <= 0.1f) {
     editor->camera.zoom = 0.1f;
+    return;
   }
+  editor->collisionStep = 1;
 }
 
 void editorHandleKeypress(Editor *editor, SDL_KeyboardEvent event) {
@@ -29,8 +33,28 @@ void editorHandleKeypress(Editor *editor, SDL_KeyboardEvent event) {
   }
 }
 
+void checkCollisionsCE(Editor *editor, Input *input) {
+  editor->hoveredCE_ID = 0;
+  Circuit *circuit = &editor->ctx->circuit;
+
+  for (u32 i = 1; i < circuit->pivots.len; i++) {
+    Pivot *pivot = circuit->pivots.array + i;
+    Vec2i pivotHitbox = scaleVec2i(newVec2i(15, 15), editor->camera.zoom);
+    Vec2i screenPos = world2screenVec2i(editor->camera, pivot->position);
+
+    if (cartesianCollideABB(input->mouse.position, screenPos, pivotHitbox)) {
+      editor->hoveredCE_ID = pivot->ID;
+    }
+  }
+}
+
 void updateEditor(Editor *editor, Input *input) {
   Circuit *circuit = &editor->ctx->circuit;
+
+  editor->collisionStep = input->mouse.positionUpdated;
+  if (editor->collisionStep) {
+    checkCollisionsCE(editor, input);
+  }
 
   const bool *keystates = SDL_GetKeyboardState(NULL);
   editor->selectBoxActive = 0;
@@ -69,6 +93,11 @@ void updateEditor(Editor *editor, Input *input) {
     }
   }
   case EDIT_CREATE_WIRE: {
+    if (editor->hoveredCE_ID != 0 && input->mouse.leftClick == 1) {
+      if (circuit->array[editor->hoveredCE_ID].typeID == CE_PIVOT) {
+        printf("Connected!");
+      }
+    }
   }
   }
 

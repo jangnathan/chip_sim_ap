@@ -36,6 +36,8 @@ typedef struct {
 	Vec2i selectBoxSize;
 	u8 selectBoxActive;
 
+	u8 collisionStep;
+	u32 hoveredCE_ID;
 	u32 tempCE_ID;
 
 	// TODO: Delete these and refactor {

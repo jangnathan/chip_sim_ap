@@ -8,8 +8,6 @@ typedef struct {
 
 	Vec2i viewportSize;
 	Vec2i viewportPos;
-
-	// TODO: add mouse for camera
 } Camera;
 
 Vec2i world2screenVec2i(Camera camera, Vec2f a);

@@ -5,7 +5,7 @@
 
 #define INIT_ID_SIZE 64
 
-void createCircuitEntity(Circuit *circuit, CircuitEntityType type, u32 typeID) {
+u32 assignCircuitEntity(Circuit *circuit, CircuitEntityType type, u32 typeID) {
   u32 newID = circuit->len;
   circuit->len++;
   u32 circuitsLen = circuit->len;
@@ -18,6 +18,7 @@ void createCircuitEntity(Circuit *circuit, CircuitEntityType type, u32 typeID) {
 
   circuit->array[newID].type = type;
   circuit->array[newID].typeID = typeID;
+  return newID;
 }
 
 // pivots and wires
@@ -39,7 +40,7 @@ u32 pivotsNew(Circuit *circuit) {
     pivots->array = realloc(pivots->array, sizeof(Pivot) * pivots->size);
   }
 
-  createCircuitEntity(circuit, CE_PIVOT, newID);
+  pivots->array[newID].ID = assignCircuitEntity(circuit, CE_PIVOT, newID);
 
   return newID;
 };
@@ -62,7 +63,7 @@ u32 wiresNew(Circuit *circuit) {
     wires->array = realloc(wires->array, sizeof(Wire) * wires->size);
   }
 
-  createCircuitEntity(circuit, CE_WIRE, newID);
+  wires->array[newID].ID = assignCircuitEntity(circuit, CE_WIRE, newID);
 
   return newID;
 }

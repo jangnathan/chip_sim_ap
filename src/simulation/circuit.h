@@ -5,8 +5,9 @@
 
 // PIVOT
 typedef struct {
-  u32 connectionID;
   Vec2f position;
+  u32 ID;
+  u32 connectionID;
 } Pivot;
 
 typedef struct {
@@ -17,6 +18,7 @@ typedef struct {
 
 // WIRE
 typedef struct {
+  u32 ID;
   u32 pivotID1;
   u32 pivotID2;
 } Wire;

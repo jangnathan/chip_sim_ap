@@ -90,14 +90,14 @@ u8 collideAABB(Vec2i a_pos, Vec2i a_size, Vec2i b_pos, Vec2i b_size) {
 	return 0;
 }
 
-u8 worldCollideABB(Vec2f a_pos, Vec2f b_pos, Vec2f b_size) {
+u8 cartesianCollideABB(Vec2i a_pos, Vec2i b_pos, Vec2i b_size) {
 	if (a_pos.x * 2 >= b_pos.x * 2 - b_size.x && a_pos.x * 2 <= b_pos.x * 2 + b_size.x &&
 		 a_pos.y * 2 >= b_pos.y * 2- b_size.y && a_pos.y * 2 <= b_pos.y * 2 + b_size.y)
 		return 1;
 
 	return 0;
 }
-u8 worldCollideAABB(Vec2f a_pos, Vec2f a_size, Vec2f b_pos, Vec2f b_size) {
+u8 cartesianCollideAABB(Vec2f a_pos, Vec2f a_size, Vec2f b_pos, Vec2f b_size) {
 	if (a_pos.x * 2 + a_size.x >= b_pos.x * 2 - b_size.x && a_pos.x * 2 - a_size.x <= b_pos.x * 2 + b_size.x &&
 		a_pos.y * 2 - a_size.y <= b_pos.y * 2 + b_size.y && a_pos.y * 2+ a_size.y >= b_pos.y * 2- b_size.y) {
 		return 1;

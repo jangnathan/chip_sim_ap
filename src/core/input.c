@@ -24,6 +24,8 @@ void initInput(Input *input) {
 // called at start of event
 void updateInput(Input *input) {
 	// reset clicks after event
+	input->mouse.positionUpdated = 0;
+
 	input->mouse.leftClick = 0;
 	input->mouse.rightClick = 0;
 	input->mouse.leftDown = 0;
