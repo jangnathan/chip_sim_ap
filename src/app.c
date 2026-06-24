@@ -64,7 +64,7 @@ void update(App *app) {
 	switch (app->state) {
 		case ST_NONE:
 			break;
-		case ST_EDIT:
+		case ST_EDIT: {
 			Vec2i viewportSize = app->window.size;
 			viewportSize.y -= app->editor.menubarHeight;
 			app->editor.camera.viewportSize = viewportSize;
@@ -72,6 +72,7 @@ void update(App *app) {
 
 			updateEditor(&app->editor, &app->input);
 			break;
+		}
 	}
 }
 
