@@ -127,3 +127,4 @@ typedef struct {
 u32 inputChipsNew(Circuit *circuit, const InputChipOptions *options);
 
 void circuitInit(Circuit *circuit);
+void circuitFree(Circuit *circuit);

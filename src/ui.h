@@ -82,6 +82,7 @@ void uiEndLayout(UICtx *ctx);
 UILayout *uiThisLayout(UICtx *ctx);
 void uiMoveLayoutCursor(UICtx *ctx, i32 x, i32 y);
 void uiSetLayoutCursorPos(UICtx *ctx, i32 x, i32 y);
+void uiSetLayoutCursorPosX(UICtx *ctx, i32 x);
 void uiResetLayoutCursorX(UICtx *ctx);
 
 // text / texture rendering

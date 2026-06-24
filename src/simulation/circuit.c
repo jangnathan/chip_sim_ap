@@ -106,3 +106,11 @@ void circuitInit(Circuit *circuit) {
   inputChipsInit(&circuit->inputChips);
   simpleChipsInit(&circuit->simpleChips);
 }
+
+void circuitFree(Circuit *circuit) {
+  free(circuit->array);
+  free(circuit->pivots.array);
+  free(circuit->wires.array);
+  free(circuit->inputChips.array);
+  free(circuit->simpleChips.array);
+}

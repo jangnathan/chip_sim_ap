@@ -48,8 +48,8 @@ void initApp(App *app) {
 
 	app->state = ST_EDIT;
 	app->editor.ctx = &app->ctx;
+	app->editor.uiCtx = &app->uiCtx;
 	initEditor(&app->editor);
-	initEditorUI(&app->editor, &app->uiCtx);
 
 	loadTextures(app->window.renderer, &app->textures, app->font);
 
@@ -104,6 +104,7 @@ void render(App *app) {
 void closeApp(App *app) {
 	closeInput(&app->input);
 	closeWindow(&app->window);
+	circuitFree(&app->ctx.circuit);
 	SDL_Quit();
 }
 

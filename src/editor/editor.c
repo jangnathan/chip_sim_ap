@@ -30,15 +30,12 @@ void editorHandleKeypress(Editor *editor, SDL_KeyboardEvent event) {
 }
 
 void updateEditor(Editor *editor, Input *input) {
-	Circuit *circuit = &editor->ctx->circuit;
+  Circuit *circuit = &editor->ctx->circuit;
 
   const bool *keystates = SDL_GetKeyboardState(NULL);
-  u8 isMovingCamera = 0;
-
   editor->selectBoxActive = 0;
 
   if (keystates[SDL_SCANCODE_SPACE]) {
-    isMovingCamera = 1;
     input->mouse.cursorIcon = CURSOR_MOVE;
 
     if (input->mouse.leftDown) {
@@ -52,31 +49,51 @@ void updateEditor(Editor *editor, Input *input) {
                                             input->mouse.centerPosition)),
                      1.0f / editor->camera.zoom));
     }
+    return;
   }
 
-  if (isMovingCamera == 0) {
-    if (editor->state == EDIT_MOVE_CE) {
-      Vec2f mousePos = vec2ItoF(input->mouse.centerPosition);
-      //mousePos.y += editor->menubarHeight / 2;
+  switch (editor->state) {
+  case EDIT_MOVE_CE: {
+    Vec2f mousePos = vec2ItoF(input->mouse.centerPosition);
+    // mousePos.y += editor->menubarHeight / 2;
 
-      // positioning logic
-      Vec2f pos1 = translateVec2f(editor->camera.position,
-                                  mousePos);
-      Vec2f pos = scaleVec2f(pos1, 1.0f / editor->camera.zoom);
+    // positioning logic
+    Vec2f pos1 = translateVec2f(editor->camera.position, mousePos);
+    Vec2f pos = scaleVec2f(pos1, 1.0f / editor->camera.zoom);
 
-      positionCircuitEntity(circuit, circuit->array+editor->tempCE_ID, pos);
+    positionCircuitEntity(circuit, circuit->array + editor->tempCE_ID, pos);
 
-      if (input->mouse.leftClick) {
-        input->mouse.leftClick = 0;
-        editor->state = EDIT_NONE;
-      }
+    if (input->mouse.leftClick) {
+      input->mouse.leftClick = 0;
+      editor->state = EDIT_NONE;
     }
+  }
+  case EDIT_CREATE_WIRE: {
+  }
   }
 
   if (editor->simulating) {
   }
 }
 
+void initEditorUI(Editor *editor) {
+  UICtx *ctx = editor->uiCtx;
+  SDL_Renderer *renderer = ctx->window->renderer;
+  editor->menubarHeight = 80;
+  setUICachedText(&editor->startSimulationText, renderer, ctx->font, "Simulate",
+                  newColor(0, 0, 0, 255));
+  setUICachedText(&editor->stopSimulationText, renderer, ctx->font, "Stop",
+                  newColor(0, 0, 0, 255));
+
+  setUICachedText(&editor->pivotText, renderer, ctx->font, "Pivot",
+                  newColor(0, 0, 0, 255));
+
+  setUICachedText(&editor->wireText, renderer, ctx->font, "Wire",
+                  newColor(0, 0, 0, 255));
+
+  setUICachedText(&editor->switchText, renderer, ctx->font, "Switch",
+                  newColor(0, 0, 0, 255));
+}
 void initEditor(Editor *editor) {
   editor->state = EDIT_NONE;
   editor->simulating = 0;
@@ -97,24 +114,8 @@ void initEditor(Editor *editor) {
   // keys control
   editor->zoomOutKey = SDL_SCANCODE_MINUS;
   editor->zoomInKey = SDL_SCANCODE_EQUALS;
-}
 
-void initEditorUI(Editor *editor, UICtx *ctx) {
-  SDL_Renderer *renderer = ctx->window->renderer;
-  editor->menubarHeight = 80;
-  setUICachedText(&editor->startSimulationText, renderer, ctx->font, "Simulate",
-                  newColor(0, 0, 0, 255));
-  setUICachedText(&editor->stopSimulationText, renderer, ctx->font, "Stop",
-                  newColor(0, 0, 0, 255));
-
-  setUICachedText(&editor->pivotText, renderer, ctx->font, "Pivot",
-                  newColor(0, 0, 0, 255));
-
-  setUICachedText(&editor->wireText, renderer, ctx->font, "Wire",
-                  newColor(0, 0, 0, 255));
-
-  setUICachedText(&editor->switchText, renderer, ctx->font, "Switch",
-                  newColor(0, 0, 0, 255));
+  initEditorUI(editor);
 }
 
 void simulateButtonClicked(void *eventStateObject) {
@@ -145,10 +146,15 @@ void createWire(void *eventStateObject) {
   App *app = (App *)eventStateObject;
   Editor *editor = &app->editor;
   Ctx *ctx = editor->ctx;
+  UICtx *uiCtx = editor->uiCtx;
   Circuit *circuit = &ctx->circuit;
   Wires *wires = &circuit->wires;
 
-  wiresNew(circuit);
+  editor->tempCE_ID = wiresNew(circuit);
+  editor->state = EDIT_CREATE_WIRE;
+
+  setUICachedText(&editor->editorMessage, uiCtx->window->renderer, uiCtx->font,
+                  "select a pivot to bind to", newColor(0, 0, 0, 255));
 }
 
 void createSwitchChip(void *eventStateObject) {}
@@ -186,12 +192,21 @@ void editorUI(UICtx *uiCtx, Editor *editor) {
 
   uiEndLayout(uiCtx);
 
+  // <editor message>
+  if (editor->editorMessage.textLen > 0) {
+    uiSetLayoutCursorPosX(uiCtx, uiRootLayout(uiCtx)->size.x / 2);
+    uiLabel(uiCtx, &(UILabelOptions){.cachedText = &editor->editorMessage,
+                                     .fontSize = 16});
+    uiResetLayoutCursorX(uiCtx);
+  }
+  // </editor message>
+
   // <left sidebar>
   uiBeginLayout(uiCtx,
                 &(UILayoutOptions){.size = newVec2i(90, 500),
                                    .padding = newVec4i(10, 10, 10, 10),
                                    .bgColor = newColor(200, 200, 200, 255),
-                                  .spacing = 8});
+                                   .spacing = 8});
 
   // <create pivot>
   uiBeginLayout(uiCtx,
@@ -203,7 +218,7 @@ void editorUI(UICtx *uiCtx, Editor *editor) {
           &(UILabelOptions){.cachedText = &editor->pivotText, .fontSize = 18});
   uiEndLayout(uiCtx);
   // </create pivot>
-  
+
   // <create wire>
   uiBeginLayout(uiCtx,
                 &(UILayoutOptions){.size = newVec2i(90, 22),

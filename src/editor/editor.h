@@ -9,6 +9,7 @@ typedef enum {
 	EDIT_NONE,
 	EDIT_SELECT_OPTION,
 	EDIT_MOVE_CE,
+	EDIT_CREATE_WIRE,
 	EDIT_SELECT_IN_LINK_CHIP,	
 	EDIT_FIND_LINK_CHIP,	
 	EDIT_SELECT_OUT_LINK_CHIP
@@ -19,6 +20,7 @@ typedef struct {
 	Ctx *ctx;
 
 	// ui
+	UICtx *uiCtx;
 	u16 menubarHeight;
 	UICachedText startSimulationText;
 	UICachedText stopSimulationText;
@@ -26,6 +28,8 @@ typedef struct {
 	UICachedText pivotText;
 	UICachedText wireText;
 	UICachedText switchText;
+
+	UICachedText editorMessage;
 
 	// selection box - may delete
 	Vec2i selectBoxPos;
@@ -58,7 +62,6 @@ typedef struct {
 void initEditor(Editor *editor);
 void editorUI(UICtx *ctx, Editor *editor);
 void updateEditor(Editor *editor, Input *input);
-void initEditorUI(Editor *editor, UICtx *ctx);
 
 void editorHandleKeypress(Editor *editor, SDL_KeyboardEvent event);
 

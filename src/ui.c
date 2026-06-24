@@ -182,6 +182,12 @@ void uiSetLayoutCursorPos(UICtx *ctx, i32 x, i32 y) {
   layout->cursorPos.y = y;
 }
 
+void uiSetLayoutCursorPosX(UICtx *ctx, i32 x) {
+  UILayout *layout = ctx->layoutStack + ctx->layoutDepth - 1;
+
+  layout->cursorPos.x = x;
+}
+
 void uiResetLayoutCursorX(UICtx *ctx) {
   UILayout *layout = ctx->layoutStack + ctx->layoutDepth - 1;
 
