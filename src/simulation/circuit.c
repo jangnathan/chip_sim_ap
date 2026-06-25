@@ -31,7 +31,7 @@ void pivotsInit(Pivots *pivots) {
 u32 pivotsNew(Circuit *circuit) {
   Pivots *pivots = &circuit->pivots;
 
-  u32 newID = pivots->len;
+  u32 newPivotID = pivots->len;
   pivots->len++;
   u32 pivotsLen = pivots->len;
 
@@ -40,7 +40,9 @@ u32 pivotsNew(Circuit *circuit) {
     pivots->array = realloc(pivots->array, sizeof(Pivot) * pivots->size);
   }
 
-  pivots->array[newID].ID = assignCircuitEntity(circuit, CE_PIVOT, newID);
+  u32 newID = assignCircuitEntity(circuit, CE_PIVOT, newPivotID);
+  Pivot *pivot = pivots->array + newPivotID;
+  pivot->ID = newID;
 
   return newID;
 };
@@ -54,7 +56,7 @@ void wiresInit(Wires *wires) {
 u32 wiresNew(Circuit *circuit) {
   Wires *wires = &circuit->wires;
 
-  u32 newID = wires->len;
+  u32 newWireID = wires->len;
   wires->len++;
   u32 wiresLen = wires->len;
 
@@ -62,8 +64,12 @@ u32 wiresNew(Circuit *circuit) {
     wires->size *= 2;
     wires->array = realloc(wires->array, sizeof(Wire) * wires->size);
   }
-
-  wires->array[newID].ID = assignCircuitEntity(circuit, CE_WIRE, newID);
+  
+  u32 newID = assignCircuitEntity(circuit, CE_WIRE, newWireID);
+  Wire *wire = wires->array + newWireID;
+  wire->pivotID1 = 0;
+  wire->pivotID2 = 0;
+  wire->ID = newID;
 
   return newID;
 }

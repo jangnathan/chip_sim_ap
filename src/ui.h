@@ -38,7 +38,6 @@ typedef struct {
 	u8 wrap;
 } UILayout;
 
-
 typedef struct {
 	SDL_Texture *x;
 } UIDefaultIcons;

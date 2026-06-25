@@ -44,12 +44,14 @@ void checkCollisionsCE(Editor *editor, Input *input) {
 
     if (cartesianCollideABB(input->mouse.position, screenPos, pivotHitbox)) {
       editor->hoveredCE_ID = pivot->ID;
+      printf("HOVER %d\n", editor->hoveredCE_ID);
     }
   }
 }
 
 void updateEditor(Editor *editor, Input *input) {
   Circuit *circuit = &editor->ctx->circuit;
+  UICtx *uiCtx = editor->uiCtx;
 
   editor->collisionStep = input->mouse.positionUpdated;
   if (editor->collisionStep) {
@@ -76,7 +78,15 @@ void updateEditor(Editor *editor, Input *input) {
     return;
   }
 
+  // temp ce as pointer
+  CircuitEntity *ce = circuit->array + editor->tempCE_ID;
+
   switch (editor->state) {
+  case EDIT_NONE: {
+    // keeps texture cached
+    editor->editorMessage.textLen = 0;
+    break;
+  }
   case EDIT_MOVE_CE: {
     Vec2f mousePos = vec2ItoF(input->mouse.centerPosition);
     // mousePos.y += editor->menubarHeight / 2;
@@ -94,16 +104,35 @@ void updateEditor(Editor *editor, Input *input) {
     break;
   }
   case EDIT_CREATE_WIRE: {
+    setUICachedText(&editor->editorMessage, uiCtx->window->renderer,
+                    uiCtx->font, "select a pivot to bind to",
+                    newColor(0, 0, 0, 255));
+
     if (editor->hoveredCE_ID != 0 && input->mouse.leftClick == 1) {
       if (circuit->array[editor->hoveredCE_ID].type == CE_PIVOT) {
-        circuit->wires.array[editor->tempCE_ID].pivotID1 = editor->hoveredCE_ID;
+        Wire *wire = circuit->wires.array + ce->typeID;
+        wire->pivotID1 = editor->hoveredCE_ID;
         editor->state = EDIT_SELECT_WIRE_PIVOT2;
-        printf("Connected! %d ", editor->hoveredCE_ID);
+        printf("Connected pivot1! %d ", editor->hoveredCE_ID);
       }
     }
     break;
   }
   case EDIT_SELECT_WIRE_PIVOT2: {
+    setUICachedText(&editor->editorMessage, uiCtx->window->renderer,
+                    uiCtx->font, "select a 2nd pivot to bind to",
+                    newColor(0, 0, 0, 255));
+
+    if (editor->hoveredCE_ID != 0 && input->mouse.leftClick == 1) {
+      if (circuit->array[editor->hoveredCE_ID].type == CE_PIVOT) {
+        Wire *wire = circuit->wires.array + ce->typeID;
+        wire->pivotID2 = editor->hoveredCE_ID;
+
+        editor->state = EDIT_NONE;
+
+        printf("Connected pivot2! %d ", editor->hoveredCE_ID);
+      }
+    }
     break;
   }
   }
@@ -170,6 +199,9 @@ void closeEditChipMenu(void *eventStateObject) {
 void createPivot(void *eventStateObject) {
   App *app = (App *)eventStateObject;
   Editor *editor = &app->editor;
+  if (editor->state != EDIT_NONE)
+    return;
+
   Ctx *ctx = editor->ctx;
   Circuit *circuit = &ctx->circuit;
   Pivots *pivots = &circuit->pivots;
@@ -181,6 +213,9 @@ void createPivot(void *eventStateObject) {
 void createWire(void *eventStateObject) {
   App *app = (App *)eventStateObject;
   Editor *editor = &app->editor;
+  if (editor->state != EDIT_NONE)
+    return;
+
   Ctx *ctx = editor->ctx;
   UICtx *uiCtx = editor->uiCtx;
   Circuit *circuit = &ctx->circuit;
@@ -188,9 +223,6 @@ void createWire(void *eventStateObject) {
 
   editor->tempCE_ID = wiresNew(circuit);
   editor->state = EDIT_CREATE_WIRE;
-
-  setUICachedText(&editor->editorMessage, uiCtx->window->renderer, uiCtx->font,
-                  "select a pivot to bind to", newColor(0, 0, 0, 255));
 }
 
 void createSwitchChip(void *eventStateObject) {}
@@ -233,7 +265,7 @@ void editorUI(UICtx *uiCtx, Editor *editor) {
     uiSetLayoutCursorPosX(uiCtx, uiRootLayout(uiCtx)->size.x / 2);
     uiLabel(uiCtx, &(UILabelOptions){.cachedText = &editor->editorMessage,
                                      .fontSize = 16});
-    uiResetLayoutCursorX(uiCtx);
+    uiSetLayoutCursorPos(uiCtx, 0, editor->menubarHeight);
   }
   // </editor message>
 

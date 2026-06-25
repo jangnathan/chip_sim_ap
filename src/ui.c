@@ -244,8 +244,6 @@ void uiDecal(UICtx *ctx, const UIDecalOptions *options) {
 void setUICachedText(UICachedText *cachedText, SDL_Renderer *renderer,
                      TTF_Font *font, char *text, Color color) {
   u8 textLen = strlen(text);
-  if (textLen == 0)
-    return;
   if (textLen > MAX_TEXT_LEN) {
     fprintf(stderr, "");
   }

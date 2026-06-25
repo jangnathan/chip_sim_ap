@@ -1,4 +1,5 @@
 #include "render.h"
+#include "simulation/circuit.h"
 #include <math.h>
 
 typedef struct {
@@ -27,6 +28,51 @@ void drawPivot(RendererCtx *renderCtx, Pivot *pivot) {
   SDL_FRect rect = createRenderRect(camera, pos.x, pos.y, 15.0f, 15.0f);
   SDL_SetRenderDrawColor(renderer, 50, 50, 200, 255);
   SDL_RenderFillRect(renderer, &rect);
+}
+// WIRE
+void drawWire(RendererCtx *renderCtx, Vec2f p1_i, Vec2f p2_i) {
+  SDL_Renderer *renderer = renderCtx->renderer;
+  Camera camera = renderCtx->camera;
+
+  Vec2i p1 = world2screenVec2i(camera, p1_i);
+  Vec2i p2 = world2screenVec2i(camera, p2_i);
+  float x1 = p1.x;
+  float x2 = p2.x;
+  float y1 = p1.y;
+  float y2 = p2.y;
+  float dx = x2 - x1;
+  float dy = y2 - y1;
+
+  float thickness = 5.0f * camera.zoom;
+
+  float pmx = 5;
+  float pmy = 5;
+
+  // TODO, make line thickness uniform
+  Color color = newColor(0, 0, 0, 255);
+  SDL_FColor sdlColor = {color.r / 255, color.g / 255, color.b / 255, color.a / 255};
+  SDL_Vertex vertices[4] = {
+      {{x1 + pmx, y1 + pmy}, sdlColor, {0.0f, 0.0f}},
+      {{x2 + pmx, y2 + pmy}, sdlColor, {1.0f, 0.0f}},
+      {{x2 - pmx, y2 - pmy}, sdlColor, {1.0f, 1.0f}},
+      {{x1 - pmx, y1 - pmy}, sdlColor, {0.0f, 1.0f}}
+  };
+  int indices[6] = { 0, 1, 2, 0, 2, 3 };
+
+  SDL_RenderGeometry(renderer, NULL, vertices, 4, indices, 6);
+}
+
+void renderWire(RendererCtx *renderCtx, Circuit *circuit, Wire *wire) {
+  if (wire->pivotID1 == 0 || wire->pivotID2 == 0) {
+    return;
+  }
+  CircuitEntity *p1_CE = circuit->array + wire->pivotID1;
+  CircuitEntity *p2_CE = circuit->array + wire->pivotID2;
+
+  Pivot *p1 = circuit->pivots.array + p1_CE->typeID;
+  Pivot *p2 = circuit->pivots.array + p2_CE->typeID;
+  
+  drawWire(renderCtx, p1->position, p2->position);
 }
 
 // INPUT CHIP
@@ -193,6 +239,9 @@ void renderEditor(SDL_Renderer *renderer, Textures *textures, Editor *editor) {
   // render circuit
   for (u32 i = 1; i < circuit->pivots.len; i++) {
     drawPivot(&renderCtx, circuit->pivots.array + i);
+  }
+  for (u32 i = 1; i < circuit->wires.len; i++) {
+    renderWire(&renderCtx, circuit, circuit->wires.array + i);
   }
 
   if (editor->selectBoxActive) {
