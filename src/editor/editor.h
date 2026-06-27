@@ -33,6 +33,8 @@ typedef struct {
 	UICachedText switchText;
 
 	UICachedText editorMessage;
+	u8 editorMessageID;
+	u32 editorMessageLastTime;
 
 	// selection box - may delete
 	Vec2i selectBoxPos;

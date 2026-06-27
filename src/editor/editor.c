@@ -113,19 +113,36 @@ void updateEditor(Editor *editor, Input *input) {
         Wire *wire = circuit->wires.array + ce->typeID;
         wire->pivotID1 = editor->hoveredCE_ID;
         editor->state = EDIT_SELECT_WIRE_PIVOT2;
+        editor->editorMessageID = 0;
         printf("Connected pivot1! %d ", editor->hoveredCE_ID);
       }
     }
     break;
   }
   case EDIT_SELECT_WIRE_PIVOT2: {
-    setUICachedText(&editor->editorMessage, uiCtx->window->renderer,
-                    uiCtx->font, "select a 2nd pivot to bind to",
-                    newColor(0, 0, 0, 255));
+    if (editor->editorMessageID == 0) {
+      setUICachedText(&editor->editorMessage, uiCtx->window->renderer,
+                      uiCtx->font, "select a 2nd pivot to bind to",
+                      newColor(0, 0, 0, 255));
+    } else if (editor->editorMessageID == 1) {
+      setUICachedText(&editor->editorMessage, uiCtx->window->renderer,
+                      uiCtx->font, "Cannot set pivot2 to same as pivot1",
+                      newColor(255, 0, 0, 255));
+
+      u32 current_time = SDL_GetTicks();
+      if ((current_time - editor->editorMessageLastTime) / 1000.0f > 1) {
+        editor->editorMessageID = 0;
+      }
+    }
 
     if (editor->hoveredCE_ID != 0 && input->mouse.leftClick == 1) {
       if (circuit->array[editor->hoveredCE_ID].type == CE_PIVOT) {
         Wire *wire = circuit->wires.array + ce->typeID;
+        if (editor->hoveredCE_ID == wire->pivotID1) {
+          editor->editorMessageID = 1;
+          editor->editorMessageLastTime = SDL_GetTicks();
+          break;
+        }
         wire->pivotID2 = editor->hoveredCE_ID;
 
         editor->state = EDIT_NONE;
