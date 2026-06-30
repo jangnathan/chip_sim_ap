@@ -182,21 +182,6 @@ void renderSimpleChip(RendererCtx *renderCtx, SimpleChip *simpleChip) {
   SDL_RenderFillRect(renderer, &indicator);
 }
 
-void renderChip(RendererCtx *renderCtx, Circuit *circuit, u32 i) {
-  u32 typeID = circuit->array[i].typeID;
-
-  switch (circuit->array[i].type) {
-  case CE_NONE:
-    break;
-  case CE_SIMPLE:
-    renderSimpleChip(renderCtx, circuit->simpleChips.array + typeID);
-    break;
-  case CE_INPUT:
-    renderInputChip(renderCtx, circuit->inputChips.array + typeID);
-    break;
-  }
-}
-
 // GRID
 
 void renderGrid(SDL_Renderer *renderer, Editor *editor, float x, float y,
@@ -243,6 +228,9 @@ void renderEditor(SDL_Renderer *renderer, Textures *textures, Editor *editor) {
   }
   for (u32 i = 1; i < circuit->wires.len; i++) {
     renderWire(&renderCtx, circuit, circuit->wires.array + i);
+  }
+  for (u32 i = 1; i < circuit->inputChips.len; i++) {
+    renderInputChip(&renderCtx, circuit->inputChips.array + i);
   }
 
   if (editor->selectBoxActive) {

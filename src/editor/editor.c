@@ -242,7 +242,23 @@ void createWire(void *eventStateObject) {
   editor->state = EDIT_CREATE_WIRE;
 }
 
-void createSwitchChip(void *eventStateObject) {}
+void createSwitchChip(void *eventStateObject) {
+  App *app = (App *)eventStateObject;
+  Editor *editor = &app->editor;
+
+  if (editor->state != EDIT_NONE)
+    return;
+
+  Ctx *ctx = editor->ctx;
+  UICtx *uiCtx = editor->uiCtx;
+  Circuit *circuit = &ctx->circuit;
+  Wires *wires = &circuit->wires;
+
+  editor->tempCE_ID = inputChipsNew(circuit, &(InputChipOptions) {
+    .type = SWITCH
+  });
+  editor->state = EDIT_MOVE_CE;
+}
 
 void editorUI(UICtx *uiCtx, Editor *editor) {
   // <navbar>

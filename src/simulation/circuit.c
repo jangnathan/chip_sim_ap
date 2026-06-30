@@ -64,7 +64,7 @@ u32 wiresNew(Circuit *circuit) {
     wires->size *= 2;
     wires->array = realloc(wires->array, sizeof(Wire) * wires->size);
   }
-  
+
   u32 newID = assignCircuitEntity(circuit, CE_WIRE, newWireID);
   Wire *wire = wires->array + newWireID;
   wire->pivotID1 = 0;
@@ -76,14 +76,59 @@ u32 wiresNew(Circuit *circuit) {
 
 // CHIPS
 
-void simpleChipsInit(SimpleChips *simpleChips) {}
-u32 simpleChipsNew(Circuit *circuit, const SimpleChipOptions *options) {
-  return 0;
+void simpleChipsInit(SimpleChips *simpleChips) {
+  simpleChips->len = 1;
+  simpleChips->size = 256;
+  simpleChips->array = malloc(sizeof(SimpleChip) * simpleChips->size);
+}
+void inputChipsInit(InputChips *inputChips) {
+  inputChips->len = 1;
+  inputChips->size = 256;
+  inputChips->array = malloc(sizeof(InputChip) * inputChips->size);
 }
 
-void inputChipsInit(InputChips *inputChips) {}
-u32 inputChipsNew(Circuit *circuit, const InputChipOptions *options) {
-  return 0;
+u32 simpleChipsNew(Circuit *circuit, SimpleChipOptions *options) {
+  SimpleChips *simpleChips = &circuit->simpleChips;
+
+  u32 newChipID = simpleChips->len;
+  simpleChips->len++;
+  u32 simpleChipsLen = simpleChips->len;
+
+  if (simpleChipsLen >= simpleChips->size) {
+    simpleChips->size *= 2;
+    simpleChips->array =
+        realloc(simpleChips->array, sizeof(SimpleChip) * simpleChips->size);
+  }
+
+  u32 newID = assignCircuitEntity(circuit, CE_INPUT, newChipID);
+  SimpleChip *simpleChip = simpleChips->array + newChipID;
+  simpleChip->type = options->type;
+  simpleChip->position = options->position;
+  simpleChip->ID = newID;
+
+  return newID;
+}
+u32 inputChipsNew(Circuit *circuit, InputChipOptions *options) {
+  InputChips *inputChips = &circuit->inputChips;
+
+  u32 newChipID = inputChips->len;
+  inputChips->len++;
+  u32 inputChipsLen = inputChips->len;
+
+  if (inputChipsLen >= inputChips->size) {
+    inputChips->size *= 2;
+    inputChips->array =
+        realloc(inputChips->array, sizeof(InputChip) * inputChips->size);
+  }
+
+  u32 newID = assignCircuitEntity(circuit, CE_INPUT, newChipID);
+  InputChip *inputChip = inputChips->array + newChipID;
+  inputChip->type = options->type;
+  inputChip->position = options->position;
+  inputChip->out = 0;
+  inputChip->ID = newID;
+
+  return newID;
 }
 
 void positionCircuitEntity(Circuit *circuit, CircuitEntity *entity, Vec2f pos) {
