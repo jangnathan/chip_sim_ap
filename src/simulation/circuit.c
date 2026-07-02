@@ -166,3 +166,55 @@ void circuitFree(Circuit *circuit) {
   free(circuit->inputChips.array);
   free(circuit->simpleChips.array);
 }
+
+void deleteCE(Circuit *circuit, u32 ID) {
+  u32 typeID = circuit->array[ID].typeID;
+  CircuitEntityType ceType = circuit->array[ID].type;
+
+  switch (ceType) {
+  case CE_NONE:
+    break;
+  case CE_PIVOT: {
+    circuit->pivots.len--;
+
+    // typeID now points to replaced
+    circuit->pivots.array[typeID] = circuit->pivots.array[circuit->pivots.len];
+    // swap with last element then reduce length
+
+    // set new type element's ID to the swapped CE
+    circuit->pivots.array[typeID].ID = ID;
+    break;
+  }
+  case CE_INPUT: {
+    circuit->inputChips.len--;
+
+    // typeID now points to replaced
+    circuit->inputChips.array[typeID] =
+        circuit->inputChips.array[circuit->inputChips.len];
+    // swap with last element then reduce length
+
+    // set new type element's ID to the swapped CE
+    circuit->inputChips.array[typeID].ID = ID;
+    break;
+  }
+  case CE_SIMPLE: {
+    circuit->simpleChips.len--;
+
+    // typeID now points to replaced
+    circuit->simpleChips.array[typeID] =
+        circuit->simpleChips.array[circuit->simpleChips.len];
+    // swap with last element then reduce length
+
+    // set new type element's ID to the swapped CE
+    circuit->simpleChips.array[typeID].ID = ID;
+    break;
+  }
+  default:
+    break;
+  }
+
+  circuit->len--;
+  // ID now points to replaced
+  circuit->array[ID] = circuit->array[circuit->len];
+  circuit->array[ID].typeID = typeID;
+}

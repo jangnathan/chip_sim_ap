@@ -32,6 +32,8 @@ typedef struct {
 	UICachedText wireText;
 	UICachedText switchText;
 
+	UICachedText deleteText;
+
 	UICachedText editorMessage;
 	u8 editorMessageID;
 	u32 editorMessageLastTime;

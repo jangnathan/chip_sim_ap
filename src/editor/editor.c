@@ -45,6 +45,28 @@ void checkCollisionsCE(Editor *editor, Input *input) {
     if (cartesianCollideABB(input->mouse.position, screenPos, pivotHitbox)) {
       editor->hoveredCE_ID = pivot->ID;
       printf("HOVER %d\n", editor->hoveredCE_ID);
+      return;
+    }
+  }
+  for (u32 i = 1; i < circuit->inputChips.len; i++) {
+    InputChip *inputChip = circuit->inputChips.array + i;
+    Vec2i screenPos = world2screenVec2i(editor->camera, inputChip->position);
+    Vec2i inputHitbox;
+
+    switch (inputChip->type) {
+    case SWITCH: {
+      inputHitbox = newVec2i(50, 100);
+      break;
+    }
+    default:
+      break;
+    }
+    inputHitbox = scaleVec2i(inputHitbox, editor->camera.zoom);
+
+    if (cartesianCollideABB(input->mouse.position, screenPos, inputHitbox)) {
+      editor->hoveredCE_ID = inputChip->ID;
+      printf("HOVER %d\n", editor->hoveredCE_ID);
+      return;
     }
   }
 }
@@ -81,10 +103,31 @@ void updateEditor(Editor *editor, Input *input) {
   // temp ce as pointer
   CircuitEntity *ce = circuit->array + editor->tempCE_ID;
 
+  if (editor->simulating) {
+    if (editor->hoveredCE_ID == 0)
+      return;
+    if (!input->mouse.leftClick)
+      return;
+
+    ce = circuit->array + editor->hoveredCE_ID;
+    if (ce->type == CE_INPUT) {
+      InputChip *inputChip = circuit->inputChips.array + ce->typeID;
+      inputChip->out = !inputChip->out;
+    }
+    return;
+  }
+
   switch (editor->state) {
   case EDIT_NONE: {
     // keeps texture cached
     editor->editorMessage.textLen = 0;
+
+    if (editor->hoveredCE_ID != 0 && input->mouse.leftClick) {
+      editor->tempCE_ID = editor->hoveredCE_ID;
+      ce = circuit->array + editor->hoveredCE_ID;
+
+      editor->state = EDIT_SELECT_OPTION;
+    }
     break;
   }
   case EDIT_MOVE_CE: {
@@ -175,6 +218,8 @@ void initEditorUI(Editor *editor) {
 
   setUICachedText(&editor->switchText, renderer, ctx->font, "Switch",
                   newColor(0, 0, 0, 255));
+  setUICachedText(&editor->deleteText, renderer, ctx->font, "Delete",
+                  newColor(0, 0, 0, 255));
 }
 void initEditor(Editor *editor) {
   editor->state = EDIT_NONE;
@@ -190,8 +235,12 @@ void initEditor(Editor *editor) {
   editor->gridSize = 16;
   editor->selectBoxActive = 0;
 
+  editor->tempCE_ID = 0;
+  editor->hoveredCE_ID = 0;
+  // DELETE {
   editor->editChipID = 0;
   editor->editChipNumInputs = 0;
+  // }
 
   // keys control
   editor->zoomOutKey = SDL_SCANCODE_MINUS;
@@ -218,6 +267,8 @@ void createPivot(void *eventStateObject) {
   Editor *editor = &app->editor;
   if (editor->state != EDIT_NONE)
     return;
+  if (editor->simulating)
+    return;
 
   Ctx *ctx = editor->ctx;
   Circuit *circuit = &ctx->circuit;
@@ -231,6 +282,8 @@ void createWire(void *eventStateObject) {
   App *app = (App *)eventStateObject;
   Editor *editor = &app->editor;
   if (editor->state != EDIT_NONE)
+    return;
+  if (editor->simulating)
     return;
 
   Ctx *ctx = editor->ctx;
@@ -248,16 +301,27 @@ void createSwitchChip(void *eventStateObject) {
 
   if (editor->state != EDIT_NONE)
     return;
+  if (editor->simulating)
+    return;
 
   Ctx *ctx = editor->ctx;
   UICtx *uiCtx = editor->uiCtx;
   Circuit *circuit = &ctx->circuit;
   Wires *wires = &circuit->wires;
 
-  editor->tempCE_ID = inputChipsNew(circuit, &(InputChipOptions) {
-    .type = SWITCH
-  });
+  editor->tempCE_ID =
+      inputChipsNew(circuit, &(InputChipOptions){.type = SWITCH});
   editor->state = EDIT_MOVE_CE;
+}
+
+void deleteButtonClicked(void *eventStateObject) {
+  App *app = (App *)eventStateObject;
+  Editor *editor = &app->editor;
+  Ctx *ctx = editor->ctx;
+  Circuit *circuit = &ctx->circuit;
+
+  deleteCE(circuit, editor->tempCE_ID);
+  editor->state = EDIT_NONE;
 }
 
 void editorUI(UICtx *uiCtx, Editor *editor) {
@@ -368,11 +432,16 @@ void editorUI(UICtx *uiCtx, Editor *editor) {
     uiResetLayoutCursorX(uiCtx);
     // </close button>
 
-    uiLabel(uiCtx, &(UILabelOptions){.cachedText = simulateButtonText,
-                                     .fontSize = 24});
-
-    uiLabel(uiCtx, &(UILabelOptions){.cachedText = simulateButtonText,
-                                     .fontSize = 24});
+    // <delete item button>
+    uiBeginLayout(uiCtx,
+                  &(UILayoutOptions){.size = newVec2i(96, 32),
+                                     .padding = newVec4i(4, 4, 4, 4),
+                                     .bgColor = newColor(200, 50, 50, 255),
+                                     .onClick = &deleteButtonClicked});
+    uiLabel(uiCtx, &(UILabelOptions){.cachedText = &editor->deleteText,
+                                     .fontSize = 18});
+    uiEndLayout(uiCtx);
+    // </delete item button>
 
     uiEndLayout(uiCtx);
   }

@@ -130,3 +130,5 @@ u32 inputChipsNew(Circuit *circuit, const InputChipOptions *options);
 
 void circuitInit(Circuit *circuit);
 void circuitFree(Circuit *circuit);
+
+void deleteCE(Circuit *circuit, u32 ID);
