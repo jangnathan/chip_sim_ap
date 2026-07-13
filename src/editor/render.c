@@ -67,11 +67,8 @@ void renderWire(RendererCtx *renderCtx, Circuit *circuit, Wire *wire) {
   if (wire->pivotID1 == 0 || wire->pivotID2 == 0) {
     return;
   }
-  CircuitEntity *p1_CE = circuit->array + wire->pivotID1;
-  CircuitEntity *p2_CE = circuit->array + wire->pivotID2;
-
-  Pivot *p1 = circuit->pivots.array + p1_CE->typeID;
-  Pivot *p2 = circuit->pivots.array + p2_CE->typeID;
+  Pivot *p1 = circuit->pivots.array + wire->pivotID1;
+  Pivot *p2 = circuit->pivots.array + wire->pivotID2;
   
   drawWire(renderCtx, p1->position, p2->position);
 }

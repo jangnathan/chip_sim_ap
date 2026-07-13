@@ -8,6 +8,9 @@ typedef struct {
   Vec2f position;
   u32 ID;
   u32 connectionID;
+
+  // for chip terminals
+  u32 designatedChipID;
 } Pivot;
 
 typedef struct {
@@ -51,6 +54,10 @@ typedef struct {
   SimpleChipType type;
   u32 ID;
 
+  u32 pivotID_A;
+  u32 pivotID_B;
+  u32 pivotID_out;
+
   u8 nextOut; // to synchronize
   u8 out;
   // it can support up to 8 bits of output
@@ -70,6 +77,9 @@ typedef struct {
 
   InputChipType type;
   u32 ID;
+
+  u32 pivotID_out;
+
   u8 out;
 } InputChip;
 
@@ -119,14 +129,14 @@ typedef struct {
   Vec2f position;
 } SimpleChipOptions;
 
-u32 simpleChipsNew(Circuit *circuit, const SimpleChipOptions *options);
+u32 simpleChipsNew(Circuit *circuit, SimpleChipOptions *options);
 
 typedef struct {
   InputChipType type;
   Vec2f position;
 } InputChipOptions;
 
-u32 inputChipsNew(Circuit *circuit, const InputChipOptions *options);
+u32 inputChipsNew(Circuit *circuit, InputChipOptions *options);
 
 void circuitInit(Circuit *circuit);
 void circuitFree(Circuit *circuit);

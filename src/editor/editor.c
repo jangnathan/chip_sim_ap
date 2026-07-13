@@ -102,6 +102,7 @@ void updateEditor(Editor *editor, Input *input) {
 
   // temp ce as pointer
   CircuitEntity *ce = circuit->array + editor->tempCE_ID;
+  CircuitEntity *hoveredCE = circuit->array + editor->hoveredCE_ID;
 
   if (editor->simulating) {
     if (editor->hoveredCE_ID == 0)
@@ -154,7 +155,7 @@ void updateEditor(Editor *editor, Input *input) {
     if (editor->hoveredCE_ID != 0 && input->mouse.leftClick == 1) {
       if (circuit->array[editor->hoveredCE_ID].type == CE_PIVOT) {
         Wire *wire = circuit->wires.array + ce->typeID;
-        wire->pivotID1 = editor->hoveredCE_ID;
+        wire->pivotID1 = hoveredCE->typeID;
         editor->state = EDIT_SELECT_WIRE_PIVOT2;
         editor->editorMessageID = 0;
         printf("Connected pivot1! %d ", editor->hoveredCE_ID);
@@ -181,12 +182,12 @@ void updateEditor(Editor *editor, Input *input) {
     if (editor->hoveredCE_ID != 0 && input->mouse.leftClick == 1) {
       if (circuit->array[editor->hoveredCE_ID].type == CE_PIVOT) {
         Wire *wire = circuit->wires.array + ce->typeID;
-        if (editor->hoveredCE_ID == wire->pivotID1) {
+        if (hoveredCE->typeID == wire->pivotID1) {
           editor->editorMessageID = 1;
           editor->editorMessageLastTime = SDL_GetTicks();
           break;
         }
-        wire->pivotID2 = editor->hoveredCE_ID;
+        wire->pivotID2 = hoveredCE->typeID;
 
         editor->state = EDIT_NONE;
 
