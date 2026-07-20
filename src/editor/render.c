@@ -229,6 +229,9 @@ void renderEditor(SDL_Renderer *renderer, Textures *textures, Editor *editor) {
   for (u32 i = 1; i < circuit->inputChips.len; i++) {
     renderInputChip(&renderCtx, circuit->inputChips.array + i);
   }
+  for (u32 i = 1; i < circuit->simpleChips.len; i++) {
+    renderSimpleChip(&renderCtx, circuit->simpleChips.array + i);
+  }
 
   if (editor->selectBoxActive) {
     SDL_FRect box = {editor->selectBoxPos.x - editor->selectBoxSize.x / 2,

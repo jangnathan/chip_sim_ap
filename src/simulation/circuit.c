@@ -92,12 +92,12 @@ void inputChipsInit(InputChips *inputChips) {
 
 void positionSimpleChip(Circuit *circuit, SimpleChip *simpleChip, Vec2f pos) {
   simpleChip->position = pos;
-  u32 pivotID_out = circuit->array[simpleChip->pivotID_out].typeID;
-  circuit->pivots.array[pivotID_out].position = translateVec2f(pos, newVec2f(0.0f, 25.0f));
+  circuit->pivots.array[simpleChip->pivotID_out].position = translateVec2f(pos, newVec2f(0.0f, 40.0f));
 }
 
 u32 simpleChipsNew(Circuit *circuit, SimpleChipOptions *options) {
   SimpleChips *simpleChips = &circuit->simpleChips;
+  Pivots *pivots = &circuit->pivots;
 
   u32 newChipID = simpleChips->len;
   simpleChips->len++;
@@ -109,15 +109,17 @@ u32 simpleChipsNew(Circuit *circuit, SimpleChipOptions *options) {
         realloc(simpleChips->array, sizeof(SimpleChip) * simpleChips->size);
   }
 
-  u32 newID = assignCircuitEntity(circuit, CE_INPUT, newChipID);
+  u32 newID = assignCircuitEntity(circuit, CE_SIMPLE, newChipID);
   SimpleChip *simpleChip = simpleChips->array + newChipID;
   simpleChip->type = options->type;
-  simpleChip->position = options->position;
   simpleChip->ID = newID;
   
   u32 pivotID_out_CE = pivotsNew(circuit);
   u32 pivotID_out = circuit->array[pivotID_out_CE].typeID;
-  circuit->pivots.array[pivotID_out].designatedChipID = newID;
+  simpleChip->pivotID_out = pivotID_out;
+  pivots->array[pivotID_out].designatedChipID = newID;
+
+  positionSimpleChip(circuit, simpleChip, options->position);
 
   return newID;
 }
@@ -149,8 +151,7 @@ u32 inputChipsNew(Circuit *circuit, InputChipOptions *options) {
   u32 pivotID_CE = pivotsNew(circuit);
   u32 pivotID = circuit->array[pivotID_CE].typeID;
   inputChip->pivotID_out = pivotID;
-  pivots->array[pivotID].position =
-      translateVec2f(options->position, InputChipPivotOffset());
+  pivots->array[pivotID].position = translateVec2f(options->position, InputChipPivotOffset());
   pivots->array[pivotID].designatedChipID = newID;
 
   return newID;

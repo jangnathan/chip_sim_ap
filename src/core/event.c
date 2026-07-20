@@ -38,7 +38,7 @@ void handleEvents(App *app) {
       break;
     case SDL_EVENT_MOUSE_MOTION:
       input->mouse.positionUpdated = 1;
-      input->mouse.position = newVec2i(event.motion.x, event.motion.y);
+      input->mouse.position = newVec2i((i32)event.motion.x, (i32)event.motion.y);
       input->mouse.centerPosition =
           newVec2i(event.motion.x - app->window.size.x / 2,
                    app->window.size.y / 2 - event.motion.y);

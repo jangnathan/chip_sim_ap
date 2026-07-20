@@ -220,6 +220,10 @@ void initEditorUI(Editor *editor) {
 
   setUICachedText(&editor->switchText, renderer, ctx->font, "Switch",
                   newColor(0, 0, 0, 255));
+
+  setUICachedText(&editor->andGateText, renderer, ctx->font, "and gate",
+                  newColor(0, 0, 0, 255));
+
   setUICachedText(&editor->deleteText, renderer, ctx->font, "Delete",
                   newColor(0, 0, 0, 255));
 }
@@ -309,10 +313,27 @@ void createSwitchChip(void *eventStateObject) {
   Ctx *ctx = editor->ctx;
   UICtx *uiCtx = editor->uiCtx;
   Circuit *circuit = &ctx->circuit;
-  Wires *wires = &circuit->wires;
 
   editor->tempCE_ID =
       inputChipsNew(circuit, &(InputChipOptions){.type = SWITCH});
+  editor->state = EDIT_MOVE_CE;
+}
+
+void createAndGate(void *eventStateObject) {
+  App *app = (App *)eventStateObject;
+  Editor *editor = &app->editor;
+
+  if (editor->state != EDIT_NONE)
+    return;
+  if (editor->simulating)
+    return;
+
+  Ctx *ctx = editor->ctx;
+  UICtx *uiCtx = editor->uiCtx;
+  Circuit *circuit = &ctx->circuit;
+
+  editor->tempCE_ID =
+      simpleChipsNew(circuit, &(SimpleChipOptions){.type = AND});
   editor->state = EDIT_MOVE_CE;
 }
 
@@ -407,6 +428,17 @@ void editorUI(UICtx *uiCtx, Editor *editor) {
           &(UILabelOptions){.cachedText = &editor->switchText, .fontSize = 18});
   uiEndLayout(uiCtx);
   // </create switch>
+
+  // <create and gate>
+  uiBeginLayout(uiCtx,
+                &(UILayoutOptions){.size = newVec2i(90, 22),
+                                   .bgColor = newColor(255, 255, 255, 255),
+                                   .padding = newVec4i(2, 2, 2, 2),
+                                   .onClick = &createAndGate});
+  uiLabel(uiCtx, &(UILabelOptions){.cachedText = &editor->andGateText,
+                                   .fontSize = 18});
+  uiEndLayout(uiCtx);
+  // </create and gate>
 
   uiEndLayout(uiCtx);
   // </left sidebar>

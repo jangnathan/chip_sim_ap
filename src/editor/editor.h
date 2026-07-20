@@ -31,6 +31,7 @@ typedef struct {
 	UICachedText pivotText;
 	UICachedText wireText;
 	UICachedText switchText;
+	UICachedText andGateText;
 
 	UICachedText deleteText;
 
