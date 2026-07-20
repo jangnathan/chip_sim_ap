@@ -143,6 +143,7 @@ void updateEditor(Editor *editor, Input *input) {
 
     if (input->mouse.leftClick) {
       input->mouse.leftClick = 0;
+
       editor->state = EDIT_NONE;
     }
     break;

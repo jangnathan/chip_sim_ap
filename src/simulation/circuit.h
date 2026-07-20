@@ -19,6 +19,7 @@ typedef struct {
   u32 size;
 } Pivots;
 
+
 // WIRE
 typedef struct {
   u32 ID;
@@ -31,6 +32,7 @@ typedef struct {
   u32 len;
   u32 size;
 } Wires;
+
 
 // SIMPLE CHIP
 
@@ -69,6 +71,11 @@ typedef struct {
   u32 size;
 } SimpleChips;
 
+typedef struct {
+  SimpleChipType type;
+  Vec2f position;
+} SimpleChipOptions;
+
 // INPUT CHIP
 typedef enum { CLOCK, SWITCH } InputChipType;
 
@@ -83,11 +90,19 @@ typedef struct {
   u8 out;
 } InputChip;
 
+Vec2f InputChipPivotOffset();
+
 typedef struct {
   InputChip *array;
   u32 len;
   u32 size;
 } InputChips;
+
+
+typedef struct {
+  InputChipType type;
+  Vec2f position;
+} InputChipOptions;
 
 // Chip entity
 
@@ -117,26 +132,19 @@ typedef struct {
   CircuitEntity *array;
 } Circuit;
 
-void positionCircuitEntity(Circuit *circuit, CircuitEntity *CircuitEntity,
-                           Vec2f pos);
 
+// New circuit entity
 u32 pivotsNew(Circuit *circuit);
 
 u32 wiresNew(Circuit *circuit);
 
-typedef struct {
-  SimpleChipType type;
-  Vec2f position;
-} SimpleChipOptions;
+u32 inputChipsNew(Circuit *circuit, InputChipOptions *options);
 
 u32 simpleChipsNew(Circuit *circuit, SimpleChipOptions *options);
 
-typedef struct {
-  InputChipType type;
-  Vec2f position;
-} InputChipOptions;
-
-u32 inputChipsNew(Circuit *circuit, InputChipOptions *options);
+void positionSimpleChip(Circuit *circuit, SimpleChip *simpleChip, Vec2f pos); // position pivots, etc
+void positionCircuitEntity(Circuit *circuit, CircuitEntity *CircuitEntity,
+                           Vec2f pos);
 
 void circuitInit(Circuit *circuit);
 void circuitFree(Circuit *circuit);

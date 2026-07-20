@@ -44,6 +44,9 @@ u32 pivotsNew(Circuit *circuit) {
   Pivot *pivot = pivots->array + newPivotID;
   pivot->ID = newID;
 
+  // 0 at default
+  pivot->designatedChipID = 0;
+
   return newID;
 };
 
@@ -87,6 +90,12 @@ void inputChipsInit(InputChips *inputChips) {
   inputChips->array = malloc(sizeof(InputChip) * inputChips->size);
 }
 
+void positionSimpleChip(Circuit *circuit, SimpleChip *simpleChip, Vec2f pos) {
+  simpleChip->position = pos;
+  u32 pivotID_out = circuit->array[simpleChip->pivotID_out].typeID;
+  circuit->pivots.array[pivotID_out].position = translateVec2f(pos, newVec2f(0.0f, 25.0f));
+}
+
 u32 simpleChipsNew(Circuit *circuit, SimpleChipOptions *options) {
   SimpleChips *simpleChips = &circuit->simpleChips;
 
@@ -105,11 +114,19 @@ u32 simpleChipsNew(Circuit *circuit, SimpleChipOptions *options) {
   simpleChip->type = options->type;
   simpleChip->position = options->position;
   simpleChip->ID = newID;
+  
+  u32 pivotID_out_CE = pivotsNew(circuit);
+  u32 pivotID_out = circuit->array[pivotID_out_CE].typeID;
+  circuit->pivots.array[pivotID_out].designatedChipID = newID;
 
   return newID;
 }
+
+Vec2f InputChipPivotOffset() { return newVec2f(0.0f, 60.0f); }
+
 u32 inputChipsNew(Circuit *circuit, InputChipOptions *options) {
   InputChips *inputChips = &circuit->inputChips;
+  Pivots *pivots = &circuit->pivots;
 
   u32 newChipID = inputChips->len;
   inputChips->len++;
@@ -122,11 +139,19 @@ u32 inputChipsNew(Circuit *circuit, InputChipOptions *options) {
   }
 
   u32 newID = assignCircuitEntity(circuit, CE_INPUT, newChipID);
+
   InputChip *inputChip = inputChips->array + newChipID;
   inputChip->type = options->type;
   inputChip->position = options->position;
   inputChip->out = 0;
   inputChip->ID = newID;
+
+  u32 pivotID_CE = pivotsNew(circuit);
+  u32 pivotID = circuit->array[pivotID_CE].typeID;
+  inputChip->pivotID_out = pivotID;
+  pivots->array[pivotID].position =
+      translateVec2f(options->position, InputChipPivotOffset());
+  pivots->array[pivotID].designatedChipID = newID;
 
   return newID;
 }
@@ -136,11 +161,34 @@ void positionCircuitEntity(Circuit *circuit, CircuitEntity *entity, Vec2f pos) {
   case CE_PIVOT:
     circuit->pivots.array[entity->typeID].position = pos;
     break;
-  case CE_INPUT:
-    circuit->inputChips.array[entity->typeID].position = pos;
+  case CE_INPUT: {
+    InputChip *inputChip = circuit->inputChips.array + entity->typeID;
+    inputChip->position = pos;
+    circuit->pivots.array[inputChip->pivotID_out].position =
+        translateVec2f(pos, InputChipPivotOffset());
+    break;
+  }
+  case CE_SIMPLE: {
+    SimpleChip *simpleChip = circuit->simpleChips.array + entity->typeID;
+    simpleChip->position = pos;
+
+    positionSimpleChip(circuit, simpleChip, pos);
+    break;
+  }
+  default:
+    break;
+  }
+}
+
+void setPivotID_out(Circuit *circuit, CircuitEntity *entity, u32 out) {
+  switch (entity->type) {
+  case CE_NONE:
     break;
   case CE_SIMPLE:
-    circuit->simpleChips.array[entity->typeID].position = pos;
+    InputChip *inputChip = circuit->inputChips.array + entity->typeID;
+
+    inputChip->pivotID_out = out;
+    break;
   default:
     break;
   }
@@ -175,6 +223,13 @@ void deleteCE(Circuit *circuit, u32 ID) {
   case CE_NONE:
     break;
   case CE_PIVOT: {
+
+    u32 designatedChipID = circuit->pivots.array[typeID].designatedChipID;
+    // throw an error if it has a designated chipID
+    if (designatedChipID > 0) {
+      return 1; // No error enum for now
+    }
+
     circuit->pivots.len--;
 
     // typeID now points to replaced
@@ -188,6 +243,13 @@ void deleteCE(Circuit *circuit, u32 ID) {
   case CE_INPUT: {
     circuit->inputChips.len--;
 
+    // delete assigned pivot
+    u32 pivotID = circuit->inputChips.array[typeID].pivotID_out;
+    u32 pivotID_CE = circuit->pivots.array[pivotID].ID;
+
+    // set the pivot to be lone
+    circuit->pivots.array[pivotID].designatedChipID = 0;
+    deleteCE(circuit, pivotID_CE);
     // typeID now points to replaced
     circuit->inputChips.array[typeID] =
         circuit->inputChips.array[circuit->inputChips.len];
@@ -199,6 +261,14 @@ void deleteCE(Circuit *circuit, u32 ID) {
   }
   case CE_SIMPLE: {
     circuit->simpleChips.len--;
+
+    // delete assigned pivot
+    u32 pivotID = circuit->simpleChips.array[typeID].pivotID_out;
+    u32 pivotID_CE = circuit->pivots.array[pivotID].ID;
+
+    // set the pivot to be lone
+    circuit->pivots.array[pivotID].designatedChipID = 0;
+    deleteCE(circuit, pivotID_CE);
 
     // typeID now points to replaced
     circuit->simpleChips.array[typeID] =
