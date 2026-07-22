@@ -30,7 +30,10 @@ typedef struct {
 
 	UICachedText pivotText;
 	UICachedText wireText;
+
 	UICachedText switchText;
+
+	UICachedText simpleChipsText[sizeof(SimpleChipType)];
 	UICachedText andGateText;
 
 	UICachedText deleteText;

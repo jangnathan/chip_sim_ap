@@ -25,6 +25,7 @@ src/simulation/circuit.c
 src/simulation/simulate.c
 src/unit.c
 src/editor/editor.c
+src/editor/editor_ui.c
 src/editor/render.c
 src/textures.c
 src/ui.c

@@ -8,14 +8,10 @@
 #include "textures.h"
 #include "editor/editor.h"
 #include "core/window.h"
+#include "app_state.h"
 
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
-
-typedef enum {
-	ST_NONE,
-	ST_EDIT
-} AppState;
 
 typedef struct {
 	tWindow window;
