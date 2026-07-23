@@ -198,6 +198,7 @@ void updateEditor(Editor *editor, Input *input) {
   }
 
   if (editor->simulating) {
+    simulate(editor->ctx);
   }
 }
 

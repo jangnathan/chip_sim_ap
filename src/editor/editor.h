@@ -2,6 +2,7 @@
 #include "simulation/ctx.h"
 #include "ui.h"
 #include "simulation/circuit.h"
+#include "simulation/simulate.h"
 #include "core/input.h"
 #include "core/camera.h"
 

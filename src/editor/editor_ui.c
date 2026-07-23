@@ -42,6 +42,12 @@ void simulateButtonClicked(void *eventStateObject, void *params) {
   Editor *editor = eventStateObj->editor;
 
   editor->simulating = !editor->simulating;
+
+  if (editor->simulating) {
+    startSimulation(editor->ctx);
+  } else {
+    stopSimulation(editor->ctx);
+  }
 }
 void closeEditChipMenu(void *eventStateObject, void *params) {
   EventStateObject *eventStateObj = (EventStateObject *)(eventStateObject);

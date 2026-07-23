@@ -3,15 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-const char* const SimpleChipsName[] = {
-  "AND",
-  "OR",
-  "NOT",
-  "NAND",
-  "NOR",
-  "XOR",
-  "XNOR"
-};
+const char *const SimpleChipsName[] = {"AND", "OR",  "NOT", "NAND",
+                                       "NOR", "XOR", "XNOR"};
 
 #define INIT_ID_SIZE 64
 
@@ -102,7 +95,11 @@ void inputChipsInit(InputChips *inputChips) {
 
 void positionSimpleChip(Circuit *circuit, SimpleChip *simpleChip, Vec2f pos) {
   simpleChip->position = pos;
-  circuit->pivots.array[simpleChip->pivotID_out].position = translateVec2f(pos, newVec2f(0.0f, 40.0f));
+  circuit->pivots.array[simpleChip->pivotID_out].position =
+      translateVec2f(pos, newVec2f(0.0f, 40.0f));
+
+  circuit->pivots.array[simpleChip->pivotID_A].position = translateVec2f(pos, newVec2f(-25.0f, -25.0f));
+  circuit->pivots.array[simpleChip->pivotID_B].position = translateVec2f(pos, newVec2f(25.0f, -25.0f));
 }
 
 u32 simpleChipsNew(Circuit *circuit, SimpleChipOptions *options) {
@@ -123,11 +120,21 @@ u32 simpleChipsNew(Circuit *circuit, SimpleChipOptions *options) {
   SimpleChip *simpleChip = simpleChips->array + newChipID;
   simpleChip->type = options->type;
   simpleChip->ID = newID;
-  
+
   u32 pivotID_out_CE = pivotsNew(circuit);
   u32 pivotID_out = circuit->array[pivotID_out_CE].typeID;
   simpleChip->pivotID_out = pivotID_out;
   pivots->array[pivotID_out].designatedChipID = newID;
+
+  u32 pivotID_A_CE = pivotsNew(circuit);
+  u32 pivotID_A = circuit->array[pivotID_A_CE].typeID;
+  simpleChip->pivotID_A = pivotID_A;
+  pivots->array[pivotID_A].designatedChipID = newID;
+
+  u32 pivotID_B_CE = pivotsNew(circuit);
+  u32 pivotID_B = circuit->array[pivotID_B_CE].typeID;
+  simpleChip->pivotID_B = pivotID_B;
+  pivots->array[pivotID_B].designatedChipID = newID;
 
   positionSimpleChip(circuit, simpleChip, options->position);
 
@@ -161,7 +168,8 @@ u32 inputChipsNew(Circuit *circuit, InputChipOptions *options) {
   u32 pivotID_CE = pivotsNew(circuit);
   u32 pivotID = circuit->array[pivotID_CE].typeID;
   inputChip->pivotID_out = pivotID;
-  pivots->array[pivotID].position = translateVec2f(options->position, InputChipPivotOffset());
+  pivots->array[pivotID].position =
+      translateVec2f(options->position, InputChipPivotOffset());
   pivots->array[pivotID].designatedChipID = newID;
 
   return newID;

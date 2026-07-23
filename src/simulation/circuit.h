@@ -7,7 +7,7 @@
 typedef struct {
   Vec2f position;
   u32 ID;
-  u32 connectionID;
+  u32 connectionID; // simulation
 
   // for chip terminals
   u32 designatedChipID;
@@ -18,7 +18,6 @@ typedef struct {
   u32 len;
   u32 size;
 } Pivots;
-
 
 // WIRE
 typedef struct {
@@ -32,7 +31,6 @@ typedef struct {
   u32 len;
   u32 size;
 } Wires;
-
 
 // SIMPLE CHIP
 
@@ -51,7 +49,7 @@ typedef enum {
   SIMPLE_CHIP_TYPE_END
 } SimpleChipType;
 
-extern const char* const SimpleChipsName[];
+extern const char *const SimpleChipsName[];
 
 typedef struct {
   Vec2f position;
@@ -101,7 +99,6 @@ typedef struct {
   u32 size;
 } InputChips;
 
-
 typedef struct {
   InputChipType type;
   Vec2f position;
@@ -135,7 +132,6 @@ typedef struct {
   CircuitEntity *array;
 } Circuit;
 
-
 // New circuit entity
 u32 pivotsNew(Circuit *circuit);
 
@@ -145,7 +141,8 @@ u32 inputChipsNew(Circuit *circuit, InputChipOptions *options);
 
 u32 simpleChipsNew(Circuit *circuit, SimpleChipOptions *options);
 
-void positionSimpleChip(Circuit *circuit, SimpleChip *simpleChip, Vec2f pos); // position pivots, etc
+void positionSimpleChip(Circuit *circuit, SimpleChip *simpleChip,
+                        Vec2f pos); // position pivots, etc
 void positionCircuitEntity(Circuit *circuit, CircuitEntity *CircuitEntity,
                            Vec2f pos);
 
