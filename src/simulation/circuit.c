@@ -3,6 +3,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+const char* const SimpleChipsName[] = {
+  "AND",
+  "OR",
+  "NOT",
+  "NAND",
+  "NOR",
+  "XOR",
+  "XNOR"
+};
+
 #define INIT_ID_SIZE 64
 
 u32 assignCircuitEntity(Circuit *circuit, CircuitEntityType type, u32 typeID) {

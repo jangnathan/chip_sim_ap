@@ -1,5 +1,17 @@
-#include "editor.h"
 #include "app.h"
+#include "editor.h"
+
+#include <SDL3/SDL.h>
+
+void initSimpleChipsText(Editor *editor) {
+  UICtx *ctx = editor->uiCtx;
+  SDL_Renderer *renderer = ctx->window->renderer;
+
+  for (u8 i = 0; i < SIMPLE_CHIP_TYPE_END; i++) {
+    setUICachedText(editor->simpleChipsText + i, renderer, ctx->font, SimpleChipsName[i],
+                    newColor(0, 0, 0, 255));
+  }
+}
 
 void initEditorUI(Editor *editor) {
   UICtx *ctx = editor->uiCtx;
@@ -19,29 +31,29 @@ void initEditorUI(Editor *editor) {
   setUICachedText(&editor->switchText, renderer, ctx->font, "Switch",
                   newColor(0, 0, 0, 255));
 
-  setUICachedText(&editor->andGateText, renderer, ctx->font, "and gate",
-                  newColor(0, 0, 0, 255));
-
   setUICachedText(&editor->deleteText, renderer, ctx->font, "Delete",
                   newColor(0, 0, 0, 255));
+
+  initSimpleChipsText(editor);
 }
 
-void simulateButtonClicked(void *eventStateObject) {
-  App *app = (App *)eventStateObject;
-  Editor *editor = &app->editor;
+void simulateButtonClicked(void *eventStateObject, void *params) {
+  EventStateObject *eventStateObj = (EventStateObject *)(eventStateObject);
+  Editor *editor = eventStateObj->editor;
 
   editor->simulating = !editor->simulating;
 }
-void closeEditChipMenu(void *eventStateObject) {
-  App *app = (App *)eventStateObject;
-  Editor *editor = &app->editor;
+void closeEditChipMenu(void *eventStateObject, void *params) {
+  EventStateObject *eventStateObj = (EventStateObject *)(eventStateObject);
+  Editor *editor = eventStateObj->editor;
 
   editor->state = EDIT_NONE;
 }
 
-void createPivot(void *eventStateObject) {
-  App *app = (App *)eventStateObject;
-  Editor *editor = &app->editor;
+void createPivot(void *eventStateObject, void *params) {
+  EventStateObject *eventStateObj = (EventStateObject *)(eventStateObject);
+  Editor *editor = eventStateObj->editor;
+
   if (editor->state != EDIT_NONE)
     return;
   if (editor->simulating)
@@ -55,9 +67,10 @@ void createPivot(void *eventStateObject) {
   editor->state = EDIT_MOVE_CE;
 }
 
-void createWire(void *eventStateObject) {
-  App *app = (App *)eventStateObject;
-  Editor *editor = &app->editor;
+void createWire(void *eventStateObject, void *params) {
+  EventStateObject *eventStateObj = (EventStateObject *)(eventStateObject);
+  Editor *editor = eventStateObj->editor;
+
   if (editor->state != EDIT_NONE)
     return;
   if (editor->simulating)
@@ -72,9 +85,9 @@ void createWire(void *eventStateObject) {
   editor->state = EDIT_CREATE_WIRE;
 }
 
-void createSwitchChip(void *eventStateObject) {
-  App *app = (App *)eventStateObject;
-  Editor *editor = &app->editor;
+void createSwitchChip(void *eventStateObject, void *params) {
+  EventStateObject *eventStateObj = (EventStateObject *)(eventStateObject);
+  Editor *editor = eventStateObj->editor;
 
   if (editor->state != EDIT_NONE)
     return;
@@ -90,9 +103,14 @@ void createSwitchChip(void *eventStateObject) {
   editor->state = EDIT_MOVE_CE;
 }
 
-void createAndGate(void *eventStateObject) {
-  App *app = (App *)eventStateObject;
-  Editor *editor = &app->editor;
+typedef struct {
+  SimpleChipType type;
+} createSimpleChipParams;
+void createSimpleChip(void *eventStateObject, void *params_a) {
+  EventStateObject *eventStateObj = (EventStateObject *)(eventStateObject);
+  createSimpleChipParams *params = (createSimpleChipParams*)params_a;
+
+  Editor *editor = eventStateObj->editor;
 
   if (editor->state != EDIT_NONE)
     return;
@@ -104,13 +122,14 @@ void createAndGate(void *eventStateObject) {
   Circuit *circuit = &ctx->circuit;
 
   editor->tempCE_ID =
-      simpleChipsNew(circuit, &(SimpleChipOptions){.type = AND});
+      simpleChipsNew(circuit, &(SimpleChipOptions){.type = params->type});
   editor->state = EDIT_MOVE_CE;
 }
 
 void deleteButtonClicked(void *eventStateObject) {
-  App *app = (App *)eventStateObject;
-  Editor *editor = &app->editor;
+  EventStateObject *eventStateObj = (EventStateObject *)(eventStateObject);
+  Editor *editor = eventStateObj->editor;
+
   Ctx *ctx = editor->ctx;
   Circuit *circuit = &ctx->circuit;
 
@@ -119,7 +138,21 @@ void deleteButtonClicked(void *eventStateObject) {
 }
 
 void renderSimpleChipBtnsUI(UICtx *uiCtx, Editor *editor) {
+  for (u8 i = 0; i < SIMPLE_CHIP_TYPE_END; i++) {
+    createSimpleChipParams *params = &(createSimpleChipParams){
+      .type = i
+    };
 
+    uiBeginLayout(uiCtx,
+                  &(UILayoutOptions){.size = newVec2i(90, 22),
+                                     .bgColor = newColor(255, 255, 255, 255),
+                                     .padding = newVec4i(2, 2, 2, 2),
+                                     .onClick = &createSimpleChip,
+                                    .onClickParams = params});
+    uiLabel(uiCtx, &(UILabelOptions){.cachedText = editor->simpleChipsText + i,
+                                     .fontSize = 18});
+    uiEndLayout(uiCtx);
+  }
 }
 
 void editorUI(UICtx *uiCtx, Editor *editor) {
@@ -204,16 +237,7 @@ void editorUI(UICtx *uiCtx, Editor *editor) {
   uiEndLayout(uiCtx);
   // </create switch>
 
-  // <create and gate>
-  uiBeginLayout(uiCtx,
-                &(UILayoutOptions){.size = newVec2i(90, 22),
-                                   .bgColor = newColor(255, 255, 255, 255),
-                                   .padding = newVec4i(2, 2, 2, 2),
-                                   .onClick = &createAndGate});
-  uiLabel(uiCtx, &(UILabelOptions){.cachedText = &editor->andGateText,
-                                   .fontSize = 18});
-  uiEndLayout(uiCtx);
-  // </create and gate>
+  renderSimpleChipBtnsUI(uiCtx, editor);
 
   uiEndLayout(uiCtx);
   // </left sidebar>

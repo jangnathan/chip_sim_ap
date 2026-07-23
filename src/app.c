@@ -44,7 +44,11 @@ void initApp(App *app) {
 	app->uiCtx.window = &app->window;
 	app->uiCtx.input = input;
 	app->uiCtx.font = app->font;
-	initUICtx(&app->uiCtx, app);
+
+	app->eventStateObject.editor = &app->editor;
+	app->eventStateObject.ctx = &app->ctx;
+	app->uiCtx.eventStateObject = &app->eventStateObject;
+	initUICtx(&app->uiCtx);
 
 	app->state = ST_EDIT;
 	app->editor.ctx = &app->ctx;

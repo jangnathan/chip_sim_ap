@@ -36,6 +36,10 @@ typedef struct {
 
 	UIOrientation orientation;
 	u8 wrap;
+
+	void *onClickParams;
+	void (*onClick)(void *state, void *params);
+	void (*onHover)(void *state);
 } UILayout;
 
 typedef struct {
@@ -53,11 +57,9 @@ typedef struct {
 	u8 layoutDepth;
 
 	void *eventStateObject;
-	void (*onClick)(void *state);
-	void (*onHover)(void *state);
 } UICtx;
 
-void initUICtx(UICtx *ctx, void *eventStateObject);
+void initUICtx(UICtx *ctx);
 void uiBeginRoot(UICtx *ctx);
 void uiEndRoot(UICtx *ctx);
 UILayout *uiRootLayout(UICtx *ctx);
@@ -71,8 +73,9 @@ typedef struct {
 	UISizing sizing;
 	u32 spacing;
 
-	void (*onClick)(void *state);
-	void (*onHover)(void *state);
+	void *onClickParams;
+	void (*onClick)(void *state, void *params);
+	void (*onHover)(void *state, void *params);
 } UILayoutOptions;
 
 void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options);

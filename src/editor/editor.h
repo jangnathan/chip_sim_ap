@@ -33,7 +33,7 @@ typedef struct {
 
 	UICachedText switchText;
 
-	UICachedText simpleChipsText[sizeof(SimpleChipType)];
+	UICachedText simpleChipsText[SIMPLE_CHIP_TYPE_END];
 	UICachedText andGateText;
 
 	UICachedText deleteText;

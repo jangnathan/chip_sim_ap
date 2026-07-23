@@ -1,4 +1,7 @@
+#pragma once
+
 #include "editor/editor.h"
+#include "simulation/ctx.h"
 
 typedef enum {
 	ST_NONE,

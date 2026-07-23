@@ -24,6 +24,7 @@ typedef struct {
 
 	Ctx ctx;
 	AppState state;
+	EventStateObject eventStateObject;
 
 	// state structures
 	Editor editor;

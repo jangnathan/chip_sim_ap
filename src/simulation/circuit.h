@@ -48,7 +48,10 @@ typedef enum {
   NOR,
   XOR,
   XNOR,
+  SIMPLE_CHIP_TYPE_END
 } SimpleChipType;
+
+extern const char* const SimpleChipsName[];
 
 typedef struct {
   Vec2f position;

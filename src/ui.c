@@ -39,7 +39,7 @@ void generateIcons(UICtx *ctx) {
   SDL_SetRenderTarget(renderer, NULL);
 }
 
-void initUICtx(UICtx *ctx, void *eventStateObject) {
+void initUICtx(UICtx *ctx) {
   if (ctx->window == NULL) {
     fprintf(stderr, "UICtx.window must be set before calling uiInitCtx()");
   }
@@ -49,8 +49,11 @@ void initUICtx(UICtx *ctx, void *eventStateObject) {
   if (ctx->input == NULL) {
     fprintf(stderr, "UICtx.input must be set before calling uiInitCtx()");
   }
+  if (ctx->eventStateObject == NULL) {
+    fprintf(stderr,
+            "UICtx.eventStateObject must be set before calling uiInitCtx()");
+  }
   ctx->layoutDepth = 1;
-  ctx->eventStateObject = eventStateObject;
 
   generateIcons(ctx);
 }
@@ -64,20 +67,9 @@ void uiBeginRoot(UICtx *ctx) {
   container->cursorPos = newVec2i(0, 0);
   container->spacing = 0;
   ctx->layoutDepth = 1;
-
-  ctx->onHover = NULL;
-  ctx->onClick = NULL;
 }
 
 void uiEndRoot(UICtx *ctx) {
-  if (ctx->onHover != NULL) {
-    ctx->onHover(ctx->eventStateObject);
-  }
-  if (ctx->onClick != NULL) {
-    printf("Hello2\n");
-    ctx->onClick(ctx->eventStateObject);
-  }
-
   if (ctx->layoutDepth != 1) {
     fprintf(stderr, "not enough end layouts");
     exit(1);
@@ -107,6 +99,10 @@ void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options) {
   layout->padding = options->padding;
   layout->orientation = options->orientation;
   layout->spacing = options->spacing;
+
+  layout->onClickParams = options->onClickParams;
+  layout->onClick = options->onClick;
+  layout->onHover = options->onHover;
 
   // adjust cursor position
 
@@ -138,21 +134,6 @@ void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options) {
                            layout->bgColor.b, layout->bgColor.a);
     SDL_RenderFillRect(renderer, &background);
   }
-
-  // handle events
-  Input *input = ctx->input;
-
-  if (collideABB(input->mouse.position, layout->position, layout->size)) {
-    ctx->onHover = options->onHover;
-
-    if (options->onClick != NULL) {
-      input->mouse.cursorIcon = CURSOR_POINTER;
-
-      if (input->mouse.leftClick) {
-        ctx->onClick = options->onClick;
-      }
-    }
-  }
 }
 
 void uiEndLayout(UICtx *ctx) {
@@ -162,6 +143,24 @@ void uiEndLayout(UICtx *ctx) {
   }
 
   ctx->layoutDepth--;
+  UILayout *layout = ctx->layoutStack + ctx->layoutDepth;
+
+  // handle events
+  Input *input = ctx->input;
+
+  if (collideABB(input->mouse.position, layout->position, layout->size)) {
+    if (layout->onHover != NULL) {
+      layout->onHover(ctx->eventStateObject);
+    }
+
+    if (layout->onClick != NULL) {
+      input->mouse.cursorIcon = CURSOR_POINTER;
+
+      if (input->mouse.leftClick) {
+        layout->onClick(ctx->eventStateObject, layout->onClickParams);
+      }
+    }
+  }
 }
 
 UILayout *uiThisLayout(UICtx *ctx) {
@@ -249,7 +248,8 @@ void setUICachedText(UICachedText *cachedText, SDL_Renderer *renderer,
   }
 
   // if identical, skip
-  if (strncmp(text, cachedText->text, MAX_TEXT_LEN) == 0 && equalColor(color, cachedText->color)) {
+  if (strncmp(text, cachedText->text, MAX_TEXT_LEN) == 0 &&
+      equalColor(color, cachedText->color)) {
     return;
   }
 
