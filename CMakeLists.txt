@@ -21,6 +21,8 @@ src/core/camera.c
 src/core/event.c
 src/core/input.c
 src/core/window.c
+src/simulation/ctx.c
+src/simulation/connection.c
 src/simulation/circuit.c
 src/simulation/simulate.c
 src/unit.c

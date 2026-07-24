@@ -12,10 +12,6 @@
 #define WINDOW_WIDTH 1080
 #define WINDOW_HEIGHT 720
 
-void initCtx(Ctx *ctx) {
-	circuitInit(&ctx->circuit);
-}
-
 void initApp(App *app) {
 	u8 sucess = SDL_Init(SDL_INIT_VIDEO);
 	if (!sucess) {
@@ -58,7 +54,7 @@ void initApp(App *app) {
 	loadTextures(app->window.renderer, &app->textures, app->font);
 
 	// init logic Ctx
-	initCtx(&app->ctx);
+	ctxInit(&app->ctx);
 	//app->ctx.circuit.len = 0;
 }
 

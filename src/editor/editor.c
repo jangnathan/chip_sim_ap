@@ -42,7 +42,6 @@ void checkCollisionsCE(Editor *editor, Input *input) {
 
     if (cartesianCollideABB(input->mouse.position, screenPos, pivotHitbox)) {
       editor->hoveredCE_ID = pivot->ID;
-      printf("HOVER %d\n", editor->hoveredCE_ID);
       return;
     }
   }
@@ -63,7 +62,6 @@ void checkCollisionsCE(Editor *editor, Input *input) {
 
     if (cartesianCollideABB(input->mouse.position, screenPos, inputHitbox)) {
       editor->hoveredCE_ID = inputChip->ID;
-      printf("HOVER %d\n", editor->hoveredCE_ID);
       return;
     }
   }
@@ -130,12 +128,13 @@ void updateEditor(Editor *editor, Input *input) {
     break;
   }
   case EDIT_MOVE_CE: {
-    Vec2f mousePos = vec2ItoF(input->mouse.centerPosition);
-    // mousePos.y += editor->menubarHeight / 2;
+    Vec2f mousePos = vec2ItoF(input->mouse.position);
+    mousePos.x -= (float)editor->camera.viewportSize.x / 2.0f +
+                  (float)editor->camera.viewportPos.x;
+    mousePos.y = (float)(editor->camera.viewportSize.y + editor->camera.viewportPos.y) / 2.0f - mousePos.y;
 
-    // positioning logic
-    Vec2f pos1 = translateVec2f(editor->camera.position, mousePos);
-    Vec2f pos = scaleVec2f(pos1, 1.0f / editor->camera.zoom);
+    Vec2f pos = translateVec2f(editor->camera.position,
+                                scaleVec2f(mousePos, 1.0f / editor->camera.zoom));
 
     positionCircuitEntity(circuit, circuit->array + editor->tempCE_ID, pos);
 
