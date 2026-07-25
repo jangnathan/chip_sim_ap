@@ -13,55 +13,63 @@ void resetConnections(Ctx *ctx) {
   }
 }
 
-u8 checkAndGenerateConnection(Ctx *ctx, u32 targetPivotID, u32 wirePivotID1,
-                              u32 wirePivotID2) {
+void searchAndGenerateConnections(Ctx *ctx, u32 *pivotQueue,
+                                  u32 *pivotQueueLen) {
+
   Circuit *circuit = &ctx->circuit;
   Pivots *pivots = &circuit->pivots;
+  Connections *connections = &ctx->connections;
 
-  // return check
-  if (wirePivotID1 == targetPivotID) {
-    // if pivotID2 has connection, set pivotID1 to it
-    // if it does not, create new connection, then set both pivots to it
+  u32 connectionID = connectionsNew(connections);
+  while (*pivotQueueLen > 0) {
+    *pivotQueueLen = *pivotQueueLen - 1;
+    u32 pivot_i = pivotQueue[*pivotQueueLen];
 
-    if (pivots->array[wirePivotID2].connectionID == 0) {
-      u32 newConnectionID = connectionsNew(&ctx->connections);
+    pivots->array[pivot_i].connectionID = connectionID;
 
-      pivots->array[wirePivotID1].connectionID = newConnectionID;
-      pivots->array[wirePivotID2].connectionID = newConnectionID;
-    } else {
-      pivots->array[wirePivotID1].connectionID =
-          pivots->array[wirePivotID2].connectionID;
+    for (u32 wire_i = 1; wire_i < circuit->wires.len; wire_i++) {
+      Wire *wire = circuit->wires.array + wire_i;
+
+      // add to queue
+      if (wire->pivotID1 == pivot_i) {
+        if (pivots->array[wire->pivotID2].connectionID == 0) {
+          pivotQueue[*pivotQueueLen] = wire->pivotID2;
+          *pivotQueueLen = *pivotQueueLen + 1;
+        }
+      } else if (wire->pivotID2 == pivot_i) {
+        if (pivots->array[wire->pivotID1].connectionID == 0) {
+
+          pivotQueue[*pivotQueueLen] = wire->pivotID1;
+          *pivotQueueLen = *pivotQueueLen + 1;
+        }
+      }
     }
-
-    return 1;
   }
 
-  return 0;
+  printf("pivotQueueLen after: %d\n", *pivotQueueLen);
 }
 
 void generateConnections(Ctx *ctx) {
   Circuit *circuit = &ctx->circuit;
   resetConnections(ctx);
 
+  u32 *pivotQueue = malloc(sizeof(u32) * (circuit->pivots.len - 1));
+  u32 pivotQueueLen = 0;
+
   for (u32 pivot_i = 1; pivot_i < circuit->pivots.len; pivot_i++) {
     Pivot *pivot = circuit->pivots.array + pivot_i;
 
     // look for empty connections
     if (pivot->connectionID == 0) {
-      // look for wires connected to pivot
+      pivotQueueLen++;
+      pivotQueue[0] = pivot_i;
 
-      for (u32 wire_i = 1; wire_i < circuit->wires.len; wire_i++) {
-        Wire *wire = circuit->wires.array + wire_i;
-
-        // check all 2 pivots
-        if (!checkAndGenerateConnection(ctx, pivot_i, wire->pivotID1,
-                                        wire->pivotID2)) {
-          checkAndGenerateConnection(ctx, pivot_i, wire->pivotID2,
-                                     wire->pivotID1);
-        }
-      }
+      // do BFS if queue
+      searchAndGenerateConnections(ctx, pivotQueue, &pivotQueueLen);
     }
   }
+
+  free(pivotQueue);
 }
 
 void startSimulation(Ctx *ctx) {
