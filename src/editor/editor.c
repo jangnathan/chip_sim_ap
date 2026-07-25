@@ -101,6 +101,8 @@ void updateEditor(Editor *editor, Input *input) {
   CircuitEntity *hoveredCE = circuit->array + editor->hoveredCE_ID;
 
   if (editor->simulating) {
+    simulate(editor->ctx);
+
     if (editor->hoveredCE_ID == 0)
       return;
     if (!input->mouse.leftClick)
@@ -131,10 +133,14 @@ void updateEditor(Editor *editor, Input *input) {
     Vec2f mousePos = vec2ItoF(input->mouse.position);
     mousePos.x -= (float)editor->camera.viewportSize.x / 2.0f +
                   (float)editor->camera.viewportPos.x;
-    mousePos.y = (float)(editor->camera.viewportSize.y + editor->camera.viewportPos.y) / 2.0f - mousePos.y;
+    mousePos.y =
+        (float)(editor->camera.viewportSize.y + editor->camera.viewportPos.y) /
+            2.0f -
+        mousePos.y;
 
-    Vec2f pos = translateVec2f(editor->camera.position,
-                                scaleVec2f(mousePos, 1.0f / editor->camera.zoom));
+    Vec2f pos =
+        translateVec2f(editor->camera.position,
+                       scaleVec2f(mousePos, 1.0f / editor->camera.zoom));
 
     positionCircuitEntity(circuit, circuit->array + editor->tempCE_ID, pos);
 
@@ -194,10 +200,6 @@ void updateEditor(Editor *editor, Input *input) {
     }
     break;
   }
-  }
-
-  if (editor->simulating) {
-    simulate(editor->ctx);
   }
 }
 

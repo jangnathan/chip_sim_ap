@@ -83,5 +83,31 @@ void startSimulation(Ctx *ctx) {
     printf("PIVOT ID: %d, CONNECTION ID: %d\n", pivot_i, pivot->connectionID);
   }
 }
-void simulate(Ctx *ctx) {}
+
+ElectricState *pivotConnectionState(Ctx *ctx, u32 pivotID) {
+  Circuit *circuit = &ctx->circuit;
+  Connections *connections = &ctx->connections;
+
+  u32 connectionID = circuit->pivots.array[pivotID].connectionID;
+
+  return connections->array + connectionID;
+}
+void simulate(Ctx *ctx) {
+  Circuit *circuit = &ctx->circuit;
+
+  InputChips *inputChips = &circuit->inputChips;
+  for (u32 i = 1; i < inputChips->len; i++) {
+    InputChip *inputChip = inputChips->array + i;
+    ElectricState *electricState = pivotConnectionState(ctx, inputChip->pivotID_out);
+    *electricState = inputChip->out;
+  }
+
+  SimpleChips *simpleChips = &circuit->simpleChips;
+  for (u32 i = 1; i < simpleChips->len; i++) {
+    SimpleChip *simpleChip = simpleChips->array + i;
+    ElectricState *electricStateA = pivotConnectionState(ctx, simpleChip->pivotID_A);
+
+    simpleChip->out = *electricStateA;
+  }
+}
 void stopSimulation(Ctx *ctx) {}
