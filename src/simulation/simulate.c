@@ -92,22 +92,75 @@ ElectricState *pivotConnectionState(Ctx *ctx, u32 pivotID) {
 
   return connections->array + connectionID;
 }
+
+ElectricState simpleChipEvalLogic(SimpleChipType type, ElectricState a,
+                                  ElectricState b) {
+  ElectricState result = 0;
+
+  switch (type) {
+  case AND:
+    result = (a && b) ? 1 : 0;
+    break;
+  case OR:
+    result = (a || b) ? 1 : 0;
+    break;
+  case NOT:
+    result = a ? 0 : 1;
+    break;
+  case NAND:
+    result = (a && b) ? 0 : 1;
+    break;
+  case NOR:
+    result = (a || b) ? 0 : 1;
+    break;
+  case XOR:
+    result = (a != b) ? 1 : 0;
+    break;
+  case XNOR:
+    result = (a == b) ? 1 : 0;
+    break;
+  default:
+    result = 0;
+    break;
+  }
+
+  return result;
+}
+
 void simulate(Ctx *ctx) {
   Circuit *circuit = &ctx->circuit;
-
+  Connections *connections = &ctx->connections;
   InputChips *inputChips = &circuit->inputChips;
+
+  for (u32 i = 0; i < connections->len; i++) {
+    connections->array[i] = 0;
+  }
+
   for (u32 i = 1; i < inputChips->len; i++) {
     InputChip *inputChip = inputChips->array + i;
-    ElectricState *electricState = pivotConnectionState(ctx, inputChip->pivotID_out);
-    *electricState = inputChip->out;
+    ElectricState *electricState =
+        pivotConnectionState(ctx, inputChip->pivotID_out);
+
+        // cannot disable electricity if there is already electricity if not diode
+    if (*electricState == 0) {
+      *electricState = inputChip->out;
+    }
   }
 
   SimpleChips *simpleChips = &circuit->simpleChips;
   for (u32 i = 1; i < simpleChips->len; i++) {
     SimpleChip *simpleChip = simpleChips->array + i;
-    ElectricState *electricStateA = pivotConnectionState(ctx, simpleChip->pivotID_A);
+    ElectricState *electricStateA =
+        pivotConnectionState(ctx, simpleChip->pivotID_A);
+    ElectricState *electricStateB =
+        pivotConnectionState(ctx, simpleChip->pivotID_B);
 
-    simpleChip->out = *electricStateA;
+    simpleChip->out =
+        simpleChipEvalLogic(simpleChip->type, *electricStateA, *electricStateB);
+
+    ElectricState *electricStateOut =
+        pivotConnectionState(ctx, simpleChip->pivotID_out);
+    *electricStateOut = simpleChip->out;
   }
 }
 void stopSimulation(Ctx *ctx) {}
