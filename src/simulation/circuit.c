@@ -98,8 +98,15 @@ void positionSimpleChip(Circuit *circuit, SimpleChip *simpleChip, Vec2f pos) {
   circuit->pivots.array[simpleChip->pivotID_out].position =
       translateVec2f(pos, newVec2f(0.0f, 40.0f));
 
-  circuit->pivots.array[simpleChip->pivotID_A].position = translateVec2f(pos, newVec2f(-25.0f, -25.0f));
-  circuit->pivots.array[simpleChip->pivotID_B].position = translateVec2f(pos, newVec2f(25.0f, -25.0f));
+  if (simpleChip->type == NOT) {
+    circuit->pivots.array[simpleChip->pivotID_A].position =
+        translateVec2f(pos, newVec2f(0.0f, -25.0f));
+  } else {
+    circuit->pivots.array[simpleChip->pivotID_A].position =
+        translateVec2f(pos, newVec2f(-25.0f, -25.0f));
+    circuit->pivots.array[simpleChip->pivotID_B].position =
+        translateVec2f(pos, newVec2f(25.0f, -25.0f));
+  }
 }
 
 u32 simpleChipsNew(Circuit *circuit, SimpleChipOptions *options) {
@@ -131,10 +138,14 @@ u32 simpleChipsNew(Circuit *circuit, SimpleChipOptions *options) {
   simpleChip->pivotID_A = pivotID_A;
   pivots->array[pivotID_A].designatedChipID = newID;
 
-  u32 pivotID_B_CE = pivotsNew(circuit);
-  u32 pivotID_B = circuit->array[pivotID_B_CE].typeID;
-  simpleChip->pivotID_B = pivotID_B;
-  pivots->array[pivotID_B].designatedChipID = newID;
+  if (simpleChip->type == NOT) {
+    simpleChip->pivotID_B = 0;
+  } else {
+    u32 pivotID_B_CE = pivotsNew(circuit);
+    u32 pivotID_B = circuit->array[pivotID_B_CE].typeID;
+    simpleChip->pivotID_B = pivotID_B;
+    pivots->array[pivotID_B].designatedChipID = newID;
+  }
 
   positionSimpleChip(circuit, simpleChip, options->position);
 
@@ -242,11 +253,20 @@ void deleteCE(Circuit *circuit, u32 ID) {
   case CE_NONE:
     break;
   case CE_PIVOT: {
-
     u32 designatedChipID = circuit->pivots.array[typeID].designatedChipID;
     // throw an error if it has a designated chipID
     if (designatedChipID > 0) {
       return 1; // No error enum for now
+    }
+
+    // delete connected wires
+    // what if multiple wires connected to same pivot
+    for (u32 i = 0; i < circuit->wires.len; i++) {
+      Wire *wire = circuit->wires.array + i;
+      if (wire->pivotID1 == typeID || wire->pivotID2 == typeID) {
+        deleteCE(circuit, wire->ID);
+        i--;
+      }
     }
 
     circuit->pivots.len--;
@@ -257,6 +277,13 @@ void deleteCE(Circuit *circuit, u32 ID) {
 
     // set new type element's ID to the swapped CE
     circuit->pivots.array[typeID].ID = ID;
+    break;
+  }
+  case CE_WIRE: {
+    circuit->wires.len--;
+
+    circuit->wires.array[typeID] = circuit->wires.array[circuit->wires.len];
+    circuit->wires.array[typeID].ID = ID;
     break;
   }
   case CE_INPUT: {
@@ -281,13 +308,26 @@ void deleteCE(Circuit *circuit, u32 ID) {
   case CE_SIMPLE: {
     circuit->simpleChips.len--;
 
-    // delete assigned pivot
-    u32 pivotID = circuit->simpleChips.array[typeID].pivotID_out;
-    u32 pivotID_CE = circuit->pivots.array[pivotID].ID;
-
+    // delete assigned pivots
+    u32 pivotID_out = circuit->simpleChips.array[typeID].pivotID_out;
+    u32 pivotID_out_CE = circuit->pivots.array[pivotID_out].ID;
     // set the pivot to be lone
-    circuit->pivots.array[pivotID].designatedChipID = 0;
-    deleteCE(circuit, pivotID_CE);
+    circuit->pivots.array[pivotID_out].designatedChipID = 0;
+    deleteCE(circuit, pivotID_out_CE);
+
+    u32 pivotID_A = circuit->simpleChips.array[typeID].pivotID_A;
+    u32 pivotID_A_CE = circuit->pivots.array[pivotID_A].ID;
+    // set the pivot to be lone
+    circuit->pivots.array[pivotID_A].designatedChipID = 0;
+    deleteCE(circuit, pivotID_A_CE);
+
+    u32 pivotID_B = circuit->simpleChips.array[typeID].pivotID_B;
+    if (pivotID_B != 0) { // NOT gates only have pivotID_a
+      u32 pivotID_B_CE = circuit->pivots.array[pivotID_B].ID;
+      // set the pivot to be lone
+      circuit->pivots.array[pivotID_B].designatedChipID = 0;
+      deleteCE(circuit, pivotID_B_CE);
+    }
 
     // typeID now points to replaced
     circuit->simpleChips.array[typeID] =
@@ -306,4 +346,5 @@ void deleteCE(Circuit *circuit, u32 ID) {
   // ID now points to replaced
   circuit->array[ID] = circuit->array[circuit->len];
   circuit->array[ID].typeID = typeID;
+  return;
 }

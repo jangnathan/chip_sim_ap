@@ -141,7 +141,7 @@ void simulate(Ctx *ctx) {
     ElectricState *electricState =
         pivotConnectionState(ctx, inputChip->pivotID_out);
 
-        // cannot disable electricity if there is already electricity if not diode
+    // cannot disable electricity if there is already electricity if not diode
     if (*electricState == 0) {
       *electricState = inputChip->out;
     }
@@ -150,13 +150,18 @@ void simulate(Ctx *ctx) {
   SimpleChips *simpleChips = &circuit->simpleChips;
   for (u32 i = 1; i < simpleChips->len; i++) {
     SimpleChip *simpleChip = simpleChips->array + i;
-    ElectricState *electricStateA =
-        pivotConnectionState(ctx, simpleChip->pivotID_A);
-    ElectricState *electricStateB =
-        pivotConnectionState(ctx, simpleChip->pivotID_B);
+    ElectricState electricStateA =
+        *(ElectricState *)pivotConnectionState(ctx, simpleChip->pivotID_A);
+    ElectricState electricStateB;
+    if (simpleChip->type == NOT) {
+      electricStateB = 0;
+    } else {
+      electricStateB =
+          *(ElectricState *)pivotConnectionState(ctx, simpleChip->pivotID_B);
+    }
 
     simpleChip->out =
-        simpleChipEvalLogic(simpleChip->type, *electricStateA, *electricStateB);
+        simpleChipEvalLogic(simpleChip->type, electricStateA, electricStateB);
 
     ElectricState *electricStateOut =
         pivotConnectionState(ctx, simpleChip->pivotID_out);

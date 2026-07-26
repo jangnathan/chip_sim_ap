@@ -160,6 +160,8 @@ void uiEndLayout(UICtx *ctx) {
         layout->onClick(ctx->eventStateObject, layout->onClickParams);
       }
     }
+
+    input->mouse.leftClick = 0;
   }
 }
 

@@ -65,6 +65,18 @@ void checkCollisionsCE(Editor *editor, Input *input) {
       return;
     }
   }
+  for (u32 i = 1; i < circuit->simpleChips.len; i++) {
+    SimpleChip *simpleChip = circuit->simpleChips.array + i;
+    Vec2i screenPos = world2screenVec2i(editor->camera, simpleChip->position);
+    Vec2i inputHitbox = newVec2i(50, 50);
+
+    inputHitbox = scaleVec2i(inputHitbox, editor->camera.zoom);
+
+    if (cartesianCollideABB(input->mouse.position, screenPos, inputHitbox)) {
+      editor->hoveredCE_ID = simpleChip->ID;
+      return;
+    }
+  }
 }
 
 void updateEditor(Editor *editor, Input *input) {
