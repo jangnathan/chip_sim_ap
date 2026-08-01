@@ -50,6 +50,7 @@ u8 collideAABB(Vec2i a_pos, Vec2i a_size, Vec2i b_pos, Vec2i b_size);
 
 u8 cartesianCollideABB(Vec2i a_pos, Vec2i b_pos, Vec2i b_size);
 u8 cartesianCollideAABB(Vec2f a_pos, Vec2f a_size, Vec2f b_pos, Vec2f b_size);
+u8 cartesianCollideLine(Vec2f p_pos, Vec2f a_pos, Vec2f b_pos, float thickness);
 
 Vec4i newVec4i(i32 t, i32 r, i32 b, i32 l);
 u8 isNullVec4i(Vec4i a);

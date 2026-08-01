@@ -9,6 +9,7 @@
 #include "editor/editor.h"
 #include "core/window.h"
 #include "app_state.h"
+#include "app_menubar.h"
 
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
@@ -26,6 +27,8 @@ typedef struct {
 	AppState state;
 	EventStateObject eventStateObject;
 
+	Menubar menubar;
+
 	// state structures
 	Editor editor;
 
@@ -34,3 +37,4 @@ typedef struct {
 
 void initApp(App *app);
 void runApp(App *app);
+

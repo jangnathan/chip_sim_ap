@@ -17,6 +17,7 @@ include_directories(src)
 add_executable(chipsim
 src/main.c
 src/app.c
+src/app_menubar.c
 src/core/camera.c
 src/core/event.c
 src/core/input.c

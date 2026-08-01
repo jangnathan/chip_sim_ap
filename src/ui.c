@@ -67,6 +67,8 @@ void uiBeginRoot(UICtx *ctx) {
   container->cursorPos = newVec2i(0, 0);
   container->spacing = 0;
   ctx->layoutDepth = 1;
+
+  ctx->mouseEventsPropagated = 0;
 }
 
 void uiEndRoot(UICtx *ctx) {
@@ -103,11 +105,15 @@ void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options) {
   layout->onClickParams = options->onClickParams;
   layout->onClick = options->onClick;
   layout->onHover = options->onHover;
+  layout->isClicked = options->isClicked;
+  layout->isHovered = options->isHovered;
+
+  layout->hoverCursorIcon = options->hoverCursorIcon;
 
   // adjust cursor position
 
-  layout->cursorPos = newVec2i(layout->position.x + layout->padding.t,
-                               layout->position.y + layout->padding.l);
+  layout->cursorPos = newVec2i(layout->position.x + layout->padding.l,
+                               layout->position.y + layout->padding.t);
 
   switch (prevLayout->orientation) {
   case UI_HORIZONTAL:
@@ -148,19 +154,23 @@ void uiEndLayout(UICtx *ctx) {
   // handle events
   Input *input = ctx->input;
 
-  if (collideABB(input->mouse.position, layout->position, layout->size)) {
+  if (collideABB(input->mouse.position, layout->position, layout->size) && !ctx->mouseEventsPropagated) {
+    input->mouse.cursorIcon = layout->hoverCursorIcon;
+
     if (layout->onHover != NULL) {
       layout->onHover(ctx->eventStateObject);
     }
+    if (layout->isHovered != NULL) {
+      *layout->isHovered = 1;
+    }
 
     if (layout->onClick != NULL) {
-      input->mouse.cursorIcon = CURSOR_POINTER;
-
       if (input->mouse.leftClick) {
         layout->onClick(ctx->eventStateObject, layout->onClickParams);
       }
     }
 
+    ctx->mouseEventsPropagated = 1;
     input->mouse.leftClick = 0;
   }
 }

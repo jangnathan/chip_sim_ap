@@ -40,6 +40,11 @@ typedef struct {
 	void *onClickParams;
 	void (*onClick)(void *state, void *params);
 	void (*onHover)(void *state);
+
+	u8 *isHovered;
+	u8 *isClicked;
+
+	CursorIcon hoverCursorIcon;
 } UILayout;
 
 typedef struct {
@@ -57,6 +62,8 @@ typedef struct {
 	u8 layoutDepth;
 
 	void *eventStateObject;
+
+	u8 mouseEventsPropagated;
 } UICtx;
 
 void initUICtx(UICtx *ctx);
@@ -76,6 +83,11 @@ typedef struct {
 	void *onClickParams;
 	void (*onClick)(void *state, void *params);
 	void (*onHover)(void *state, void *params);
+
+	u8 *isClicked;
+	u8 *isHovered;
+
+	CursorIcon hoverCursorIcon;
 } UILayoutOptions;
 
 void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options);

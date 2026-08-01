@@ -8,8 +8,8 @@ void initSimpleChipsText(Editor *editor) {
   SDL_Renderer *renderer = ctx->window->renderer;
 
   for (u8 i = 0; i < SIMPLE_CHIP_TYPE_END; i++) {
-    setUICachedText(editor->simpleChipsText + i, renderer, ctx->font, SimpleChipsName[i],
-                    newColor(0, 0, 0, 255));
+    setUICachedText(editor->simpleChipsText + i, renderer, ctx->font,
+                    SimpleChipsName[i], newColor(0, 0, 0, 255));
   }
 }
 
@@ -114,7 +114,7 @@ typedef struct {
 } createSimpleChipParams;
 void createSimpleChip(void *eventStateObject, void *params_a) {
   EventStateObject *eventStateObj = (EventStateObject *)(eventStateObject);
-  createSimpleChipParams *params = (createSimpleChipParams*)params_a;
+  createSimpleChipParams *params = (createSimpleChipParams *)params_a;
 
   Editor *editor = eventStateObj->editor;
 
@@ -145,16 +145,15 @@ void deleteButtonClicked(void *eventStateObject) {
 
 void renderSimpleChipBtnsUI(UICtx *uiCtx, Editor *editor) {
   for (u8 i = 0; i < SIMPLE_CHIP_TYPE_END; i++) {
-    createSimpleChipParams *params = &(createSimpleChipParams){
-      .type = i
-    };
+    createSimpleChipParams *params = &(createSimpleChipParams){.type = i};
 
     uiBeginLayout(uiCtx,
                   &(UILayoutOptions){.size = newVec2i(90, 22),
                                      .bgColor = newColor(255, 255, 255, 255),
                                      .padding = newVec4i(2, 2, 2, 2),
                                      .onClick = &createSimpleChip,
-                                    .onClickParams = params});
+                                     .onClickParams = params,
+                                     .hoverCursorIcon = CURSOR_POINTER});
     uiLabel(uiCtx, &(UILabelOptions){.cachedText = editor->simpleChipsText + i,
                                      .fontSize = 18});
     uiEndLayout(uiCtx);
@@ -182,7 +181,8 @@ void editorUI(UICtx *uiCtx, Editor *editor) {
                                           .padding = newVec4i(10, 10, 10, 10),
                                           .bgColor = simulateButtonColor,
 
-                                          .onClick = &simulateButtonClicked});
+                                          .onClick = &simulateButtonClicked,
+                                          .hoverCursorIcon = CURSOR_POINTER});
 
   uiLabel(uiCtx,
           &(UILabelOptions){.cachedText = simulateButtonText, .fontSize = 24});
@@ -199,7 +199,7 @@ void editorUI(UICtx *uiCtx, Editor *editor) {
     uiSetLayoutCursorPosX(uiCtx, uiRootLayout(uiCtx)->size.x / 2);
     uiLabel(uiCtx, &(UILabelOptions){.cachedText = &editor->editorMessage,
                                      .fontSize = 16});
-    uiSetLayoutCursorPos(uiCtx, 0, editor->menubarHeight);
+    uiSetLayoutCursorPos(uiCtx, 0, uiThisLayout(uiCtx)->cursorPos.y - 16);
   }
   // </editor message>
 
@@ -215,7 +215,8 @@ void editorUI(UICtx *uiCtx, Editor *editor) {
                 &(UILayoutOptions){.size = newVec2i(90, 22),
                                    .bgColor = newColor(255, 255, 255, 255),
                                    .padding = newVec4i(2, 2, 2, 2),
-                                   .onClick = &createPivot});
+                                   .onClick = &createPivot,
+                                   .hoverCursorIcon = CURSOR_POINTER});
   uiLabel(uiCtx,
           &(UILabelOptions){.cachedText = &editor->pivotText, .fontSize = 18});
   uiEndLayout(uiCtx);
@@ -226,7 +227,8 @@ void editorUI(UICtx *uiCtx, Editor *editor) {
                 &(UILayoutOptions){.size = newVec2i(90, 22),
                                    .bgColor = newColor(255, 255, 255, 255),
                                    .padding = newVec4i(2, 2, 2, 2),
-                                   .onClick = &createWire});
+                                   .onClick = &createWire,
+                                   .hoverCursorIcon = CURSOR_POINTER});
   uiLabel(uiCtx,
           &(UILabelOptions){.cachedText = &editor->wireText, .fontSize = 18});
   uiEndLayout(uiCtx);
@@ -237,7 +239,8 @@ void editorUI(UICtx *uiCtx, Editor *editor) {
                 &(UILayoutOptions){.size = newVec2i(90, 22),
                                    .bgColor = newColor(255, 255, 255, 255),
                                    .padding = newVec4i(2, 2, 2, 2),
-                                   .onClick = &createSwitchChip});
+                                   .onClick = &createSwitchChip,
+                                   .hoverCursorIcon = CURSOR_POINTER});
   uiLabel(uiCtx,
           &(UILabelOptions){.cachedText = &editor->switchText, .fontSize = 18});
   uiEndLayout(uiCtx);
@@ -264,7 +267,8 @@ void editorUI(UICtx *uiCtx, Editor *editor) {
                   &(UILayoutOptions){.size = newVec2i(32, 32),
                                      .padding = newVec4i(4, 4, 4, 4),
                                      .bgColor = newColor(200, 50, 50, 255),
-                                     .onClick = &closeEditChipMenu});
+                                     .onClick = &closeEditChipMenu,
+                                     .hoverCursorIcon = CURSOR_POINTER});
     uiDecal(uiCtx, &(UIDecalOptions){.size = newVec2i(24, 24),
                                      .texture = uiCtx->defaultIcons.x});
     uiEndLayout(uiCtx);
@@ -276,7 +280,8 @@ void editorUI(UICtx *uiCtx, Editor *editor) {
                   &(UILayoutOptions){.size = newVec2i(96, 32),
                                      .padding = newVec4i(4, 4, 4, 4),
                                      .bgColor = newColor(200, 50, 50, 255),
-                                     .onClick = &deleteButtonClicked});
+                                     .onClick = &deleteButtonClicked,
+                                     .hoverCursorIcon = CURSOR_POINTER});
     uiLabel(uiCtx, &(UILabelOptions){.cachedText = &editor->deleteText,
                                      .fontSize = 18});
     uiEndLayout(uiCtx);

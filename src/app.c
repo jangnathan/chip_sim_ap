@@ -1,123 +1,131 @@
 #include "app.h"
-#include "simulation/simulate.h"
-#include "simulation/circuit.h"
-#include "core/input.h"
 #include "core/event.h"
+#include "core/input.h"
 #include "editor/render.h"
+#include "simulation/circuit.h"
+#include "simulation/simulate.h"
 
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define WINDOW_WIDTH 1080
 #define WINDOW_HEIGHT 720
 
 void initApp(App *app) {
-	u8 sucess = SDL_Init(SDL_INIT_VIDEO);
-	if (!sucess) {
-		fprintf(stderr, "error initializing SDL3");
-		exit(1);
-	}
+  u8 sucess = SDL_Init(SDL_INIT_VIDEO);
+  if (!sucess) {
+    fprintf(stderr, "error initializing SDL3");
+    exit(1);
+  }
 
-	if (!TTF_Init()) {
-		fprintf(stderr, "error initializing SDL3_ttf");
-		exit(1);
-	}
+  if (!TTF_Init()) {
+    fprintf(stderr, "error initializing SDL3_ttf");
+    exit(1);
+  }
 
-	app->font = TTF_OpenFont("asset/ARIAL.ttf", 16);
-	if (!app->font) {
-		fprintf(stderr, "error loading font");
-		exit(1);
-	}
+  app->font = TTF_OpenFont("asset/ARIAL.ttf", 16);
+  if (!app->font) {
+    fprintf(stderr, "error loading font");
+    exit(1);
+  }
 
-	app->running = 1;
-	createWindow(&app->window, newVec2i(WINDOW_WIDTH, WINDOW_HEIGHT));
-	windowSetMinSize(&app->window, newVec2i(500, 300));
+  app->running = 1;
+  createWindow(&app->window, newVec2i(WINDOW_WIDTH, WINDOW_HEIGHT));
+  windowSetMinSize(&app->window, newVec2i(500, 300));
 
-	Input *input = &app->input;
-	initInput(input);
+  Input *input = &app->input;
+  initInput(input);
 
-	app->uiCtx.window = &app->window;
-	app->uiCtx.input = input;
-	app->uiCtx.font = app->font;
+  app->uiCtx.window = &app->window;
+  app->uiCtx.input = input;
+  app->uiCtx.font = app->font;
 
-	app->eventStateObject.editor = &app->editor;
-	app->eventStateObject.ctx = &app->ctx;
-	app->uiCtx.eventStateObject = &app->eventStateObject;
-	initUICtx(&app->uiCtx);
+  app->eventStateObject.editor = &app->editor;
+  app->eventStateObject.ctx = &app->ctx;
+  app->uiCtx.eventStateObject = &app->eventStateObject;
+  initUICtx(&app->uiCtx);
 
-	app->state = ST_EDIT;
-	app->editor.ctx = &app->ctx;
-	app->editor.uiCtx = &app->uiCtx;
-	initEditor(&app->editor);
+  initMenubar(&app->menubar, &app->uiCtx);
 
-	loadTextures(app->window.renderer, &app->textures, app->font);
+  app->state = ST_EDIT;
+  app->editor.ctx = &app->ctx;
+  app->editor.uiCtx = &app->uiCtx;
+  initEditor(&app->editor);
 
-	// init logic Ctx
-	ctxInit(&app->ctx);
-	//app->ctx.circuit.len = 0;
+  loadTextures(app->window.renderer, &app->textures, app->font);
+
+  // init logic Ctx
+  ctxInit(&app->ctx);
+  // app->ctx.circuit.len = 0;
 }
 
 void update(App *app) {
-	updateWindow(&app->window);
+  updateWindow(&app->window);
 
-	switch (app->state) {
-		case ST_NONE:
-			break;
-		case ST_EDIT: {
-			Vec2i viewportSize = app->window.size;
-			viewportSize.y -= app->editor.menubarHeight;
-			app->editor.camera.viewportSize = viewportSize;
-			app->editor.camera.viewportPos = newVec2i(0, app->editor.menubarHeight);
+  switch (app->state) {
+  case ST_NONE:
+    break;
+  case ST_EDIT: {
+    Vec2i viewportSize = app->window.size;
+    viewportSize.y -= app->editor.menubarHeight;
+    app->editor.camera.viewportSize = viewportSize;
+    app->editor.camera.viewportPos = newVec2i(0, app->editor.menubarHeight);
 
-			updateEditor(&app->editor, &app->input);
-			break;
-		}
-	}
+    updateEditor(&app->editor, &app->input);
+    break;
+  }
+  }
 }
 
 void render(App *app) {
-	Ctx *ctx = &app->ctx;
-	SDL_Renderer *renderer = app->window.renderer;
-	UICtx *uiCtx = &app->uiCtx;
+  Ctx *ctx = &app->ctx;
+  SDL_Renderer *renderer = app->window.renderer;
+  UICtx *uiCtx = &app->uiCtx;
 
-	SDL_SetRenderDrawColor(renderer, app->editor.bgColor.r,
-												app->editor.bgColor.g,
-												app->editor.bgColor.b, app->editor.bgColor.a);
-	SDL_RenderClear(renderer);
+  SDL_SetRenderDrawColor(renderer, app->editor.bgColor.r, app->editor.bgColor.g,
+                         app->editor.bgColor.b, app->editor.bgColor.a);
+  SDL_RenderClear(renderer);
 
-	uiBeginRoot(uiCtx);
+  uiBeginRoot(uiCtx);
 
-	switch (app->state) {
-		case ST_NONE:
-			break;
-		case ST_EDIT:
-			renderEditor(renderer, &app->textures, &app->editor);
-			editorUI(uiCtx, &app->editor);
-			break;
-	}
+  // app ui
+  uiSetLayoutCursorPos(uiCtx, 0, 20);
 
-	uiEndRoot(uiCtx);
+  switch (app->state) {
+  case ST_NONE:
+    break;
+  case ST_EDIT:
+    renderEditor(renderer, &app->textures, &app->editor);
+    editorUI(uiCtx, &app->editor);
+    break;
+  }
 
-	SDL_RenderPresent(renderer);
+  // menubar is at top
+  uiSetLayoutCursorPos(uiCtx, 0, 0);
+  menubarUI(&app->menubar, uiCtx);
+
+  uiEndRoot(uiCtx);
+
+  SDL_RenderPresent(renderer);
 }
 
 void closeApp(App *app) {
-	closeInput(&app->input);
-	closeWindow(&app->window);
-	circuitFree(&app->ctx.circuit);
-	SDL_Quit();
+  closeInput(&app->input);
+  closeWindow(&app->window);
+  circuitFree(&app->ctx.circuit);
+  SDL_Quit();
 }
 
 void runApp(App *app) {
-	app->running = 1;
+  app->running = 1;
 
-	while (app->running) {
-		handleEvents(app);
-		update(app);
-		render(app);
-		SDL_Delay(33);
-	}
+  while (app->running) {
+    handleEvents(app);
+    update(app);
+    render(app);
+    SDL_Delay(33);
+  }
 
-	closeApp(app);
+  closeApp(app);
 }
