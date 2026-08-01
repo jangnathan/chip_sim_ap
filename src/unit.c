@@ -1,4 +1,5 @@
 #include "unit.h"
+#include <math.h>
 
 Color newColor(u8 r, u8 g, u8 b, u8 a) {
   Color color;
@@ -142,18 +143,28 @@ u8 cartesianCollideLine(Vec2f p_pos, Vec2f a_pos, Vec2f b_pos,
   } else if (ab.y == 0) {
     x = p_pos.x;
     y = a_pos.y;
-  } else if (ab.x > ab.y) {
+  } else if (abs(ab.x) > abs(ab.y)) {
     float x_coefficient = ab.x + (ab.y * ab.y) / ab.x;
     float constant =
         ab.x * -p_pos.x + ab.y * (ab.y * -a_pos.x / ab.x + a_pos.y - p_pos.y);
     x = -constant / x_coefficient;
     y = (ab.y * (x - a_pos.x)) / ab.x + a_pos.y;
+
+    if (p_pos.x < fminf(a_pos.x, b_pos.x) ||
+        p_pos.x > fmaxf(a_pos.x, b_pos.x)) {
+      return 0;
+    }
   } else {
-	float y_coefficient = ab.y + (ab.x * ab.x) / ab.y;
-	float constant =
-		ab.y * -p_pos.y + ab.x * (ab.x * -a_pos.y / ab.y + a_pos.x - p_pos.x);
-	y = -constant / y_coefficient;
-	x = (ab.x * (y - a_pos.y)) / ab.y + a_pos.x;
+    float y_coefficient = ab.y + (ab.x * ab.x) / ab.y;
+    float constant =
+        ab.y * -p_pos.y + ab.x * (ab.x * -a_pos.y / ab.y + a_pos.x - p_pos.x);
+    y = -constant / y_coefficient;
+    x = (ab.x * (y - a_pos.y)) / ab.y + a_pos.x;
+
+    if (p_pos.y < fminf(a_pos.y, b_pos.y) ||
+        p_pos.y > fmaxf(a_pos.y, b_pos.y)) {
+      return 0;
+    }
   }
 
   // distance between point c and point p must be less than thickness
@@ -161,7 +172,7 @@ u8 cartesianCollideLine(Vec2f p_pos, Vec2f a_pos, Vec2f b_pos,
   Vec2f cp = subtractVec2f(p_pos, c_pos);
 
   if (sumVec2f(squareVec2f(cp)) <= thickness * thickness) {
-	return 1;
+    return 1;
   }
   return 0;
 }

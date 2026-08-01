@@ -261,7 +261,7 @@ void deleteCE(Circuit *circuit, u32 ID) {
 
     // delete connected wires
     // what if multiple wires connected to same pivot
-    for (u32 i = 0; i < circuit->wires.len; i++) {
+    for (u32 i = 1; i < circuit->wires.len; i++) {
       Wire *wire = circuit->wires.array + i;
       if (wire->pivotID1 == typeID || wire->pivotID2 == typeID) {
         deleteCE(circuit, wire->ID);

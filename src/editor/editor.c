@@ -77,24 +77,20 @@ void checkCollisionsCE(Editor *editor, Input *input) {
       return;
     }
   }
-  for (u32 i = 1; i < circuit->wires.len; i++) {
+  // iterate backwards because select top first
+  for (u32 i = circuit->wires.len - 1; i > 0; --i) {
     Wire *wire = circuit->wires.array + i;
     Pivot *pivot1 = circuit->pivots.array + wire->pivotID1;
     Pivot *pivot2 = circuit->pivots.array + wire->pivotID2;
 
-    Vec2f p_pos = vec2ItoF(input->mouse.position);
-    p_pos.x -= (float)editor->camera.viewportSize.x / 2.0f +
-                (float)editor->camera.viewportPos.x;
-    p_pos.y =
-        (float)(editor->camera.viewportSize.y + editor->camera.viewportPos.y) /
-            2.0f -
-        p_pos.y;
+    Vec2f p_pos = vec2ItoF(input->mouse.centerPosition);
 
     Vec2f a_pos = pivot1->position;
     Vec2f b_pos = pivot2->position;
 
     if (cartesianCollideLine(p_pos, a_pos, b_pos, 5.0f)) {
       editor->hoveredCE_ID = wire->ID;
+      printf("hovered wire %d\n", wire->ID);
       return;
     }
   }
