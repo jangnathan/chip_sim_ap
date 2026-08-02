@@ -45,20 +45,26 @@ void drawWire(RendererCtx *renderCtx, Vec2f p1_i, Vec2f p2_i) {
 
   float thickness = 5.0f * camera.zoom;
 
-  float m = -dx / dy;
-  float pmx = thickness / sqrt(1 + m * m);
-  float pmy = m * pmx;
+  float pmy = 0.0f;
+  float pmx = 0.0f;
+  if (fabs(dy) < 0.001f) {
+    pmy = thickness;
+    pmx = 0;
+  } else {
+    float m = -dx / dy;
+    pmx = thickness / sqrt(1 + m * m);
+    pmy = m * pmx;
+  }
 
   Color color = newColor(0, 0, 0, 255);
-  SDL_FColor sdlColor = {color.r / 255, color.g / 255, color.b / 255, color.a / 255};
+  SDL_FColor sdlColor = {color.r / 255, color.g / 255, color.b / 255,
+                         color.a / 255};
 
-  SDL_Vertex vertices[4] = {
-      {{x1 + pmx, y1 + pmy}, sdlColor, {0.0f, 0.0f}},
-      {{x2 + pmx, y2 + pmy}, sdlColor, {1.0f, 0.0f}},
-      {{x2 - pmx, y2 - pmy}, sdlColor, {1.0f, 1.0f}},
-      {{x1 - pmx, y1 - pmy}, sdlColor, {0.0f, 1.0f}}
-  };
-  int indices[6] = { 0, 1, 2, 0, 2, 3 };
+  SDL_Vertex vertices[4] = {{{x1 + pmx, y1 + pmy}, sdlColor, {0.0f, 0.0f}},
+                            {{x2 + pmx, y2 + pmy}, sdlColor, {1.0f, 0.0f}},
+                            {{x2 - pmx, y2 - pmy}, sdlColor, {1.0f, 1.0f}},
+                            {{x1 - pmx, y1 - pmy}, sdlColor, {0.0f, 1.0f}}};
+  int indices[6] = {0, 1, 2, 0, 2, 3};
 
   SDL_RenderGeometry(renderer, NULL, vertices, 4, indices, 6);
 }
@@ -69,7 +75,7 @@ void renderWire(RendererCtx *renderCtx, Circuit *circuit, Wire *wire) {
   }
   Pivot *p1 = getPivotByCEID(circuit, wire->pivotCEID1);
   Pivot *p2 = getPivotByCEID(circuit, wire->pivotCEID2);
-  
+
   drawWire(renderCtx, p1->position, p2->position);
 }
 
