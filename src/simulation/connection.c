@@ -16,7 +16,8 @@ u32 connectionsNew(Connections *connections) {
     }
 
     ElectricState *electricState = connections->array + connectionID;
-    *electricState = 0;
+    electricState->on = 0;
+    electricState->on_next = 0;
 
     return connectionID;
 }

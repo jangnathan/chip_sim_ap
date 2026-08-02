@@ -1,7 +1,10 @@
 #pragma once
 #include "constants.h"
 
-typedef unsigned char ElectricState;
+typedef struct {
+    u8 on;
+    u8 on_next;
+} ElectricState;
 
 typedef struct {
     ElectricState *array;

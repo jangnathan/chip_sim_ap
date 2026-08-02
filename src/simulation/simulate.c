@@ -96,9 +96,8 @@ ElectricState *pivotConnectionState(Ctx *ctx, u32 pivotCEID) {
   return connections->array + connectionID;
 }
 
-ElectricState simpleChipEvalLogic(SimpleChipType type, ElectricState a,
-                                  ElectricState b) {
-  ElectricState result = 0;
+u8 simpleChipEvalLogic(SimpleChipType type, u8 a, u8 b) {
+  u8 result = 0;
 
   switch (type) {
   case AND:
@@ -136,7 +135,7 @@ void simulate(Ctx *ctx) {
   InputChips *inputChips = &circuit->inputChips;
 
   for (u32 i = 0; i < connections->len; i++) {
-    connections->array[i] = 0;
+    connections->array[i].on_next = 0;
   }
 
   for (u32 i = 1; i < inputChips->len; i++) {
@@ -145,30 +144,48 @@ void simulate(Ctx *ctx) {
         pivotConnectionState(ctx, inputChip->pivotCEID_out);
 
     // cannot disable electricity if there is already electricity if not diode
-    if (*electricState == 0) {
-      *electricState = inputChip->out;
+    if (electricState->on_next == 0) {
+      electricState->on_next = inputChip->out;
     }
   }
 
-  SimpleChips *simpleChips = &circuit->simpleChips;
-  for (u32 i = 1; i < simpleChips->len; i++) {
-    SimpleChip *simpleChip = simpleChips->array + i;
-    ElectricState electricStateA =
-        *(ElectricState *)pivotConnectionState(ctx, simpleChip->pivotCEID_A);
-    ElectricState electricStateB;
-    if (simpleChip->type == NOT) {
-      electricStateB = 0;
-    } else {
-      electricStateB =
-          *(ElectricState *)pivotConnectionState(ctx, simpleChip->pivotCEID_B);
+  u8 stable = 0;
+  u16 iteration = 0;
+  while (stable == 0) {
+    stable = 1;
+
+    SimpleChips *simpleChips = &circuit->simpleChips;
+    for (u32 i = 1; i < simpleChips->len; i++) {
+      SimpleChip *simpleChip = simpleChips->array + i;
+      ElectricState *electricStateA =
+          pivotConnectionState(ctx, simpleChip->pivotCEID_A);
+      ElectricState *electricStateB =
+          pivotConnectionState(ctx, simpleChip->pivotCEID_B);
+
+      simpleChip->out = simpleChipEvalLogic(
+          simpleChip->type, electricStateA->on, electricStateB->on);
+
+      ElectricState *electricStateOut =
+          pivotConnectionState(ctx, simpleChip->pivotCEID_out);
+
+      if (electricStateOut->on_next == 0) {
+        electricStateOut->on_next = simpleChip->out;
+      }
     }
 
-    simpleChip->out =
-        simpleChipEvalLogic(simpleChip->type, electricStateA, electricStateB);
+    for (u32 i = 0; i < connections->len; i++) {
+      ElectricState *electricState = connections->array + i;
+      if (electricState->on != electricState->on_next) {
+        electricState->on = electricState->on_next;
+        stable = 0;
+        break;
+      }
+    }
 
-    ElectricState *electricStateOut =
-        pivotConnectionState(ctx, simpleChip->pivotCEID_out);
-    *electricStateOut = simpleChip->out;
+    iteration++;
+    if (iteration > connections->len * 5) {
+      break;
+    }
   }
 }
 void stopSimulation(Ctx *ctx) {}
