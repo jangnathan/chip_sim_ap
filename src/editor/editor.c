@@ -80,8 +80,13 @@ void checkCollisionsCE(Editor *editor, Input *input) {
   // iterate backwards because select top first
   for (u32 i = circuit->wires.len - 1; i > 0; --i) {
     Wire *wire = circuit->wires.array + i;
-    Pivot *pivot1 = circuit->pivots.array + wire->pivotID1;
-    Pivot *pivot2 = circuit->pivots.array + wire->pivotID2;
+
+    if (wire->pivotCEID1 == 0 || wire->pivotCEID2 == 0) {
+      continue;
+    }
+    
+    Pivot *pivot1 = getPivotByCEID(circuit, wire->pivotCEID1);
+    Pivot *pivot2 = getPivotByCEID(circuit, wire->pivotCEID2);
 
     Vec2f p_pos = vec2ItoF(input->mouse.centerPosition);
 
@@ -188,7 +193,7 @@ void updateEditor(Editor *editor, Input *input) {
     if (editor->hoveredCE_ID != 0 && input->mouse.leftClick == 1) {
       if (circuit->array[editor->hoveredCE_ID].type == CE_PIVOT) {
         Wire *wire = circuit->wires.array + ce->typeID;
-        wire->pivotID1 = hoveredCE->typeID;
+        wire->pivotCEID1 = editor->hoveredCE_ID;
         editor->state = EDIT_SELECT_WIRE_PIVOT2;
         editor->editorMessageID = 0;
         printf("Connected pivot1! %d ", editor->hoveredCE_ID);
@@ -215,12 +220,12 @@ void updateEditor(Editor *editor, Input *input) {
     if (editor->hoveredCE_ID != 0 && input->mouse.leftClick == 1) {
       if (circuit->array[editor->hoveredCE_ID].type == CE_PIVOT) {
         Wire *wire = circuit->wires.array + ce->typeID;
-        if (hoveredCE->typeID == wire->pivotID1) {
+        if (editor->hoveredCE_ID == wire->pivotCEID1) {
           editor->editorMessageID = 1;
           editor->editorMessageLastTime = SDL_GetTicks();
           break;
         }
-        wire->pivotID2 = hoveredCE->typeID;
+        wire->pivotCEID2 = editor->hoveredCE_ID;
 
         editor->state = EDIT_NONE;
 

@@ -22,8 +22,8 @@ typedef struct {
 // WIRE
 typedef struct {
   u32 ID;
-  u32 pivotID1;
-  u32 pivotID2;
+  u32 pivotCEID1;
+  u32 pivotCEID2;
 } Wire;
 
 typedef struct {
@@ -57,9 +57,9 @@ typedef struct {
   SimpleChipType type;
   u32 ID;
 
-  u32 pivotID_A;
-  u32 pivotID_B;
-  u32 pivotID_out;
+  u32 pivotCEID_A;
+  u32 pivotCEID_B;
+  u32 pivotCEID_out;
 
   u8 nextOut; // to synchronize
   u8 out;
@@ -86,7 +86,7 @@ typedef struct {
   InputChipType type;
   u32 ID;
 
-  u32 pivotID_out;
+  u32 pivotCEID_out;
 
   u8 out;
 } InputChip;
@@ -133,6 +133,9 @@ typedef struct {
 } Circuit;
 
 // New circuit entity
+u32 pivotIndexFromCEID(Circuit *circuit, u32 pivotCEID);
+Pivot *getPivotByCEID(Circuit *circuit, u32 pivotCEID);
+
 u32 pivotsNew(Circuit *circuit);
 
 u32 wiresNew(Circuit *circuit);

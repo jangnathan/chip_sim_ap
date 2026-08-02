@@ -64,11 +64,11 @@ void drawWire(RendererCtx *renderCtx, Vec2f p1_i, Vec2f p2_i) {
 }
 
 void renderWire(RendererCtx *renderCtx, Circuit *circuit, Wire *wire) {
-  if (wire->pivotID1 == 0 || wire->pivotID2 == 0) {
+  if (wire->pivotCEID1 == 0 || wire->pivotCEID2 == 0) {
     return;
   }
-  Pivot *p1 = circuit->pivots.array + wire->pivotID1;
-  Pivot *p2 = circuit->pivots.array + wire->pivotID2;
+  Pivot *p1 = getPivotByCEID(circuit, wire->pivotCEID1);
+  Pivot *p2 = getPivotByCEID(circuit, wire->pivotCEID2);
   
   drawWire(renderCtx, p1->position, p2->position);
 }
@@ -224,6 +224,10 @@ void renderEditor(SDL_Renderer *renderer, Textures *textures, Editor *editor) {
     drawPivot(&renderCtx, circuit->pivots.array + i);
   }
   for (u32 i = 1; i < circuit->wires.len; i++) {
+    if (circuit->wires.array[i].pivotCEID1 == 0 ||
+        circuit->wires.array[i].pivotCEID2 == 0) {
+      continue;
+    }
     renderWire(&renderCtx, circuit, circuit->wires.array + i);
   }
   for (u32 i = 1; i < circuit->inputChips.len; i++) {
