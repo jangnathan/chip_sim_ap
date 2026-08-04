@@ -55,7 +55,6 @@ install(TARGETS chipsim
 install(DIRECTORY "${CMAKE_SOURCE_DIR}/asset/" DESTINATION share/chipsim/asset)
 
 add_custom_command(TARGET chipsim POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:chipsim>"
     COMMAND ${CMAKE_COMMAND} -E create_symlink
         "${CMAKE_SOURCE_DIR}/asset"
         "$<TARGET_FILE_DIR:chipsim>/asset"
