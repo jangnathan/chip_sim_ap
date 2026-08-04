@@ -82,7 +82,7 @@ typedef struct {
 
 	void *onClickParams;
 	void (*onClick)(void *state, void *params);
-	void (*onHover)(void *state, void *params);
+	void (*onHover)(void *state);
 
 	u8 *isClicked;
 	u8 *isHovered;

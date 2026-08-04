@@ -254,7 +254,7 @@ void circuitFree(Circuit *circuit) {
   free(circuit->simpleChips.array);
 }
 
-void deleteCE(Circuit *circuit, u32 ID) {
+u8 deleteCE(Circuit *circuit, u32 ID) {
   u32 typeID = circuit->array[ID].typeID;
   CircuitEntityType ceType = circuit->array[ID].type;
 
@@ -354,5 +354,5 @@ void deleteCE(Circuit *circuit, u32 ID) {
   // ID now points to replaced
   //circuit->array[ID] = circuit->array[circuit->len];
   circuit->array[replaceCE_ID].typeID = typeID;
-  return;
+  return 0;
 }

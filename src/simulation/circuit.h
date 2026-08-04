@@ -152,4 +152,4 @@ void positionCircuitEntity(Circuit *circuit, CircuitEntity *CircuitEntity,
 void circuitInit(Circuit *circuit);
 void circuitFree(Circuit *circuit);
 
-void deleteCE(Circuit *circuit, u32 ID);
+u8 deleteCE(Circuit *circuit, u32 ID);

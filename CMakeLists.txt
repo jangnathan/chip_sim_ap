@@ -14,6 +14,7 @@ find_package(SDL3_ttf CONFIG REQUIRED)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include_directories(src)
+
 add_executable(chipsim
 src/main.c
 src/app.c
@@ -33,6 +34,7 @@ src/editor/render.c
 src/textures.c
 src/ui.c
 )
+target_compile_options(chipsim PRIVATE -Wincompatible-function-pointer-types)
 
 target_precompile_headers(chipsim PRIVATE
     <string.h>
@@ -48,7 +50,7 @@ target_link_libraries(chipsim PRIVATE SDL3_ttf::SDL3_ttf)
 install(TARGETS chipsim
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
+   ARCHIVE DESTINATION lib
 )
 install(DIRECTORY "${CMAKE_SOURCE_DIR}/asset/" DESTINATION share/chipsim/asset)
 

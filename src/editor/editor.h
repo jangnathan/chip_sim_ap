@@ -74,6 +74,7 @@ typedef struct {
 } Editor;
 
 void initEditor(Editor *editor);
+void initEditorUI(Editor *editor);
 void editorUI(UICtx *ctx, Editor *editor);
 void updateEditor(Editor *editor, Input *input);
 

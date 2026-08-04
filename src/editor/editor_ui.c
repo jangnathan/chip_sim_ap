@@ -132,7 +132,7 @@ void createSimpleChip(void *eventStateObject, void *params_a) {
   editor->state = EDIT_MOVE_CE;
 }
 
-void deleteButtonClicked(void *eventStateObject) {
+void deleteButtonClicked(void *eventStateObject, void *param) {
   EventStateObject *eventStateObj = (EventStateObject *)(eventStateObject);
   Editor *editor = eventStateObj->editor;
 
