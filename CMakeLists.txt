@@ -45,9 +45,23 @@ target_precompile_headers(chipsim PRIVATE
 target_link_libraries(chipsim PRIVATE SDL3::SDL3)
 target_link_libraries(chipsim PRIVATE SDL3_ttf::SDL3_ttf)
 
-install(DIRECTORY "asset/" DESTINATION share/chipsimap)
+install(TARGETS chipsim
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+)
+install(DIRECTORY "${CMAKE_SOURCE_DIR}/asset/" DESTINATION share/chipsim/asset)
+
+add_custom_command(TARGET chipsim POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:chipsim>"
+    COMMAND ${CMAKE_COMMAND} -E create_symlink
+        "${CMAKE_SOURCE_DIR}/asset"
+        "$<TARGET_FILE_DIR:chipsim>/asset"
+    COMMENT "Creating symlink to asset directory"
+)
 
 if(WIN32)
+# Copy DLLs
     add_custom_command(TARGET chipsim POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             $<TARGET_RUNTIME_DLLS:chipsim>

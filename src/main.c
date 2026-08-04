@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main() {
+int main(int argc, char *argv[]) {
   printf("Hello World!");
   // init
   App *app = malloc(sizeof(App));
@@ -21,6 +21,10 @@ int main() {
                                 });
 
   runApp(app);
+
+  /*char h;
+  printf("press any key to exit...");
+  scanf("%c", &h);*/
   free(app);
 
   return 0;
