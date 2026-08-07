@@ -22,19 +22,17 @@ void menubarUI(Menubar *menubar, UICtx *uiCtx) {
                                           .size.x = 16 * 3 + 8,
                                           .size.y = 20 * 2});
 
-  u8 fileButtonHovered = 0;
   uiBeginLayout(uiCtx, &(UILayoutOptions){.padding.t = 2,
                                           .padding.l = 5,
 
                                           .size.x = 16 * 3 + 8,
                                           .size.y = 20,
                                           .bgColor = newColor(200, 200, 200, 1),
-                                          .isHovered = &fileButtonHovered});
+                                          .isHoveredPtr = &menubar->fileButtonHovered});
   uiLabel(uiCtx,
           &(UILabelOptions){.cachedText = &menubar->fileText, .fontSize = 16});
   uiEndLayout(uiCtx);
 
-  u8 fileSubButtonHovered = 0;
   if (menubar->fileSectionActiveDelay > 0) {
     menubar->fileSectionActiveDelay--;
 
@@ -45,15 +43,17 @@ void menubarUI(Menubar *menubar, UICtx *uiCtx) {
                                      .size.x = 16 * 3 + 8,
                                      .size.y = 20,
                                      .bgColor = newColor(200, 200, 200, 1),
-                                     .isHovered = &fileSubButtonHovered});
+                                     .isHoveredPtr = &menubar->fileButtonHovered});
     uiLabel(uiCtx,
             &(UILabelOptions){.cachedText = &menubar->newText, .fontSize = 16});
     uiEndLayout(uiCtx);
   }
 
-  if (fileButtonHovered || fileSubButtonHovered) {
+  if (menubar->fileButtonHovered) {
     menubar->fileSectionActiveDelay = 2;
   }
+  menubar->fileButtonHovered = 0;
+
 
   uiEndLayout(uiCtx);
   // <column/>

@@ -5,6 +5,8 @@ typedef struct {
   UICachedText fileText;
   u8 fileSectionActiveDelay;
 
+  u8 fileButtonHovered;
+
   UICachedText newText;
 } Menubar;
 

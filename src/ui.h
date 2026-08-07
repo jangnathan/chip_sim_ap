@@ -1,7 +1,7 @@
 #pragma once
-#include "unit.h"
 #include "core/input.h"
 #include "core/window.h"
+#include "unit.h"
 
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
@@ -9,61 +9,64 @@
 #define MAX_LAYOUT_STACK 32
 
 typedef enum {
-	UI_VERTICAL,
-	UI_HORIZONTAL,
+  UI_VERTICAL,
+  UI_HORIZONTAL,
 } UIOrientation;
 
 typedef enum {
-	UI_SIZING_NONE = 0,
-	UI_FILL_WIDTH = 1 << 1,
-	UI_FILL_HEIGHT = 1 << 2,
+  UI_SIZING_NONE = 0,
+  UI_FILL_WIDTH = 1 << 1,
+  UI_FILL_HEIGHT = 1 << 2,
 } UISizing;
 
-typedef enum { // by default is top left, cannot have both top and bottom or right and left
-	UI_ALIGN_TOP = 0,
-	UI_ALIGN_RIGHT = 1 << 1,
-	UI_ALIGN_BOTTOM = 1 << 2,
-	UI_ALIGN_LEFT = 0,
+typedef enum { // by default is top left, cannot have both top and bottom or
+               // right and left
+  UI_ALIGN_TOP = 0,
+  UI_ALIGN_RIGHT = 1 << 1,
+  UI_ALIGN_BOTTOM = 1 << 2,
+  UI_ALIGN_LEFT = 0,
 } UIAlignment;
 
 typedef struct {
-	Vec2i cursorPos;
-	Vec2i position;
-	Vec2i size;
-	Vec4i padding;
-	Color bgColor;
-	u32 spacing;
+  Vec2i cursorPos;
+  Vec2i position;
+  Vec2i size;
+  Vec4i padding;
+  Color bgColor;
+  u32 spacing;
 
-	UIOrientation orientation;
-	u8 wrap;
+  UIOrientation orientation;
+  u8 wrap;
 
-	void *onClickParams;
-	void (*onClick)(void *state, void *params);
-	void (*onHover)(void *state);
-
-	u8 *isHovered;
-	u8 *isClicked;
-
-	CursorIcon hoverCursorIcon;
+  CursorIcon hoverCursorIcon;
 } UILayout;
 
 typedef struct {
-	SDL_Texture *x;
+  SDL_Texture *x;
 } UIDefaultIcons;
 
 typedef struct {
-	tWindow *window;
-	TTF_Font *font;
-	Input *input;
+  tWindow *window;
+  TTF_Font *font;
+  Input *input;
 
-	UIDefaultIcons defaultIcons;
+  UIDefaultIcons defaultIcons;
 
-	UILayout layoutStack[MAX_LAYOUT_STACK];
-	u8 layoutDepth;
+  UILayout layoutStack[MAX_LAYOUT_STACK];
+  u8 layoutDepth;
 
-	void *eventStateObject;
+  void *eventStateObject;
 
-	u8 mouseEventsPropagated;
+  void (*onClick)(void *state, void *params);
+  void (*onHover)(void *state, void *params);
+
+  char onClickParams[32]; // buffer size: 32 bytes * 8 = 256 bits
+  char hoverParams[32]; // buffer size: 32 bytes * 8 = 256 bits
+
+  u8 *isClickedPtr;
+  u8 *isHoveredPtr;
+
+  u8 mouseEventsPropagated;
 } UICtx;
 
 void initUICtx(UICtx *ctx);
@@ -73,21 +76,23 @@ UILayout *uiRootLayout(UICtx *ctx);
 
 // layout stack push / pop
 typedef struct {
-	Vec2i size;
-	Vec4i padding;
-	Color bgColor;
-	UIOrientation orientation;
-	UISizing sizing;
-	u32 spacing;
+  Vec2i size;
+  Vec4i padding;
+  Color bgColor;
+  UIOrientation orientation;
+  UISizing sizing;
+  u32 spacing;
 
-	void *onClickParams;
-	void (*onClick)(void *state, void *params);
-	void (*onHover)(void *state);
+  void *onClickParams;
+  void (*onClick)(void *state, void *params);
 
-	u8 *isClicked;
-	u8 *isHovered;
+  void *hoverParams;
+  void (*onHover)(void *state, void *params);
 
-	CursorIcon hoverCursorIcon;
+  u8 *isClickedPtr;
+  u8 *isHoveredPtr;
+
+  CursorIcon hoverCursorIcon;
 } UILayoutOptions;
 
 void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options);
@@ -104,24 +109,26 @@ void uiResetLayoutCursorX(UICtx *ctx);
 #define MAX_TEXT_LEN 128
 
 typedef struct {
-	char text[MAX_TEXT_LEN];
-	SDL_Texture *texture;
-	u8 textLen;
-	Color color;
+  char text[MAX_TEXT_LEN];
+  SDL_Texture *texture;
+  u8 textLen;
+  Color color;
 } UICachedText;
 
 typedef struct {
-	UICachedText *cachedText;
-	u8 fontSize;
+  UICachedText *cachedText;
+  u8 fontSize;
 } UILabelOptions;
 
 void uiLabel(UICtx *ctx, const UILabelOptions *options);
 
 typedef struct {
-	SDL_Texture *texture;
-	Vec2i size;
+  SDL_Texture *texture;
+  Vec2i size;
 } UIDecalOptions;
 void uiDecal(UICtx *ctx, const UIDecalOptions *options);
 
-void setUICachedText(UICachedText *cachedText, SDL_Renderer *renderer, TTF_Font *font, char *text, Color color);
-SDL_Texture *newTextTexture(SDL_Renderer *renderer, char *text, TTF_Font *font, Color color);
+void setUICachedText(UICachedText *cachedText, SDL_Renderer *renderer,
+                     TTF_Font *font, char *text, Color color);
+SDL_Texture *newTextTexture(SDL_Renderer *renderer, char *text, TTF_Font *font,
+                            Color color);

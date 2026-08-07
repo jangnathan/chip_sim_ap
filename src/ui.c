@@ -53,6 +53,7 @@ void initUICtx(UICtx *ctx) {
     fprintf(stderr,
             "UICtx.eventStateObject must be set before calling uiInitCtx()");
   }
+
   ctx->layoutDepth = 1;
 
   generateIcons(ctx);
@@ -68,13 +69,30 @@ void uiBeginRoot(UICtx *ctx) {
   container->spacing = 0;
   ctx->layoutDepth = 1;
 
-  ctx->mouseEventsPropagated = 0;
+  ctx->onClick = NULL;
+  ctx->onHover = NULL;
+
+  ctx->isClickedPtr = NULL;
+  ctx->isHoveredPtr = NULL;
 }
 
 void uiEndRoot(UICtx *ctx) {
   if (ctx->layoutDepth != 1) {
     fprintf(stderr, "not enough end layouts");
     exit(1);
+  }
+  if (ctx->onClick != NULL) {
+    ctx->onClick(ctx->eventStateObject, ctx->onClickParams);
+  }
+  if (ctx->onHover != NULL) {
+    ctx->onHover(ctx->eventStateObject, ctx->hoverParams);
+  }
+
+  if (ctx->isClickedPtr != NULL) {
+    *ctx->isClickedPtr = 1;
+  }
+  if (ctx->isHoveredPtr != NULL) {
+    *ctx->isHoveredPtr = 1;
   }
 }
 
@@ -101,12 +119,6 @@ void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options) {
   layout->padding = options->padding;
   layout->orientation = options->orientation;
   layout->spacing = options->spacing;
-
-  layout->onClickParams = options->onClickParams;
-  layout->onClick = options->onClick;
-  layout->onHover = options->onHover;
-  layout->isClicked = options->isClicked;
-  layout->isHovered = options->isHovered;
 
   layout->hoverCursorIcon = options->hoverCursorIcon;
 
@@ -140,6 +152,30 @@ void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options) {
                            layout->bgColor.b, layout->bgColor.a);
     SDL_RenderFillRect(renderer, &background);
   }
+
+  // handle events
+  Input *input = ctx->input;
+
+  if (collideABB(input->mouse.position, layout->position, layout->size)) {
+    input->mouse.cursorIcon = layout->hoverCursorIcon;
+
+    ctx->isHoveredPtr = options->isHoveredPtr;
+    if (options->onHover != NULL) {
+      ctx->onHover = options->onHover;
+
+      memcpy(ctx->hoverParams, options->hoverParams, sizeof(ctx->hoverParams));
+    }
+
+    if (options->onClick != NULL) {
+      if (input->mouse.leftClick) {
+        ctx->onClick = options->onClick;
+        ctx->isClickedPtr = options->isClickedPtr;
+
+        memcpy(ctx->onClickParams, options->onClickParams,
+               sizeof(ctx->onClickParams));
+      }
+    }
+  }
 }
 
 void uiEndLayout(UICtx *ctx) {
@@ -147,32 +183,7 @@ void uiEndLayout(UICtx *ctx) {
     fprintf(stderr, "too many end layouts");
     exit(1);
   }
-
   ctx->layoutDepth--;
-  UILayout *layout = ctx->layoutStack + ctx->layoutDepth;
-
-  // handle events
-  Input *input = ctx->input;
-
-  if (collideABB(input->mouse.position, layout->position, layout->size) && !ctx->mouseEventsPropagated) {
-    input->mouse.cursorIcon = layout->hoverCursorIcon;
-
-    if (layout->onHover != NULL) {
-      layout->onHover(ctx->eventStateObject);
-    }
-    if (layout->isHovered != NULL) {
-      *layout->isHovered = 1;
-    }
-
-    if (layout->onClick != NULL) {
-      if (input->mouse.leftClick) {
-        layout->onClick(ctx->eventStateObject, layout->onClickParams);
-      }
-    }
-
-    ctx->mouseEventsPropagated = 1;
-    input->mouse.leftClick = 0;
-  }
 }
 
 UILayout *uiThisLayout(UICtx *ctx) {
