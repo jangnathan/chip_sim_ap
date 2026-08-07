@@ -34,7 +34,6 @@ src/editor/render.c
 src/textures.c
 src/ui.c
 )
-target_compile_options(chipsim PRIVATE -Wincompatible-function-pointer-types)
 
 target_precompile_headers(chipsim PRIVATE
     <string.h>
