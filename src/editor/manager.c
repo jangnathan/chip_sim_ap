@@ -1,3 +1,4 @@
+#include "editor/render.h"
 #include "editor/manager.h"
 
 #include <stdlib.h>
