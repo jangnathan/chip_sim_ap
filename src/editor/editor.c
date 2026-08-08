@@ -22,15 +22,6 @@ void editorZoomIn(Editor *editor) {
   editor->collisionStep = 1;
 }
 
-void editorHandleKeypress(Editor *editor, SDL_KeyboardEvent event) {
-  SDL_Scancode code = event.scancode;
-  if (code == editor->zoomInKey) {
-    editorZoomIn(editor);
-  } else if (code == editor->zoomOutKey) {
-    editorZoomOut(editor);
-  }
-}
-
 void checkCollisionsCE(Editor *editor, Input *input) {
   editor->hoveredCE_ID = 0;
   Circuit *circuit = &editor->ctx->circuit;
@@ -84,7 +75,7 @@ void checkCollisionsCE(Editor *editor, Input *input) {
     if (wire->pivotCEID1 == 0 || wire->pivotCEID2 == 0) {
       continue;
     }
-    
+
     Pivot *pivot1 = getPivotByCEID(circuit, wire->pivotCEID1);
     Pivot *pivot2 = getPivotByCEID(circuit, wire->pivotCEID2);
 
@@ -130,6 +121,12 @@ void updateEditor(Editor *editor, Input *input) {
     return;
   }
 
+  if (input->keys[editor->zoomInKey]) {
+    editorZoomIn(editor);
+  } else if (input->keys[editor->zoomOutKey]) {
+    editorZoomOut(editor);
+  }
+
   // temp ce as pointer
   CircuitEntity *ce = circuit->array + editor->tempCE_ID;
   CircuitEntity *hoveredCE = circuit->array + editor->hoveredCE_ID;
@@ -164,13 +161,7 @@ void updateEditor(Editor *editor, Input *input) {
     break;
   }
   case EDIT_MOVE_CE: {
-    Vec2f mousePos = vec2ItoF(input->mouse.position);
-    mousePos.x -= (float)editor->camera.viewportSize.x / 2.0f +
-                  (float)editor->camera.viewportPos.x;
-    mousePos.y =
-        (float)(editor->camera.viewportSize.y + editor->camera.viewportPos.y) /
-            2.0f -
-        mousePos.y;
+    Vec2f mousePos = vec2ItoF(input->mouse.centerPosition);
 
     Vec2f pos =
         translateVec2f(editor->camera.position,
@@ -208,7 +199,7 @@ void updateEditor(Editor *editor, Input *input) {
                       newColor(0, 0, 0, 255));
     } else if (editor->editorMessageID == 1) {
       setUICachedText(&editor->editorMessage, uiCtx->window->renderer,
-                      uiCtx->font, "Cannot set pivot2 to same as pivot1",
+                      uiCtx->font, "cannot connect to the same pivot twice",
                       newColor(255, 0, 0, 255));
 
       u32 current_time = SDL_GetTicks();
@@ -261,6 +252,4 @@ void initEditor(Editor *editor) {
   // keys control
   editor->zoomOutKey = SDL_SCANCODE_MINUS;
   editor->zoomInKey = SDL_SCANCODE_EQUALS;
-
-  initEditorUI(editor);
 }

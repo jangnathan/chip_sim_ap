@@ -71,6 +71,8 @@ void uiBeginRoot(UICtx *ctx) {
 
   ctx->onClick = NULL;
   ctx->onHover = NULL;
+  ctx->onClickParams[0] = '\0';
+  ctx->hoverParams[0] = '\0';
 
   ctx->isClickedPtr = NULL;
   ctx->isHoveredPtr = NULL;
@@ -163,7 +165,10 @@ void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options) {
     if (options->onHover != NULL) {
       ctx->onHover = options->onHover;
 
-      memcpy(ctx->hoverParams, options->hoverParams, sizeof(ctx->hoverParams));
+      if (options->hoverParams != NULL) {
+        memcpy(ctx->hoverParams, options->hoverParams,
+               sizeof(ctx->hoverParams));
+      }
     }
 
     if (options->onClick != NULL) {
@@ -171,8 +176,10 @@ void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options) {
         ctx->onClick = options->onClick;
         ctx->isClickedPtr = options->isClickedPtr;
 
-        memcpy(ctx->onClickParams, options->onClickParams,
-               sizeof(ctx->onClickParams));
+        if (options->onClickParams != NULL) {
+          memcpy(ctx->onClickParams, options->onClickParams,
+                 sizeof(ctx->onClickParams));
+        }
       }
     }
   }

@@ -12,14 +12,6 @@ int main(int argc, char *argv[]) {
   App *app = malloc(sizeof(App));
   initApp(app);
 
-  Ctx *ctx = &app->ctx;
-  Circuit *circuit = &ctx->circuit;
-
-  u32 a = inputChipsNew(circuit, &(InputChipOptions){
-	.type = SWITCH,
-	.position = newVec2f(0, 0)
-                                });
-
   runApp(app);
 
   /*char h;

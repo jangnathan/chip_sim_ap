@@ -9,11 +9,11 @@ typedef struct {
 } RendererCtx;
 
 SDL_FRect createRenderRect(Camera camera, float x, float y, float width,
-                           float height) {
+			   float height) {
   Vec2i screenPos = world2screenVec2i(camera, newVec2f(x, y));
   SDL_FRect rect = {screenPos.x - width * camera.zoom / 2,
-                    screenPos.y - height * camera.zoom / 2, width * camera.zoom,
-                    height * camera.zoom};
+		    screenPos.y - height * camera.zoom / 2, width * camera.zoom,
+		    height * camera.zoom};
   return rect;
 }
 
@@ -58,12 +58,12 @@ void drawWire(RendererCtx *renderCtx, Vec2f p1_i, Vec2f p2_i) {
 
   Color color = newColor(0, 0, 0, 255);
   SDL_FColor sdlColor = {color.r / 255, color.g / 255, color.b / 255,
-                         color.a / 255};
+			 color.a / 255};
 
   SDL_Vertex vertices[4] = {{{x1 + pmx, y1 + pmy}, sdlColor, {0.0f, 0.0f}},
-                            {{x2 + pmx, y2 + pmy}, sdlColor, {1.0f, 0.0f}},
-                            {{x2 - pmx, y2 - pmy}, sdlColor, {1.0f, 1.0f}},
-                            {{x1 - pmx, y1 - pmy}, sdlColor, {0.0f, 1.0f}}};
+			    {{x2 + pmx, y2 + pmy}, sdlColor, {1.0f, 0.0f}},
+			    {{x2 - pmx, y2 - pmy}, sdlColor, {1.0f, 1.0f}},
+			    {{x1 - pmx, y1 - pmy}, sdlColor, {0.0f, 1.0f}}};
   int indices[6] = {0, 1, 2, 0, 2, 3};
 
   SDL_RenderGeometry(renderer, NULL, vertices, 4, indices, 6);
@@ -188,25 +188,26 @@ void renderSimpleChip(RendererCtx *renderCtx, SimpleChip *simpleChip) {
 // GRID
 
 void renderGrid(SDL_Renderer *renderer, Editor *editor, float x, float y,
-                float w, float h) {
+		float w, float h) {
   SDL_SetRenderDrawColor(renderer, 180, 180, 180, editor->bgColor.a);
 
-  for (u16 i = 1; i < h / editor->gridSize; i++) {
+  for (u16 i = 1; i < h / editor->gridSize / editor->camera.zoom; i++) {
     // line across x axis
-    SDL_FRect lineX = {0,
-                       i * editor->gridSize -
-                           ((i32)editor->camera.position.y % editor->gridSize) *
-                               editor->camera.zoom +
-                           y,
-                       w, 1.0f};
+    SDL_FRect lineX = {
+	0,
+	((i * editor->gridSize +
+	  ((i32)editor->camera.position.y % editor->gridSize)) *
+	     editor->camera.zoom +
+	 y),
+	w, 1.0f};
     SDL_RenderFillRect(renderer, &lineX);
   }
-  for (u16 i = 1; i < w / editor->gridSize; i++) {
-    SDL_FRect lineY = {i * editor->gridSize -
-                           ((i32)editor->camera.position.x % editor->gridSize) *
-                               editor->camera.zoom +
-                           x,
-                       y, 1.0f, h};
+  for (u16 i = 1; i < w / editor->gridSize / editor->camera.zoom; i++) {
+    SDL_FRect lineY = {(i * editor->gridSize -
+			((i32)editor->camera.position.x % editor->gridSize)) *
+			       editor->camera.zoom +
+			   x,
+		       y, 1.0f, h};
     SDL_RenderFillRect(renderer, &lineY);
   }
 }
@@ -222,8 +223,8 @@ void renderEditor(SDL_Renderer *renderer, Textures *textures, Editor *editor) {
 
   Color bgColor = editor->bgColor;
 
-  renderGrid(renderer, editor, 0, (float)editor->menubarHeight,
-             (float)camera.viewportSize.x, (float)camera.viewportSize.y);
+  renderGrid(renderer, editor, 0, 0, (float)camera.viewportSize.x,
+	     (float)camera.viewportSize.y);
 
   // render circuit
   for (u32 i = 1; i < circuit->pivots.len; i++) {
@@ -231,7 +232,7 @@ void renderEditor(SDL_Renderer *renderer, Textures *textures, Editor *editor) {
   }
   for (u32 i = 1; i < circuit->wires.len; i++) {
     if (circuit->wires.array[i].pivotCEID1 == 0 ||
-        circuit->wires.array[i].pivotCEID2 == 0) {
+	circuit->wires.array[i].pivotCEID2 == 0) {
       continue;
     }
     renderWire(&renderCtx, circuit, circuit->wires.array + i);
@@ -245,8 +246,8 @@ void renderEditor(SDL_Renderer *renderer, Textures *textures, Editor *editor) {
 
   if (editor->selectBoxActive) {
     SDL_FRect box = {editor->selectBoxPos.x - editor->selectBoxSize.x / 2,
-                     editor->selectBoxPos.y - editor->selectBoxSize.y / 2,
-                     editor->selectBoxSize.x, editor->selectBoxSize.y};
+		     editor->selectBoxPos.y - editor->selectBoxSize.y / 2,
+		     editor->selectBoxSize.x, editor->selectBoxSize.y};
     SDL_SetRenderDrawColor(renderer, 50, 50, 255, 0);
     SDL_RenderRect(renderer, &box);
   }

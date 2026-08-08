@@ -47,6 +47,10 @@ void updateInput(Input *input) {
 	}
 
 	input->mouse.cursorIcon = CURSOR_DEFAULT;
+
+	for (u16 i = 0; i < 256; i++) {
+		input->keys[i] = 0x00;
+	}
 }
 
 void closeInput(Input *input) {

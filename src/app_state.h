@@ -1,6 +1,7 @@
 #pragma once
 
 #include "editor/editor.h"
+#include "editor/manager.h"
 #include "simulation/ctx.h"
 
 typedef enum {
@@ -9,9 +10,5 @@ typedef enum {
 } AppState;
 
 typedef struct {
-    Editor *editor;
-    Ctx *ctx;
-
-    // params
-    u32 simpleChipUI_i;
+    EditorManager *manager;
 } EventStateObject;

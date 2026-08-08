@@ -41,22 +41,19 @@ void initApp(App *app) {
   app->uiCtx.input = input;
   app->uiCtx.font = app->font;
 
-  app->eventStateObject.editor = &app->editor;
-  app->eventStateObject.ctx = &app->ctx;
+  app->eventStateObject.manager = &app->editorManager;
   app->uiCtx.eventStateObject = &app->eventStateObject;
   initUICtx(&app->uiCtx);
 
   initMenubar(&app->menubar, &app->uiCtx);
 
   app->state = ST_EDIT;
-  app->editor.ctx = &app->ctx;
-  app->editor.uiCtx = &app->uiCtx;
-  initEditor(&app->editor);
+  editorManagerInit(&app->editorManager, &app->uiCtx);
+
+  editorUI_init(&app->uiCtx, &app->editorUI);
 
   loadTextures(app->window.renderer, &app->textures, app->font);
 
-  // init logic Ctx
-  ctxInit(&app->ctx);
   // app->ctx.circuit.len = 0;
 }
 
@@ -68,23 +65,17 @@ void update(App *app) {
     break;
   case ST_EDIT: {
     Vec2i viewportSize = app->window.size;
-    viewportSize.y -= app->editor.menubarHeight;
-    app->editor.camera.viewportSize = viewportSize;
-    app->editor.camera.viewportPos = newVec2i(0, app->editor.menubarHeight);
-
-    updateEditor(&app->editor, &app->input);
+    editorManagerUpdate(&app->editorManager, &app->input, viewportSize);
     break;
   }
   }
 }
 
 void render(App *app) {
-  Ctx *ctx = &app->ctx;
   SDL_Renderer *renderer = app->window.renderer;
   UICtx *uiCtx = &app->uiCtx;
 
-  SDL_SetRenderDrawColor(renderer, app->editor.bgColor.r, app->editor.bgColor.g,
-                         app->editor.bgColor.b, app->editor.bgColor.a);
+  SDL_SetRenderDrawColor(renderer, 225, 225, 225, 255);
   SDL_RenderClear(renderer);
 
   uiBeginRoot(uiCtx);
@@ -96,8 +87,7 @@ void render(App *app) {
   case ST_NONE:
     break;
   case ST_EDIT:
-    renderEditor(renderer, &app->textures, &app->editor);
-    editorUI(uiCtx, &app->editor);
+    editorManagerRender(renderer, &app->textures, &app->editorManager, &app->editorUI, uiCtx);
     break;
   }
 
@@ -113,7 +103,8 @@ void render(App *app) {
 void closeApp(App *app) {
   closeInput(&app->input);
   closeWindow(&app->window);
-  circuitFree(&app->ctx.circuit);
+  editorManagerFree(&app->editorManager);
+
   SDL_Quit();
 }
 

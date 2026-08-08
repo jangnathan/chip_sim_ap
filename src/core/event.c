@@ -3,29 +3,6 @@
 #include "ui.h"
 #include <stdio.h>
 
-void handleKeyPress(App *app, SDL_KeyboardEvent event) {
-  /* OLD
-  if (app->ui.activeTextInput < textInputNone) {
-          UITextInput *textInput = app->ui.textInputs +
-  (u32)app->ui.activeTextInput;
-
-          textInput->text[textInput->textLen] = '\0'; // null terminate
-
-          // convert keycode to add text to the active text input
-
-          setUITextInputText(app->renderer, app->font, textInput, "hello");
-          return;
-  }*/
-
-  switch (app->state) {
-  case ST_NONE:
-    break;
-  case ST_EDIT:
-    editorHandleKeypress(&app->editor, event);
-    break;
-  }
-}
-
 void handleEvents(App *app) {
   Input *input = &app->input;
   updateInput(input);
@@ -64,7 +41,10 @@ void handleEvents(App *app) {
     case SDL_EVENT_KEY_DOWN:
       if (event.key.repeat) {
       } else {
-        handleKeyPress(app, event.key);
+        SDL_Scancode code = event.key.scancode;
+        if (code < 256) {
+          input->keys[code] = 0x01;
+        }
       }
       break;
     default:
