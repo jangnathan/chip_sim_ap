@@ -22,9 +22,7 @@ typedef enum {
 typedef struct {
   EditState state;
   Ctx *ctx;
-
-  // ui
-  UICtx *uiCtx;
+  u16 ctxID;
 
   UICachedText editorMessage;
 
@@ -62,7 +60,7 @@ typedef struct {
 } Editor;
 
 void initEditor(Editor *editor);
-void updateEditor(Editor *editor, Input *input);
+void updateEditor(Editor *editor, Input *input, UICtx *uiCtx);
 
 void editorHandleKeypress(Editor *editor, SDL_KeyboardEvent event);
 

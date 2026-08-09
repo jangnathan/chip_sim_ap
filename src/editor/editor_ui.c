@@ -88,7 +88,6 @@ void createWire(void *eventStateObject, void *params) {
     return;
 
   Ctx *ctx = editor->ctx;
-  UICtx *uiCtx = editor->uiCtx;
   Circuit *circuit = &ctx->circuit;
   Wires *wires = &circuit->wires;
 
@@ -106,7 +105,6 @@ void createSwitchChip(void *eventStateObject, void *params) {
     return;
 
   Ctx *ctx = editor->ctx;
-  UICtx *uiCtx = editor->uiCtx;
   Circuit *circuit = &ctx->circuit;
 
   editor->tempCE_ID =
@@ -129,7 +127,6 @@ void createSimpleChip(void *eventStateObject, void *params_a) {
     return;
 
   Ctx *ctx = editor->ctx;
-  UICtx *uiCtx = editor->uiCtx;
   Circuit *circuit = &ctx->circuit;
 
   editor->tempCE_ID =

@@ -17,11 +17,15 @@ typedef struct {
     u16 editorsLen;
     u16 editorsSize;
 
+    UICachedText cachedText[16];
+
     i32 activeEditorIdx;
 } EditorManager;
 
 void editorManagerInit(EditorManager *manager, UICtx *uiCtx);
 void editorManagerRender(SDL_Renderer *renderer, Textures *textures, EditorManager *manager, EditorUI *editorUI, UICtx *uiCtx);
-void editorManagerUpdate(EditorManager *manager, Input *input, Vec2i windowSize);
+void editorManagerUpdate(EditorManager *manager, Input *input, UICtx *uiCtx, Vec2i windowSize);
+
+u16 editorManagerAddEditor(EditorManager *manager);
 
 void editorManagerFree(EditorManager *manager);

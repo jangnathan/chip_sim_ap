@@ -54,6 +54,7 @@ void initApp(App *app) {
 
   loadTextures(app->window.renderer, &app->textures, app->font);
 
+  printf("All initialized\n");
   // app->ctx.circuit.len = 0;
 }
 
@@ -65,7 +66,7 @@ void update(App *app) {
     break;
   case ST_EDIT: {
     Vec2i viewportSize = app->window.size;
-    editorManagerUpdate(&app->editorManager, &app->input, viewportSize);
+    editorManagerUpdate(&app->editorManager, &app->input, &app->uiCtx, viewportSize);
     break;
   }
   }

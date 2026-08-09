@@ -92,9 +92,8 @@ void checkCollisionsCE(Editor *editor, Input *input) {
   }
 }
 
-void updateEditor(Editor *editor, Input *input) {
+void updateEditor(Editor *editor, Input *input, UICtx *uiCtx) {
   Circuit *circuit = &editor->ctx->circuit;
-  UICtx *uiCtx = editor->uiCtx;
 
   editor->collisionStep = input->mouse.positionUpdated;
   if (editor->collisionStep) {
@@ -113,10 +112,10 @@ void updateEditor(Editor *editor, Input *input) {
 
     if (input->mouse.leftHeld) {
       editor->camera.position = translateVec2f(
-          editor->camera.oldPosition,
-          scaleVec2f(vec2ItoF(subtractVec2i(input->mouse.oldCenterPosition,
-                                            input->mouse.centerPosition)),
-                     1.0f / editor->camera.zoom));
+	  editor->camera.oldPosition,
+	  scaleVec2f(vec2ItoF(subtractVec2i(input->mouse.oldCenterPosition,
+					    input->mouse.centerPosition)),
+		     1.0f / editor->camera.zoom));
     }
     return;
   }
@@ -164,8 +163,8 @@ void updateEditor(Editor *editor, Input *input) {
     Vec2f mousePos = vec2ItoF(input->mouse.centerPosition);
 
     Vec2f pos =
-        translateVec2f(editor->camera.position,
-                       scaleVec2f(mousePos, 1.0f / editor->camera.zoom));
+	translateVec2f(editor->camera.position,
+		       scaleVec2f(mousePos, 1.0f / editor->camera.zoom));
 
     positionCircuitEntity(circuit, circuit->array + editor->tempCE_ID, pos);
 
@@ -178,16 +177,16 @@ void updateEditor(Editor *editor, Input *input) {
   }
   case EDIT_CREATE_WIRE: {
     setUICachedText(&editor->editorMessage, uiCtx->window->renderer,
-                    uiCtx->font, "select a pivot to bind to",
-                    newColor(0, 0, 0, 255));
+		    uiCtx->font, "select a pivot to bind to",
+		    newColor(0, 0, 0, 255));
 
     if (editor->hoveredCE_ID != 0 && input->mouse.leftClick == 1) {
       if (circuit->array[editor->hoveredCE_ID].type == CE_PIVOT) {
-        Wire *wire = circuit->wires.array + ce->typeID;
-        wire->pivotCEID1 = editor->hoveredCE_ID;
-        editor->state = EDIT_SELECT_WIRE_PIVOT2;
-        editor->editorMessageID = 0;
-        printf("Connected pivot1! %d ", editor->hoveredCE_ID);
+	Wire *wire = circuit->wires.array + ce->typeID;
+	wire->pivotCEID1 = editor->hoveredCE_ID;
+	editor->state = EDIT_SELECT_WIRE_PIVOT2;
+	editor->editorMessageID = 0;
+	printf("Connected pivot1! %d ", editor->hoveredCE_ID);
       }
     }
     break;
@@ -195,32 +194,32 @@ void updateEditor(Editor *editor, Input *input) {
   case EDIT_SELECT_WIRE_PIVOT2: {
     if (editor->editorMessageID == 0) {
       setUICachedText(&editor->editorMessage, uiCtx->window->renderer,
-                      uiCtx->font, "select a 2nd pivot to bind to",
-                      newColor(0, 0, 0, 255));
+		      uiCtx->font, "select a 2nd pivot to bind to",
+		      newColor(0, 0, 0, 255));
     } else if (editor->editorMessageID == 1) {
       setUICachedText(&editor->editorMessage, uiCtx->window->renderer,
-                      uiCtx->font, "cannot connect to the same pivot twice",
-                      newColor(255, 0, 0, 255));
+		      uiCtx->font, "cannot connect to the same pivot twice",
+		      newColor(255, 0, 0, 255));
 
       u32 current_time = SDL_GetTicks();
       if ((current_time - editor->editorMessageLastTime) / 1000.0f > 1) {
-        editor->editorMessageID = 0;
+	editor->editorMessageID = 0;
       }
     }
 
     if (editor->hoveredCE_ID != 0 && input->mouse.leftClick == 1) {
       if (circuit->array[editor->hoveredCE_ID].type == CE_PIVOT) {
-        Wire *wire = circuit->wires.array + ce->typeID;
-        if (editor->hoveredCE_ID == wire->pivotCEID1) {
-          editor->editorMessageID = 1;
-          editor->editorMessageLastTime = SDL_GetTicks();
-          break;
-        }
-        wire->pivotCEID2 = editor->hoveredCE_ID;
+	Wire *wire = circuit->wires.array + ce->typeID;
+	if (editor->hoveredCE_ID == wire->pivotCEID1) {
+	  editor->editorMessageID = 1;
+	  editor->editorMessageLastTime = SDL_GetTicks();
+	  break;
+	}
+	wire->pivotCEID2 = editor->hoveredCE_ID;
 
-        editor->state = EDIT_NONE;
+	editor->state = EDIT_NONE;
 
-        printf("Connected pivot2! %d ", editor->hoveredCE_ID);
+	printf("Connected pivot2! %d ", editor->hoveredCE_ID);
       }
     }
     break;

@@ -1,4 +1,6 @@
 #include "app_menubar.h"
+#include "editor/manager.h"
+#include "app_state.h"
 #include "constants.h"
 
 void initMenubar(Menubar *menubar, UICtx *ctx) {
@@ -8,6 +10,13 @@ void initMenubar(Menubar *menubar, UICtx *ctx) {
                   newColor(0, 0, 0, 255));
 
   menubar->fileSectionActiveDelay = 0;
+}
+
+void menubarNewClicked(void *eventStateObject, void *param) {
+  EventStateObject *evo = (EventStateObject*)eventStateObject;
+  EditorManager *manager = evo->manager;
+
+  editorManagerAddEditor(manager);
 }
 
 void menubarUI(Menubar *menubar, UICtx *uiCtx) {
@@ -43,6 +52,7 @@ void menubarUI(Menubar *menubar, UICtx *uiCtx) {
                                      .size.x = 16 * 3 + 8,
                                      .size.y = 20,
                                      .bgColor = newColor(200, 200, 200, 1),
+                                     .onClick = &menubarNewClicked,
                                      .isHoveredPtr = &menubar->fileButtonHovered});
     uiLabel(uiCtx,
             &(UILabelOptions){.cachedText = &menubar->newText, .fontSize = 16});
