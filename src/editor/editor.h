@@ -24,6 +24,8 @@ typedef struct {
   Ctx *ctx;
   u16 ctxID;
 
+  u8 isTab;
+
   UICachedText editorMessage;
 
   u8 editorMessageID;

@@ -16,7 +16,8 @@ void menubarNewClicked(void *eventStateObject, void *param) {
   EventStateObject *evo = (EventStateObject*)eventStateObject;
   EditorManager *manager = evo->manager;
 
-  editorManagerAddEditor(manager);
+  u16 ctxID = editorManagerAddCtx(manager);
+  editorManagerAddEditor(manager, ctxID);
 }
 
 void menubarUI(Menubar *menubar, UICtx *uiCtx) {

@@ -1,6 +1,6 @@
-#include "editor/render.h"
 #include "editor/manager.h"
 #include "app_state.h"
+#include "editor/render.h"
 
 #include <stdlib.h>
 
@@ -13,13 +13,26 @@ void editorManagerInit(EditorManager *manager, UICtx *uiCtx) {
   manager->editorsLen = 0;
   manager->editorsSize = 4;
 
-  manager->activeEditorIdx = editorManagerAddEditor(manager);
+  u16 ctxID = editorManagerAddCtx(manager);
+  manager->activeEditorIdx = editorManagerAddEditor(manager, ctxID);
 }
 
 void closeTab(void *eventStateObject, void *param) {
+  EventStateObject *eso = (EventStateObject *)eventStateObject;
+  EditorManager *manager = eso->manager;
   u32 tabID = *((u32 *)param);
 
-  printf("Close tab: %d\n", tabID);
+  if (manager->editorsLen <= 1) {
+    return;
+  }
+
+  manager->editors[tabID].isTab = 0;
+  editorManagerDeleteEditor(manager, tabID);
+  editorManagerDeleteCtx(manager, tabID);
+  // editor order is shifted, no need to redefine unless
+  if (manager->activeEditorIdx >= tabID) {
+    manager->activeEditorIdx = manager->activeEditorIdx - 1;
+  }
 }
 
 void switchToTab(void *eventStateObject, void *param) {
@@ -56,6 +69,9 @@ void editorManagerRender(SDL_Renderer *renderer, Textures *textures,
 
   // tabs
   for (u32 i = 0; i < manager->editorsLen; i++) {
+    if (!manager->editors[i].isTab) {
+      continue;
+    }
     setUICachedText(manager->cachedText + i, uiCtx->window->renderer,
 		    uiCtx->font, "new tab", newColor(0, 0, 0, 255));
 
@@ -113,15 +129,18 @@ void updateEditorsCtx(EditorManager *manager) {
   }
 }
 
-u16 editorManagerAddEditor(EditorManager *manager) {
-  u16 newEditorID = manager->editorsLen;
-  manager->editorsLen++;
-  if (manager->editorsLen >= manager->editorsSize) {
-    manager->editorsSize = manager->editorsSize * 2;
-    manager->editors =
-	realloc(manager->editors, sizeof(Editor) * manager->editorsSize);
+u8 editorManagerDeleteCtx(EditorManager *manager, u16 ID) {
+  manager->ctxArrayLen--;
+  manager->ctxArray[ID] = manager->ctxArray[manager->ctxArrayLen];
+}
+u8 editorManagerDeleteEditor(EditorManager *manager, u16 ID) {
+  manager->editorsLen--;
+  for (u16 i = ID; i < manager->editorsLen; i++) {
+    manager->editors[i] = manager->editors[i+1];
   }
+}
 
+u16 editorManagerAddCtx(EditorManager *manager) {
   u16 newCtxID = manager->ctxArrayLen;
   manager->ctxArrayLen++;
   if (manager->ctxArrayLen >= manager->ctxArraySize) {
@@ -132,10 +151,24 @@ u16 editorManagerAddEditor(EditorManager *manager) {
     updateEditorsCtx(manager);
   }
 
-  ctxInit(manager->ctxArray + newCtxID);
+  return newCtxID;
+}
 
-  manager->editors[newEditorID].ctxID = newCtxID;
-  manager->editors[newEditorID].ctx = manager->ctxArray + newCtxID;
+u16 editorManagerAddEditor(EditorManager *manager, u16 ctxID) {
+  u16 newEditorID = manager->editorsLen;
+  manager->editorsLen++;
+  if (manager->editorsLen >= manager->editorsSize) {
+    manager->editorsSize = manager->editorsSize * 2;
+    manager->editors =
+	realloc(manager->editors, sizeof(Editor) * manager->editorsSize);
+  }
+
+  ctxInit(manager->ctxArray + ctxID);
+
+  Editor *editor = manager->editors + newEditorID;
+  editor->ctxID = ctxID;
+  editor->ctx = manager->ctxArray + ctxID;
+  editor->isTab = 1;
   initEditor(manager->editors + newEditorID);
 
   return newEditorID;
