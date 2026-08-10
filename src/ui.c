@@ -3,7 +3,7 @@
 #include <string.h>
 
 SDL_Texture *newTextTexture(SDL_Renderer *renderer, char *text, TTF_Font *font,
-                            Color color) {
+			    Color color) {
   SDL_Surface *surface;
   SDL_Color sdl_color = {color.r, color.g, color.b, color.a};
   surface = TTF_RenderText_Blended(font, text, 0, sdl_color);
@@ -19,7 +19,7 @@ void generateIcons(UICtx *ctx) {
 
   // X Icon
   icons->x = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888,
-                               SDL_TEXTUREACCESS_TARGET, 32, 32);
+			       SDL_TEXTUREACCESS_TARGET, 32, 32);
 
   SDL_SetRenderTarget(renderer, icons->x);
   // clear texture to transparent
@@ -51,7 +51,7 @@ void initUICtx(UICtx *ctx) {
   }
   if (ctx->eventStateObject == NULL) {
     fprintf(stderr,
-            "UICtx.eventStateObject must be set before calling uiInitCtx()");
+	    "UICtx.eventStateObject must be set before calling uiInitCtx()");
   }
 
   ctx->layoutDepth = 1;
@@ -111,10 +111,9 @@ void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options) {
   ctx->layoutDepth++;
 
   layout->size = options->size;
-
   if (options->sizing & UI_FILL_WIDTH) {
     layout->size.x =
-        prevLayout->size.x - (prevLayout->cursorPos.x - prevLayout->position.x);
+	prevLayout->size.x - (prevLayout->cursorPos.x - prevLayout->position.x);
   }
 
   layout->position = prevLayout->cursorPos;
@@ -127,7 +126,7 @@ void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options) {
   // adjust cursor position
 
   layout->cursorPos = newVec2i(layout->position.x + layout->padding.l,
-                               layout->position.y + layout->padding.t);
+			       layout->position.y + layout->padding.t);
 
   switch (prevLayout->orientation) {
   case UI_HORIZONTAL:
@@ -147,11 +146,11 @@ void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options) {
     layout->bgColor = options->bgColor;
 
     SDL_FRect background = {(float)layout->position.x,
-                            (float)layout->position.y, (float)layout->size.x,
-                            (float)layout->size.y};
+			    (float)layout->position.y, (float)layout->size.x,
+			    (float)layout->size.y};
 
     SDL_SetRenderDrawColor(renderer, layout->bgColor.r, layout->bgColor.g,
-                           layout->bgColor.b, layout->bgColor.a);
+			   layout->bgColor.b, layout->bgColor.a);
     SDL_RenderFillRect(renderer, &background);
   }
 
@@ -162,24 +161,25 @@ void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options) {
     input->mouse.cursorIcon = layout->hoverCursorIcon;
 
     ctx->isHoveredPtr = options->isHoveredPtr;
+
     if (options->onHover != NULL) {
       ctx->onHover = options->onHover;
 
       if (options->hoverParams != NULL) {
-        memcpy(ctx->hoverParams, options->hoverParams,
-               sizeof(ctx->hoverParams));
+	memcpy(ctx->hoverParams, options->hoverParams,
+	       sizeof(ctx->hoverParams));
       }
     }
 
     if (options->onClick != NULL) {
       if (input->mouse.leftClick) {
-        ctx->onClick = options->onClick;
-        ctx->isClickedPtr = options->isClickedPtr;
+	ctx->onClick = options->onClick;
+	ctx->isClickedPtr = options->isClickedPtr;
 
-        if (options->onClickParams != NULL) {
-          memcpy(ctx->onClickParams, options->onClickParams,
-                 sizeof(ctx->onClickParams));
-        }
+	if (options->onClickParams != NULL) {
+	  memcpy(ctx->onClickParams, options->onClickParams,
+		 sizeof(ctx->onClickParams));
+	}
       }
     }
   }
@@ -235,7 +235,7 @@ void uiLabel(UICtx *ctx, const UILabelOptions *options) {
   float width = options->cachedText->textLen * options->fontSize * 0.5f;
 
   SDL_FRect dest = {(float)layout->cursorPos.x, (float)layout->cursorPos.y,
-                    width, (float)options->fontSize};
+		    width, (float)options->fontSize};
   SDL_RenderTexture(renderer, options->cachedText->texture, NULL, &dest);
 
   switch (layout->orientation) {
@@ -255,7 +255,7 @@ void uiDecal(UICtx *ctx, const UIDecalOptions *options) {
   UILayout *layout = ctx->layoutStack + ctx->layoutDepth - 1;
 
   SDL_FRect dest = {(float)layout->cursorPos.x, (float)layout->cursorPos.y,
-                    (float)options->size.x, (float)options->size.y};
+		    (float)options->size.x, (float)options->size.y};
   SDL_RenderTexture(renderer, options->texture, NULL, &dest);
 
   switch (layout->orientation) {
@@ -271,7 +271,7 @@ void uiDecal(UICtx *ctx, const UIDecalOptions *options) {
 }
 
 void setUICachedText(UICachedText *cachedText, SDL_Renderer *renderer,
-                     TTF_Font *font, char *text, Color color) {
+		     TTF_Font *font, char *text, Color color) {
   u8 textLen = strlen(text);
   if (textLen > MAX_TEXT_LEN) {
     fprintf(stderr, "");

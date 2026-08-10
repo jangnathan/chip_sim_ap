@@ -39,6 +39,8 @@ typedef struct {
   u8 wrap;
 
   CursorIcon hoverCursorIcon;
+
+  u32 tempID;
 } UILayout;
 
 typedef struct {
