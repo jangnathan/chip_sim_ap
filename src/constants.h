@@ -7,3 +7,5 @@ typedef uint32_t u32;
 typedef uint64_t u64;
 typedef unsigned char u8;
 typedef char i8;
+
+#define MACHINE_IS_LITTLE_ENDIAN 1

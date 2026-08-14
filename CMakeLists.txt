@@ -32,6 +32,7 @@ src/editor/editor.c
 src/editor/editor_ui.c
 src/editor/manager.c
 src/editor/render.c
+src/serial/file_io.c
 src/textures.c
 src/ui.c
 )
