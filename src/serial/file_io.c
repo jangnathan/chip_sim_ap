@@ -135,6 +135,7 @@ u8 writeBufferSmall(BinaryWriter *writer, u8 *buf, u32 size) {
   for (u32 i = 0; i < size; i++) {
     writer->buffer[i + writer->bufferPos] = buf[i];
   }
+  writer->bufferPos += size;
 
   return 1;
 }
@@ -151,7 +152,40 @@ void BinaryWriter_writeU32(BinaryWriter *writer, u32 num) {
 
   writeBufferSmall(writer, buf, 4);
 }
-void BinaryWriter_writeBuf(BinaryWriter *writer, u8 *buf, u32 size);
+void BinaryWriter_writeBuf(BinaryWriter *writer, u8 *buf, u32 size) {
+  if (size > sizeof(writer->buffer)) {
+    fwrite(writer->buffer, 1, sizeof(writer->buffer), writer->fptr);
+    writer->position += writer->bufferPos;
+    writer->bufferPos = 0;
+
+    u32 bytesWritten = 0;
+    while (bytesWritten < size) {
+      u32 bytesToWrite;
+      if (size - bytesWritten < sizeof(writer->buffer)) {
+	bytesToWrite = size - bytesWritten;
+      } else {
+	bytesToWrite = sizeof(writer->buffer);
+      }
+
+      fwrite(buf + bytesWritten, 1, bytesToWrite, writer->fptr);
+      bytesWritten += bytesToWrite;
+    }
+
+    writer->position += bytesWritten;
+    return;
+  }
+
+  for (u32 i = 0; i < size; i++) {
+    BinaryWriter_writeByte(writer, buf[i]);
+  }
+}
+
+void BinaryWriter_padding(BinaryWriter *writer, u32 len) {
+  u32 i = len;
+  while (i--) {
+    BinaryWriter_writeByte(writer, '\0');
+  }
+}
 
 void BinaryWriter_flush(BinaryWriter *writer) {
   fwrite(writer->buffer, 1, writer->bufferPos, writer->fptr);

@@ -42,9 +42,11 @@ void initApp(App *app) {
   app->uiCtx.font = app->font;
 
   app->eventStateObject.manager = &app->editorManager;
+  app->eventStateObject.window = &app->window;
   app->uiCtx.eventStateObject = &app->eventStateObject;
   initUICtx(&app->uiCtx);
 
+  app->menubar.window = &app->window;
   initMenubar(&app->menubar, &app->uiCtx);
 
   app->state = ST_EDIT;

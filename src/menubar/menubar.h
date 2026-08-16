@@ -1,9 +1,12 @@
 #pragma once
 #include "ui.h"
+#include "core/window.h"
+#include <SDL3/SDL.h>
 
 typedef struct {
-  u8 fileSectionActiveDelay;
+  tWindow *window;
 
+  u8 fileSectionActiveDelay;
   u8 fileButtonHovered;
 
   UICachedText fileText;

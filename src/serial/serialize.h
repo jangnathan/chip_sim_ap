@@ -1,5 +1,4 @@
 #pragma once
+#include "simulation/ctx.h"
 
-typedef struct {
-    
-} Serializer;
+void serializeCtx(Ctx *ctx, FILE *fptr);

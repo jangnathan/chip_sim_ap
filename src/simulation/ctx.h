@@ -5,6 +5,8 @@
 typedef struct {
 	Circuit circuit;
 	Connections connections;
+
+	char name[32];
 } Ctx;
 
 void ctxInit(Ctx *ctx);

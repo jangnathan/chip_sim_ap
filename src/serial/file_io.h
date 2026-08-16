@@ -39,4 +39,5 @@ void BinaryWriter_writeByte(BinaryWriter *writer, u8 byte);
 void BinaryWriter_writeU16(BinaryWriter *writer, u16 num);
 void BinaryWriter_writeU32(BinaryWriter *writer, u32 num);
 void BinaryWriter_writeBuf(BinaryWriter *writer, u8 *buf, u32 size);
+void BinaryWriter_padding(BinaryWriter *writer, u32 len);
 void BinaryWriter_flush(BinaryWriter *writer);

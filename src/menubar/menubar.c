@@ -1,7 +1,8 @@
-#include "app_menubar.h"
+#include "menubar/menubar.h"
 #include "app_state.h"
 #include "constants.h"
 #include "editor/manager.h"
+#include "menubar/menubar_file.h"
 
 void initMenubar(Menubar *menubar, UICtx *ctx) {
   setUICachedText(&menubar->fileText, ctx->window->renderer, ctx->font, "FILE",
@@ -27,7 +28,10 @@ void menubarNewClicked(void *eventStateObject, void *param) {
 
 void menubarSaveFileClicked(void *eventStateObject, void *param) {
   EventStateObject *evo = (EventStateObject *)eventStateObject;
+  tWindow *window = evo->window;
   EditorManager *manager = evo->manager;
+
+  chipSim_saveAsFile(manager, window);
 }
 
 void menubarOpenFileClicked(void *eventStateObject, void *param) {

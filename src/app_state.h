@@ -2,6 +2,7 @@
 
 #include "editor/editor.h"
 #include "editor/manager.h"
+#include "core/window.h"
 #include "simulation/ctx.h"
 
 typedef enum {
@@ -11,4 +12,5 @@ typedef enum {
 
 typedef struct {
     EditorManager *manager;
+	tWindow *window;
 } EventStateObject;
