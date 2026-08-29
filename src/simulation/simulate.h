@@ -2,6 +2,7 @@
 #include "constants.h"
 #include "ctx.h"
 
+// 2026
 void generateConnections(Ctx *ctx);
 
 void startSimulation(Ctx *ctx);

@@ -72,9 +72,7 @@ void editorManagerRender(SDL_Renderer *renderer, Textures *textures,
     if (!manager->editors[i].isTab) {
       continue;
     }
-    setUICachedText(manager->cachedText + i, uiCtx->window->renderer,
-		    uiCtx->font, "new tab", newColor(0, 0, 0, 255));
-
+    
     Color tabColor;
     if (i == manager->activeEditorIdx) {
       tabColor = newColor(200, 200, 225, 255);
@@ -91,7 +89,8 @@ void editorManagerRender(SDL_Renderer *renderer, Textures *textures,
 					    .onClick = &switchToTab,
 					    .onClickParams = &i});
     uiLabel(uiCtx, &(UILabelOptions){.cachedText = manager->cachedText + i,
-				     .fontSize = 20});
+				     .fontSize = 20,
+            .text = "new tab"});
     uiSetLayoutCursorPos(uiCtx,
 			 uiThisLayout(uiCtx)->position.x +
 			     uiThisLayout(uiCtx)->size.x - 20,
@@ -116,7 +115,8 @@ void editorManagerUpdate(EditorManager *manager, Input *input, UICtx *uiCtx,
   if (manager->activeEditorIdx != -1) {
     Editor *editor = manager->editors + manager->activeEditorIdx;
 
-    editor->camera.viewportSize = windowSize;
+    editor->camera.viewportSize.x = windowSize.x;
+    editor->camera.viewportSize.y = windowSize.y;
     editor->camera.viewportPos = newVec2i(0, 0);
 
     updateEditor(editor, input, uiCtx);
@@ -143,6 +143,8 @@ u8 editorManagerDeleteEditor(EditorManager *manager, u16 ID) {
 u16 editorManagerAddCtx(EditorManager *manager) {
   u16 newCtxID = manager->ctxArrayLen;
   manager->ctxArrayLen++;
+
+  printf("ctxArrayLen: %d\n", manager->ctxArrayLen);
   if (manager->ctxArrayLen >= manager->ctxArraySize) {
     manager->ctxArraySize = manager->ctxArraySize * 2;
     manager->ctxArray =

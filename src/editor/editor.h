@@ -26,7 +26,7 @@ typedef struct {
 
   u8 isTab;
 
-  UICachedText editorMessage;
+  char editorMessage[MAX_TEXT_LEN];
 
   u8 editorMessageID;
   u32 editorMessageLastTime;

@@ -5,15 +5,6 @@
 #include "menubar/menubar_file.h"
 
 void initMenubar(Menubar *menubar, UICtx *ctx) {
-  setUICachedText(&menubar->fileText, ctx->window->renderer, ctx->font, "FILE",
-		  newColor(0, 0, 0, 255));
-  setUICachedText(&menubar->newText, ctx->window->renderer, ctx->font, "NEW",
-		  newColor(0, 0, 0, 255));
-  setUICachedText(&menubar->saveFileText, ctx->window->renderer, ctx->font,
-		  "SAVE FILE", newColor(0, 0, 0, 255));
-  setUICachedText(&menubar->openFileText, ctx->window->renderer, ctx->font,
-		  "OPEN FILE", newColor(0, 0, 0, 255));
-
   menubar->fileSectionActiveDelay = 0;
   menubar->hoverID = 0;
 }
@@ -87,7 +78,7 @@ void menubarUI(Menubar *menubar, UICtx *uiCtx) {
 		    .hoverParams = &(MenubarHoverParam){
 			.hoverID_ptr = &menubar->hoverID, .tempID = hoverID}});
   uiLabel(uiCtx,
-	  &(UILabelOptions){.cachedText = &menubar->fileText, .fontSize = 16});
+	  &(UILabelOptions){.cachedText = &menubar->fileText, .fontSize = 16, .text = "FILE"});
   uiEndLayout(uiCtx);
   hoverID++;
 
@@ -108,7 +99,7 @@ void menubarUI(Menubar *menubar, UICtx *uiCtx) {
 		   .hoverParams = &(MenubarHoverParam){
 		       .hoverID_ptr = &menubar->hoverID, .tempID = hoverID}});
     uiLabel(uiCtx,
-	    &(UILabelOptions){.cachedText = &menubar->newText, .fontSize = 16});
+	    &(UILabelOptions){.cachedText = &menubar->newText, .fontSize = 16, .text = "NEW"});
     uiEndLayout(uiCtx);
     hoverID++;
 
@@ -127,7 +118,7 @@ void menubarUI(Menubar *menubar, UICtx *uiCtx) {
 		       .hoverID_ptr = &menubar->hoverID, .tempID = hoverID}});
 
     uiLabel(uiCtx, &(UILabelOptions){.cachedText = &menubar->saveFileText,
-				     .fontSize = 16});
+				     .fontSize = 16, .text = "SAVE FILE"});
     uiEndLayout(uiCtx);
     hoverID++;
 
@@ -146,7 +137,7 @@ void menubarUI(Menubar *menubar, UICtx *uiCtx) {
 		   .hoverParams = &(MenubarHoverParam){
 		       .hoverID_ptr = &menubar->hoverID, .tempID = hoverID}});
     uiLabel(uiCtx, &(UILabelOptions){.cachedText = &menubar->openFileText,
-				     .fontSize = 16});
+				     .fontSize = 16, .text = "OPEN FILE"});
     uiEndLayout(uiCtx);
     hoverID++;
   }

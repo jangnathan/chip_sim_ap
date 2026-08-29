@@ -13,3 +13,4 @@ typedef struct {
 } Textures;
 
 void loadTextures(SDL_Renderer *renderer, Textures *textures, TTF_Font *font);
+void destroyTextures(Textures *textures);

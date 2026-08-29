@@ -3,36 +3,9 @@
 
 #include <SDL3/SDL.h>
 
-void initSimpleChipsText(UICtx *ctx, EditorUI *editorUI) {
-  SDL_Renderer *renderer = ctx->window->renderer;
-
-  for (u8 i = 0; i < SIMPLE_CHIP_TYPE_END; i++) {
-    setUICachedText(editorUI->simpleChipsText + i, renderer, ctx->font,
-		    SimpleChipsName[i], newColor(0, 0, 0, 255));
-  }
-}
-
 void editorUI_init(UICtx *ctx, EditorUI *editorUI) {
   SDL_Renderer *renderer = ctx->window->renderer;
   editorUI->menubarHeight = 80;
-  setUICachedText(&editorUI->startSimulationText, renderer, ctx->font,
-		  "Simulate", newColor(0, 0, 0, 255));
-  setUICachedText(&editorUI->stopSimulationText, renderer, ctx->font, "Stop",
-		  newColor(0, 0, 0, 255));
-
-  setUICachedText(&editorUI->pivotText, renderer, ctx->font, "Pivot",
-		  newColor(0, 0, 0, 255));
-
-  setUICachedText(&editorUI->wireText, renderer, ctx->font, "Wire",
-		  newColor(0, 0, 0, 255));
-
-  setUICachedText(&editorUI->switchText, renderer, ctx->font, "Switch",
-		  newColor(0, 0, 0, 255));
-
-  setUICachedText(&editorUI->deleteText, renderer, ctx->font, "Delete",
-		  newColor(0, 0, 0, 255));
-
-  initSimpleChipsText(ctx, editorUI);
 }
 
 Editor *getEditorFromESO(EventStateObject *eventStateObject) {
@@ -93,6 +66,8 @@ void createWire(void *eventStateObject, void *params) {
 
   editor->tempCE_ID = wiresNew(circuit);
   editor->state = EDIT_CREATE_WIRE;
+
+  strncpy(editor->editorMessage, "SELECT A PIVOT", MAX_TEXT_LEN);
 }
 
 void createSwitchChip(void *eventStateObject, void *params) {
@@ -158,7 +133,8 @@ void renderSimpleChipBtnsUI(UICtx *uiCtx, Editor *editor, EditorUI *editorUI) {
 				     .hoverCursorIcon = CURSOR_POINTER});
     uiLabel(uiCtx,
 	    &(UILabelOptions){.cachedText = editorUI->simpleChipsText + i,
-			      .fontSize = 18});
+			      .fontSize = 18,
+			      .text = SimpleChipsName[i]});
     uiEndLayout(uiCtx);
   }
 }
@@ -174,10 +150,8 @@ void editorUI_run(UICtx *uiCtx, Editor *editor, EditorUI *editorUI) {
 
   // <simulate button>
   Color simulateButtonColor = newColor(50, 200, 50, 255);
-  UICachedText *simulateButtonText = &editorUI->startSimulationText;
   if (editor->simulating) {
     simulateButtonColor = newColor(200, 50, 50, 255);
-    simulateButtonText = &editorUI->stopSimulationText;
   }
 
   uiBeginLayout(uiCtx, &(UILayoutOptions){.size = newVec2i(120, 50),
@@ -187,8 +161,17 @@ void editorUI_run(UICtx *uiCtx, Editor *editor, EditorUI *editorUI) {
 					  .onClick = &simulateButtonClicked,
 					  .hoverCursorIcon = CURSOR_POINTER});
 
-  uiLabel(uiCtx,
-	  &(UILabelOptions){.cachedText = simulateButtonText, .fontSize = 24});
+  if (editor->simulating) {
+    uiLabel(uiCtx,
+	    &(UILabelOptions){.cachedText = &editorUI->stopSimulationText,
+			      .fontSize = 24,
+			      .text = "Stop"});
+  } else {
+    uiLabel(uiCtx,
+	    &(UILabelOptions){.cachedText = &editorUI->startSimulationText,
+			      .fontSize = 24,
+			      .text = "Simulate"});
+  }
 
   uiEndLayout(uiCtx);
   // </simulate button>
@@ -198,10 +181,11 @@ void editorUI_run(UICtx *uiCtx, Editor *editor, EditorUI *editorUI) {
   uiEndLayout(uiCtx);
 
   // <editor message>
-  if (editor->editorMessage.textLen > 0) {
+  if (editor->editorMessage[0] != '\0') {
     uiSetLayoutCursorPosX(uiCtx, uiRootLayout(uiCtx)->size.x / 2);
-    uiLabel(uiCtx, &(UILabelOptions){.cachedText = &editor->editorMessage,
-				     .fontSize = 16});
+    uiLabel(uiCtx, &(UILabelOptions){.cachedText = &editorUI->editorMessageText,
+				     .fontSize = 16,
+				     .text = editor->editorMessage});
     uiSetLayoutCursorPos(uiCtx, 0, uiThisLayout(uiCtx)->cursorPos.y - 16);
   }
   // </editor message>
@@ -221,7 +205,8 @@ void editorUI_run(UICtx *uiCtx, Editor *editor, EditorUI *editorUI) {
 				   .onClick = &createPivot,
 				   .hoverCursorIcon = CURSOR_POINTER});
   uiLabel(uiCtx, &(UILabelOptions){.cachedText = &editorUI->pivotText,
-				   .fontSize = 18});
+				   .fontSize = 18,
+				   .text = "Pivot"});
   uiEndLayout(uiCtx);
   // </create pivot>
 
@@ -232,8 +217,9 @@ void editorUI_run(UICtx *uiCtx, Editor *editor, EditorUI *editorUI) {
 				   .padding = newVec4i(2, 2, 2, 2),
 				   .onClick = &createWire,
 				   .hoverCursorIcon = CURSOR_POINTER});
-  uiLabel(uiCtx,
-	  &(UILabelOptions){.cachedText = &editorUI->wireText, .fontSize = 18});
+  uiLabel(uiCtx, &(UILabelOptions){.cachedText = &editorUI->wireText,
+				   .fontSize = 18,
+				   .text = "Wire"});
   uiEndLayout(uiCtx);
   // </create wire>
 
@@ -245,7 +231,8 @@ void editorUI_run(UICtx *uiCtx, Editor *editor, EditorUI *editorUI) {
 				   .onClick = &createSwitchChip,
 				   .hoverCursorIcon = CURSOR_POINTER});
   uiLabel(uiCtx, &(UILabelOptions){.cachedText = &editorUI->switchText,
-				   .fontSize = 18});
+				   .fontSize = 18,
+				   .text = "Switch"});
   uiEndLayout(uiCtx);
   // </create switch>
 
@@ -286,12 +273,14 @@ void editorUI_run(UICtx *uiCtx, Editor *editor, EditorUI *editorUI) {
 				     .onClick = &deleteButtonClicked,
 				     .hoverCursorIcon = CURSOR_POINTER});
     uiLabel(uiCtx, &(UILabelOptions){.cachedText = &editorUI->deleteText,
-				     .fontSize = 18});
+				     .fontSize = 18,
+            .text = "Delete"});
     uiEndLayout(uiCtx);
     // </delete item button>
 
     uiEndLayout(uiCtx);
   }
+
 
   /*u32 menubar = newUIElement(ui);
   ui->array[menubar].type = UI_BOX;

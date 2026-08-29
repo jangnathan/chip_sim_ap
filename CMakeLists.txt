@@ -39,6 +39,10 @@ src/textures.c
 src/ui.c
 )
 
+target_compile_options(chipsim PRIVATE
+    $<$<C_COMPILER_ID:MSVC>:/FS>
+)
+
 target_precompile_headers(chipsim PRIVATE
     <string.h>
     <stdlib.h>

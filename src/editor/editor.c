@@ -2,6 +2,7 @@
 #include "simulation/simulate.h"
 
 #include <stdio.h>
+#include <string.h>
 
 void editorZoomOut(Editor *editor) {
   editor->camera.zoom += 0.1f;
@@ -149,7 +150,7 @@ void updateEditor(Editor *editor, Input *input, UICtx *uiCtx) {
   switch (editor->state) {
   case EDIT_NONE: {
     // keeps texture cached
-    editor->editorMessage.textLen = 0;
+    editor->editorMessage[0] = 0;
 
     if (editor->hoveredCE_ID != 0 && input->mouse.leftClick) {
       editor->tempCE_ID = editor->hoveredCE_ID;
@@ -176,10 +177,6 @@ void updateEditor(Editor *editor, Input *input, UICtx *uiCtx) {
     break;
   }
   case EDIT_CREATE_WIRE: {
-    setUICachedText(&editor->editorMessage, uiCtx->window->renderer,
-		    uiCtx->font, "select a pivot to bind to",
-		    newColor(0, 0, 0, 255));
-
     if (editor->hoveredCE_ID != 0 && input->mouse.leftClick == 1) {
       if (circuit->array[editor->hoveredCE_ID].type == CE_PIVOT) {
 	Wire *wire = circuit->wires.array + ce->typeID;
@@ -187,23 +184,18 @@ void updateEditor(Editor *editor, Input *input, UICtx *uiCtx) {
 	editor->state = EDIT_SELECT_WIRE_PIVOT2;
 	editor->editorMessageID = 0;
 	printf("Connected pivot1! %d ", editor->hoveredCE_ID);
+
+	strncpy(editor->editorMessage, "Select a 2nd pivot", MAX_TEXT_LEN);
       }
     }
     break;
   }
   case EDIT_SELECT_WIRE_PIVOT2: {
-    if (editor->editorMessageID == 0) {
-      setUICachedText(&editor->editorMessage, uiCtx->window->renderer,
-		      uiCtx->font, "select a 2nd pivot to bind to",
-		      newColor(0, 0, 0, 255));
-    } else if (editor->editorMessageID == 1) {
-      setUICachedText(&editor->editorMessage, uiCtx->window->renderer,
-		      uiCtx->font, "cannot connect to the same pivot twice",
-		      newColor(255, 0, 0, 255));
-
+    if (editor->editorMessageID == 1) {
       u32 current_time = SDL_GetTicks();
       if ((current_time - editor->editorMessageLastTime) / 1000.0f > 1) {
 	editor->editorMessageID = 0;
+  strncpy(editor->editorMessage, "Error cannot select wire pivot twice", MAX_TEXT_LEN);
       }
     }
 
@@ -211,7 +203,9 @@ void updateEditor(Editor *editor, Input *input, UICtx *uiCtx) {
       if (circuit->array[editor->hoveredCE_ID].type == CE_PIVOT) {
 	Wire *wire = circuit->wires.array + ce->typeID;
 	if (editor->hoveredCE_ID == wire->pivotCEID1) {
-	  editor->editorMessageID = 1;
+	  strncpy(editor->editorMessage,
+		 "cannot connect to the same pivot twice", MAX_TEXT_LEN);
+	      editor->editorMessageID = 1;
 	  editor->editorMessageLastTime = SDL_GetTicks();
 	  break;
 	}
@@ -240,6 +234,9 @@ void initEditor(Editor *editor) {
   editor->bgColor = newColor(220, 220, 220, 0);
   editor->gridSize = 16;
   editor->selectBoxActive = 0;
+
+  editor->editorMessage[0] = 0;
+  editor->editorMessageID = 0;
 
   editor->tempCE_ID = 0;
   editor->hoveredCE_ID = 0;

@@ -55,8 +55,14 @@ void initUICtx(UICtx *ctx) {
   }
 
   ctx->layoutDepth = 1;
-
   generateIcons(ctx);
+}
+
+void destroyUICtx(UICtx *ctx) {
+  if (ctx->defaultIcons.x) {
+    SDL_DestroyTexture(ctx->defaultIcons.x);
+    ctx->defaultIcons.x = NULL;
+  }
 }
 
 void uiBeginRoot(UICtx *ctx) {
@@ -232,6 +238,24 @@ void uiLabel(UICtx *ctx, const UILabelOptions *options) {
   SDL_Renderer *renderer = ctx->window->renderer;
   UILayout *layout = ctx->layoutStack + ctx->layoutDepth - 1;
 
+  u8 textureNeedsRefresh = 0;
+  if (strncmp(options->cachedText->text, options->text, MAX_TEXT_LEN)) {
+    textureNeedsRefresh = 1;
+    strncpy(options->cachedText->text, options->text, MAX_TEXT_LEN);
+  } else if (!equalColor(options->color, options->cachedText->color)) {
+    textureNeedsRefresh = 1;
+    options->cachedText->color = options->color;
+  }
+
+  if (textureNeedsRefresh == 1) {
+    if (options->cachedText->texture != NULL) {
+      SDL_DestroyTexture(options->cachedText->texture);
+    }
+    options->cachedText->texture = newTextTexture(
+	ctx->window->renderer, options->text, ctx->font, options->color);
+  }
+
+  options->cachedText->textLen = strnlen(options->text, MAX_TEXT_LEN);
   float width = options->cachedText->textLen * options->fontSize * 0.5f;
 
   SDL_FRect dest = {(float)layout->cursorPos.x, (float)layout->cursorPos.y,
@@ -270,20 +294,4 @@ void uiDecal(UICtx *ctx, const UIDecalOptions *options) {
   }
 }
 
-void setUICachedText(UICachedText *cachedText, SDL_Renderer *renderer,
-		     TTF_Font *font, char *text, Color color) {
-  u8 textLen = strlen(text);
-  if (textLen > MAX_TEXT_LEN) {
-    fprintf(stderr, "");
-  }
-
-  // if identical, skip
-  if (strncmp(text, cachedText->text, MAX_TEXT_LEN) == 0 &&
-      equalColor(color, cachedText->color)) {
-    return;
-  }
-
-  cachedText->color = color;
-  cachedText->textLen = textLen;
-  cachedText->texture = newTextTexture(renderer, text, font, color);
-}
+void uiTextShortInput(UICtx *ctx, const UITextShortInputOptions *options) {}

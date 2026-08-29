@@ -105,6 +105,9 @@ void render(App *app) {
 
 void closeApp(App *app) {
   closeInput(&app->input);
+  destroyUICtx(&app->uiCtx);
+  destroyTextures(&app->textures);
+  TTF_CloseFont(app->font);
   closeWindow(&app->window);
   editorManagerFree(&app->editorManager);
 

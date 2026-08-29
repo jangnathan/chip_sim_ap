@@ -12,6 +12,7 @@ void handleEvents(App *app) {
     switch (event.type) {
     case SDL_EVENT_QUIT:
       app->running = 0;
+      printf("Quit application");
       break;
     case SDL_EVENT_MOUSE_MOTION:
       input->mouse.positionUpdated = 1;

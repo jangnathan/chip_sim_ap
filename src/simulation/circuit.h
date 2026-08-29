@@ -104,10 +104,19 @@ typedef struct {
   Vec2f position;
 } InputChipOptions;
 
+enum CircuitIOPinType {
+  CIRCUIT_PIN_IN,
+  CIRCUIT_PIN_OUT
+};
+
+typedef struct {
+  enum CircuitIOPinType type;
+} CircuitIOPin;
+
 // Chip entity
 
 typedef enum {
-  CE_NONE,
+  CE_NONE, // deleted
   CE_PIVOT,
   CE_WIRE,
   CE_SIMPLE,

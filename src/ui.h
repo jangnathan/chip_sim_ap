@@ -20,7 +20,7 @@ typedef enum {
 } UISizing;
 
 typedef enum { // by default is top left, cannot have both top and bottom or
-               // right and left
+	       // right and left
   UI_ALIGN_TOP = 0,
   UI_ALIGN_RIGHT = 1 << 1,
   UI_ALIGN_BOTTOM = 1 << 2,
@@ -47,6 +47,15 @@ typedef struct {
   SDL_Texture *x;
 } UIDefaultIcons;
 
+enum UIInputSelectedType { UI_SELECTED_TEXT_SHORT_INPUT };
+typedef struct {
+  u32 selectorStart;
+  u32 selectorEnd;
+
+  enum UIInputSelectedType type;
+  void *selectedPtr;
+} UIInputCtx;
+
 typedef struct {
   tWindow *window;
   TTF_Font *font;
@@ -63,15 +72,18 @@ typedef struct {
   void (*onHover)(void *state, void *params);
 
   char onClickParams[32]; // buffer size: 32 bytes * 8 = 256 bits
-  char hoverParams[32]; // buffer size: 32 bytes * 8 = 256 bits
+  char hoverParams[32];	  // buffer size: 32 bytes * 8 = 256 bits
 
   u8 *isClickedPtr;
   u8 *isHoveredPtr;
 
   u8 mouseEventsPropagated;
+
+  UIInputCtx *uiInputCtx;
 } UICtx;
 
 void initUICtx(UICtx *ctx);
+void destroyUICtx(UICtx *ctx);
 void uiBeginRoot(UICtx *ctx);
 void uiEndRoot(UICtx *ctx);
 UILayout *uiRootLayout(UICtx *ctx);
@@ -120,6 +132,8 @@ typedef struct {
 typedef struct {
   UICachedText *cachedText;
   u8 fontSize;
+  Color color;
+  char *text;
 } UILabelOptions;
 
 void uiLabel(UICtx *ctx, const UILabelOptions *options);
@@ -130,7 +144,27 @@ typedef struct {
 } UIDecalOptions;
 void uiDecal(UICtx *ctx, const UIDecalOptions *options);
 
-void setUICachedText(UICachedText *cachedText, SDL_Renderer *renderer,
-                     TTF_Font *font, char *text, Color color);
 SDL_Texture *newTextTexture(SDL_Renderer *renderer, char *text, TTF_Font *font,
-                            Color color);
+			    Color color);
+
+#define UI_MAX_SHORT_INPUT_BUF 128
+
+typedef struct {
+  char buf[UI_MAX_SHORT_INPUT_BUF];
+  char placeholder[UI_MAX_SHORT_INPUT_BUF];
+  u8 refreshTexture;
+
+  SDL_Texture *texture;
+  u8 textLen;
+  Color color;
+} UITextShortInputCached;
+
+typedef struct {
+  UITextShortInputCached *cached;
+  u16 size;
+  Color color;
+
+  char *placeholder;
+} UITextShortInputOptions;
+
+void uiTextShortInput(UICtx *ctx, const UITextShortInputOptions *options);
