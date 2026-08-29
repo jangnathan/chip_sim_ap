@@ -110,6 +110,8 @@ enum CircuitIOPinType {
 };
 
 typedef struct {
+  Vec2f chipPosition;
+  Vec2f position;
   enum CircuitIOPinType type;
 } CircuitIOPin;
 

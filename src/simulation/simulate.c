@@ -14,7 +14,7 @@ void resetConnections(Ctx *ctx) {
 }
 
 void searchAndGenerateConnections(Ctx *ctx, u32 *pivotQueue,
-                                  u32 *pivotQueueLen) {
+				  u32 *pivotQueueLen) {
 
   Circuit *circuit = &ctx->circuit;
   Pivots *pivots = &circuit->pivots;
@@ -33,17 +33,17 @@ void searchAndGenerateConnections(Ctx *ctx, u32 *pivotQueue,
       // add to queue
       u32 pivotCEID = pivots->array[pivot_i].ID;
       if (wire->pivotCEID1 == pivotCEID) {
-        u32 nextPivotIndex = pivotIndexFromCEID(circuit, wire->pivotCEID2);
-        if (pivots->array[nextPivotIndex].connectionID == 0) {
-          pivotQueue[*pivotQueueLen] = nextPivotIndex;
-          *pivotQueueLen = *pivotQueueLen + 1;
-        }
+	u32 nextPivotIndex = pivotIndexFromCEID(circuit, wire->pivotCEID2);
+	if (pivots->array[nextPivotIndex].connectionID == 0) {
+	  pivotQueue[*pivotQueueLen] = nextPivotIndex;
+	  *pivotQueueLen = *pivotQueueLen + 1;
+	}
       } else if (wire->pivotCEID2 == pivotCEID) {
-        u32 nextPivotIndex = pivotIndexFromCEID(circuit, wire->pivotCEID1);
-        if (pivots->array[nextPivotIndex].connectionID == 0) {
-          pivotQueue[*pivotQueueLen] = nextPivotIndex;
-          *pivotQueueLen = *pivotQueueLen + 1;
-        }
+	u32 nextPivotIndex = pivotIndexFromCEID(circuit, wire->pivotCEID1);
+	if (pivots->array[nextPivotIndex].connectionID == 0) {
+	  pivotQueue[*pivotQueueLen] = nextPivotIndex;
+	  *pivotQueueLen = *pivotQueueLen + 1;
+	}
       }
     }
   }
@@ -141,7 +141,7 @@ void simulate(Ctx *ctx) {
   for (u32 i = 1; i < inputChips->len; i++) {
     InputChip *inputChip = inputChips->array + i;
     ElectricState *electricState =
-        pivotConnectionState(ctx, inputChip->pivotCEID_out);
+	pivotConnectionState(ctx, inputChip->pivotCEID_out);
 
     // cannot disable electricity if there is already electricity if not diode
     if (electricState->on_next == 0) {
@@ -158,27 +158,32 @@ void simulate(Ctx *ctx) {
     for (u32 i = 1; i < simpleChips->len; i++) {
       SimpleChip *simpleChip = simpleChips->array + i;
       ElectricState *electricStateA =
-          pivotConnectionState(ctx, simpleChip->pivotCEID_A);
-      ElectricState *electricStateB =
-          pivotConnectionState(ctx, simpleChip->pivotCEID_B);
+	  pivotConnectionState(ctx, simpleChip->pivotCEID_A);
 
-      simpleChip->out = simpleChipEvalLogic(
-          simpleChip->type, electricStateA->on, electricStateB->on);
+      if (simpleChip->type != NOT) {
+	ElectricState *electricStateB =
+	    pivotConnectionState(ctx, simpleChip->pivotCEID_B);
+
+	simpleChip->out = simpleChipEvalLogic(
+	    simpleChip->type, electricStateA->on, electricStateB->on);
+      } else {
+        simpleChip->out = !electricStateA->on;
+      }
 
       ElectricState *electricStateOut =
-          pivotConnectionState(ctx, simpleChip->pivotCEID_out);
+	  pivotConnectionState(ctx, simpleChip->pivotCEID_out);
 
       if (electricStateOut->on_next == 0) {
-        electricStateOut->on_next = simpleChip->out;
+	electricStateOut->on_next = simpleChip->out;
       }
     }
 
     for (u32 i = 0; i < connections->len; i++) {
       ElectricState *electricState = connections->array + i;
       if (electricState->on != electricState->on_next) {
-        electricState->on = electricState->on_next;
-        stable = 0;
-        break;
+	electricState->on = electricState->on_next;
+	stable = 0;
+	break;
       }
     }
 
