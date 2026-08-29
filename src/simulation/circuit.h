@@ -115,6 +115,25 @@ typedef struct {
   enum CircuitIOPinType type;
 } CircuitIOPin;
 
+typedef struct {
+  CircuitIOPin *array;
+  u32 len;
+  u32 size;
+} CircuitIOPins;
+
+typedef struct {
+  u32 customID;
+  Vec2f position;
+
+  u32 designatedPivotPins[16];
+} CustomChip;
+
+typedef struct {
+  CustomChip *array;
+  u32 len;
+  u32 size;
+} CustomChips;
+
 // Chip entity
 
 typedef enum {

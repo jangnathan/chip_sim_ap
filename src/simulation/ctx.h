@@ -1,12 +1,26 @@
 #pragma once
-#include "simulation/circuit.h"
 #include "connection.h"
+#include "simulation/circuit.h"
 
 typedef struct {
-	Circuit circuit;
-	Connections connections;
+  char path[64];
+  char identifier[32];
+  u32 ctxID_psd;
+} CircuitDependency;
 
-	char name[32];
+typedef struct {
+  CircuitDependency *array;
+  u16 len;
+  u16 size;
+} CircuitDependencies;
+
+typedef struct {
+  Circuit circuit;
+  Connections connections;
+
+  char identifier[32];
+
+  CircuitDependencies dependencies;
 } Ctx;
 
 void ctxInit(Ctx *ctx);

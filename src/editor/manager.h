@@ -10,6 +10,11 @@
 #include <SDL3/SDL.h>
 
 typedef struct {
+	char *identifiers;
+	Ctx **ctxPtrs;
+} SharedDepenencyManager; // to prevent multiple loading of the same dependency
+
+typedef struct {
     Ctx *ctxArray;
     u16 ctxArrayLen;
     u16 ctxArraySize;
