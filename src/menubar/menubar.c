@@ -38,10 +38,11 @@ typedef struct {
   u16 tempID;
 } MenubarHoverParam;
 
-void menubarHover(void *EventStateObject, void *param) {
-  MenubarHoverParam *menubarParam = (MenubarHoverParam *)param;
+void menubarHover(void *EventStateObject, void *param_p) {
+  MenubarHoverParam param;
+  memcpy(&param, param_p, sizeof(MenubarHoverParam));
 
-  *(menubarParam->hoverID_ptr) = menubarParam->tempID;
+  *(param.hoverID_ptr) = param.tempID;
 }
 
 Color menubarItemColor(Menubar *menubar, u16 hoverID) {
@@ -64,7 +65,7 @@ void menubarUI(Menubar *menubar, UICtx *uiCtx) {
 					  .size.x = 16 * 3 + 8,
 					  .size.y = 20 * 2});
 
-  u16 hoverID = 1;
+  u16 hoverID = 0;
   uiBeginLayout(uiCtx,
 		&(UILayoutOptions){
 		    .padding.t = 2,
@@ -77,8 +78,9 @@ void menubarUI(Menubar *menubar, UICtx *uiCtx) {
 		    .onHover = &menubarHover,
 		    .hoverParams = &(MenubarHoverParam){
 			.hoverID_ptr = &menubar->hoverID, .tempID = hoverID}});
-  uiLabel(uiCtx,
-	  &(UILabelOptions){.cachedText = &menubar->fileText, .fontSize = 16, .text = "FILE"});
+  uiLabel(uiCtx, &(UILabelOptions){.cachedText = &menubar->fileText,
+				   .fontSize = 16,
+				   .text = "FILE"});
   uiEndLayout(uiCtx);
   hoverID++;
 
@@ -98,8 +100,9 @@ void menubarUI(Menubar *menubar, UICtx *uiCtx) {
 		   .onHover = &menubarHover,
 		   .hoverParams = &(MenubarHoverParam){
 		       .hoverID_ptr = &menubar->hoverID, .tempID = hoverID}});
-    uiLabel(uiCtx,
-	    &(UILabelOptions){.cachedText = &menubar->newText, .fontSize = 16, .text = "NEW"});
+    uiLabel(uiCtx, &(UILabelOptions){.cachedText = &menubar->newText,
+				     .fontSize = 16,
+				     .text = "NEW"});
     uiEndLayout(uiCtx);
     hoverID++;
 
@@ -118,7 +121,8 @@ void menubarUI(Menubar *menubar, UICtx *uiCtx) {
 		       .hoverID_ptr = &menubar->hoverID, .tempID = hoverID}});
 
     uiLabel(uiCtx, &(UILabelOptions){.cachedText = &menubar->saveFileText,
-				     .fontSize = 16, .text = "SAVE FILE"});
+				     .fontSize = 16,
+				     .text = "SAVE FILE"});
     uiEndLayout(uiCtx);
     hoverID++;
 
@@ -137,7 +141,8 @@ void menubarUI(Menubar *menubar, UICtx *uiCtx) {
 		   .hoverParams = &(MenubarHoverParam){
 		       .hoverID_ptr = &menubar->hoverID, .tempID = hoverID}});
     uiLabel(uiCtx, &(UILabelOptions){.cachedText = &menubar->openFileText,
-				     .fontSize = 16, .text = "OPEN FILE"});
+				     .fontSize = 16,
+				     .text = "OPEN FILE"});
     uiEndLayout(uiCtx);
     hoverID++;
   }

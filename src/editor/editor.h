@@ -19,7 +19,13 @@ typedef enum {
   EDIT_SELECT_OUT_LINK_CHIP
 } EditState;
 
+typedef enum {
+  EDIT_MODE_INTERIOR,
+  EDIT_MODE_EXTERIOR
+} EditMode;
+
 typedef struct {
+  EditMode mode;
   EditState state;
   Ctx *ctx;
   u16 ctxID;
@@ -59,6 +65,7 @@ typedef struct {
   SDL_Scancode zoomInKey;
 
   u8 simulating;
+  u8 choosingEditorMode;
 } Editor;
 
 void initEditor(Editor *editor);

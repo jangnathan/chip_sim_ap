@@ -173,8 +173,7 @@ void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options) {
       ctx->onHover = options->onHover;
 
       if (options->hoverParams != NULL) {
-	memcpy(ctx->hoverParams, options->hoverParams,
-	       sizeof(ctx->hoverParams));
+	memcpy(ctx->hoverParams, options->hoverParams, 32);
       }
     }
 
@@ -184,8 +183,7 @@ void uiBeginLayout(UICtx *ctx, const UILayoutOptions *options) {
 	ctx->isClickedPtr = options->isClickedPtr;
 
 	if (options->onClickParams != NULL) {
-	  memcpy(ctx->onClickParams, options->onClickParams,
-		 sizeof(ctx->onClickParams));
+	  memcpy(ctx->onClickParams, options->onClickParams, 32);
 	}
       }
     }
@@ -214,14 +212,14 @@ void uiMoveLayoutCursor(UICtx *ctx, i32 x, i32 y) {
 void uiSetLayoutCursorPos(UICtx *ctx, i32 x, i32 y) {
   UILayout *layout = ctx->layoutStack + ctx->layoutDepth - 1;
 
-  layout->cursorPos.x = x;
-  layout->cursorPos.y = y;
+  layout->cursorPos.x = x + layout->position.x;
+  layout->cursorPos.y = y + layout->position.y;
 }
 
 void uiSetLayoutCursorPosX(UICtx *ctx, i32 x) {
   UILayout *layout = ctx->layoutStack + ctx->layoutDepth - 1;
 
-  layout->cursorPos.x = x;
+  layout->cursorPos.x = x + layout->position.x;
 }
 
 void uiResetLayoutCursorX(UICtx *ctx) {
@@ -269,6 +267,7 @@ void uiLabel(UICtx *ctx, const UILabelOptions *options) {
 
       printf("Text size: %d x %d\n", text_width, text_height);
     } else {
+      fprintf(stderr, "Failed to get string size\n");
     }
   }
 

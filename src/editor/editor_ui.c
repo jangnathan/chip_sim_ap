@@ -120,6 +120,17 @@ void deleteButtonClicked(void *eventStateObject, void *param) {
   editor->state = EDIT_NONE;
 }
 
+void modeButtonClicked(void *eventStateObject, void *param) {
+  EventStateObject *eventStateObj = (EventStateObject *)(eventStateObject);
+  Editor *editor = getEditorFromESO(eventStateObj);
+
+  if (editor->choosingEditorMode == 1) {
+    editor->choosingEditorMode = 0;
+  } else {
+    editor->choosingEditorMode = 1;
+  }
+}
+
 void renderSimpleChipBtnsUI(UICtx *uiCtx, Editor *editor, EditorUI *editorUI) {
   for (u8 i = 0; i < SIMPLE_CHIP_TYPE_END; i++) {
     createSimpleChipParams *params = &(createSimpleChipParams){.type = i};
@@ -139,7 +150,21 @@ void renderSimpleChipBtnsUI(UICtx *uiCtx, Editor *editor, EditorUI *editorUI) {
   }
 }
 
-void editorUI_run(UICtx *uiCtx, Editor *editor, EditorUI *editorUI) {
+typedef struct {
+  EditMode mode;
+} SelectEditorModeParams;
+
+void selectEditorModeButton(void *eventStateObject, void *param) {
+  EventStateObject *eventStateObj = (EventStateObject *)(eventStateObject);
+  SelectEditorModeParams *params = (SelectEditorModeParams *)param;
+
+  Editor *editor = getEditorFromESO(eventStateObj);
+
+  editor->mode = params->mode;
+  editor->choosingEditorMode = 0;
+}
+
+void editorUI_navbar(UICtx *uiCtx, Editor *editor, EditorUI *editorUI) {
   // <navbar>
   uiBeginLayout(uiCtx,
 		&(UILayoutOptions){.size.y = editorUI->menubarHeight,
@@ -147,6 +172,67 @@ void editorUI_run(UICtx *uiCtx, Editor *editor, EditorUI *editorUI) {
 				   .sizing = UI_FILL_WIDTH,
 				   .orientation = UI_HORIZONTAL,
 				   .bgColor = newColor(255, 255, 255, 255)});
+
+  uiBeginLayout(uiCtx,
+		&(UILayoutOptions){.size = newVec2i(120, 50),
+				   .bgColor = newColor(200, 200, 200, 255),
+				   .orientation = UI_VERTICAL,
+				   .spacing = 0});
+  // <mode button>
+
+  uiBeginLayout(uiCtx,
+		&(UILayoutOptions){.size = newVec2i(120, 50),
+				   .padding = newVec4i(10, 10, 10, 10),
+				   .bgColor = newColor(200, 200, 200, 255),
+				   .onClick = &modeButtonClicked,
+				   .hoverCursorIcon = CURSOR_POINTER});
+
+  if (editor->mode == EDIT_MODE_INTERIOR) {
+    uiLabel(uiCtx, &(UILabelOptions){.cachedText = &editorUI->interiorText,
+				     .fontSize = 24,
+				     .text = "Interior"});
+  } else if (editor->mode == EDIT_MODE_EXTERIOR) {
+    uiLabel(uiCtx, &(UILabelOptions){.cachedText = &editorUI->exteriorText,
+				     .fontSize = 24,
+				     .text = "Exterior"});
+  }
+  uiEndLayout(uiCtx);
+
+  // Editor mode selection dropdown
+  if (editor->choosingEditorMode == 1) {
+    // Interior button
+    uiBeginLayout(uiCtx,
+		  &(UILayoutOptions){.size = newVec2i(120, 50),
+				     .bgColor = newColor(245, 245, 245, 255),
+				     .padding = newVec4i(10, 10, 10, 10),
+				     .hoverCursorIcon = CURSOR_POINTER,
+				     .onClick = &selectEditorModeButton,
+				     .onClickParams = &(SelectEditorModeParams){
+					 .mode = EDIT_MODE_INTERIOR}});
+    uiLabel(uiCtx, &(UILabelOptions){.cachedText = &editorUI->interiorText,
+				     .fontSize = 24,
+				     .text = "Interior"});
+    uiEndLayout(uiCtx);
+
+    // Exterior button
+    uiBeginLayout(uiCtx,
+		  &(UILayoutOptions){.size = newVec2i(120, 50),
+				     .bgColor = newColor(245, 245, 245, 255),
+				     .padding = newVec4i(10, 10, 10, 10),
+
+				     .hoverCursorIcon = CURSOR_POINTER,
+				     .onClick = &selectEditorModeButton,
+				     .onClickParams = &(SelectEditorModeParams){
+					 .mode = EDIT_MODE_EXTERIOR}});
+    uiLabel(uiCtx, &(UILabelOptions){.cachedText = &editorUI->exteriorText,
+				     .fontSize = 24,
+				     .text = "Exterior"});
+    uiEndLayout(uiCtx);
+  }
+
+  uiEndLayout(uiCtx);
+  uiMoveLayoutCursor(uiCtx, 10, 0);
+  // </mode button>
 
   // <simulate button>
   Color simulateButtonColor = newColor(50, 200, 50, 255);
@@ -176,20 +262,11 @@ void editorUI_run(UICtx *uiCtx, Editor *editor, EditorUI *editorUI) {
   uiEndLayout(uiCtx);
   // </simulate button>
 
-  // </navbar>
-
   uiEndLayout(uiCtx);
+  // </navbar>
+}
 
-  // <editor message>
-  if (editor->editorMessage[0] != '\0') {
-    uiSetLayoutCursorPosX(uiCtx, uiRootLayout(uiCtx)->size.x / 2);
-    uiLabel(uiCtx, &(UILabelOptions){.cachedText = &editorUI->editorMessageText,
-				     .fontSize = 16,
-				     .text = editor->editorMessage});
-    uiSetLayoutCursorPos(uiCtx, 0, uiThisLayout(uiCtx)->cursorPos.y - 16);
-  }
-  // </editor message>
-
+void editorUI_mode_interior(UICtx *uiCtx, Editor *editor, EditorUI *editorUI) {
   // <left sidebar>
   uiBeginLayout(uiCtx,
 		&(UILayoutOptions){.size = newVec2i(90, 500),
@@ -274,13 +351,35 @@ void editorUI_run(UICtx *uiCtx, Editor *editor, EditorUI *editorUI) {
 				     .hoverCursorIcon = CURSOR_POINTER});
     uiLabel(uiCtx, &(UILabelOptions){.cachedText = &editorUI->deleteText,
 				     .fontSize = 18,
-            .text = "Delete"});
+				     .text = "Delete"});
     uiEndLayout(uiCtx);
     // </delete item button>
 
     uiEndLayout(uiCtx);
   }
+}
 
+void editorUI_run(UICtx *uiCtx, Editor *editor, EditorUI *editorUI) {
+  // draw navbar
+  uiSetLayoutCursorPos(uiCtx, 0, editorUI->menubarHeight);
+
+  // <editor message>
+  if (editor->editorMessage[0] != '\0') {
+    uiSetLayoutCursorPosX(uiCtx, uiRootLayout(uiCtx)->size.x / 2);
+    uiLabel(uiCtx, &(UILabelOptions){.cachedText = &editorUI->editorMessageText,
+				     .fontSize = 16,
+				     .text = editor->editorMessage});
+    uiSetLayoutCursorPos(uiCtx, 0, uiThisLayout(uiCtx)->cursorPos.y - 16);
+  }
+  // </editor message>
+
+  if (editor->mode == EDIT_MODE_INTERIOR) {
+    editorUI_mode_interior(uiCtx, editor, editorUI);
+  }
+
+  // draw navbar
+  uiSetLayoutCursorPos(uiCtx, 0, 0);
+  editorUI_navbar(uiCtx, editor, editorUI);
 
   /*u32 menubar = newUIElement(ui);
   ui->array[menubar].type = UI_BOX;

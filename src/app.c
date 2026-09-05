@@ -86,6 +86,10 @@ void render(App *app) {
   // app ui
   uiSetLayoutCursorPos(uiCtx, 0, 20);
 
+  // container
+  uiBeginLayout(uiCtx, &(UILayoutOptions){
+    .size = newVec2i(app->window.size.x, app->window.size.y - 20),
+           .sizing = UI_FILL_WIDTH | UI_FILL_HEIGHT});
   switch (app->state) {
   case ST_NONE:
     break;
@@ -93,6 +97,7 @@ void render(App *app) {
     editorManagerRender(renderer, &app->textures, &app->editorManager, &app->editorUI, uiCtx);
     break;
   }
+  uiEndLayout(uiCtx);
 
   // menubar is at top
   uiSetLayoutCursorPos(uiCtx, 0, 0);
@@ -104,10 +109,14 @@ void render(App *app) {
 }
 
 void closeApp(App *app) {
+  printf("Closing app\n");
+  printf("Closing Input\n");
   closeInput(&app->input);
+  printf("Closing UICtx and textures\n");
   destroyUICtx(&app->uiCtx);
   destroyTextures(&app->textures);
   TTF_CloseFont(app->font);
+  printf("Closing window\n");
   closeWindow(&app->window);
   editorManagerFree(&app->editorManager);
 

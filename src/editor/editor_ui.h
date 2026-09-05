@@ -17,6 +17,9 @@ typedef struct {
   UICachedText deleteText;
   UICachedText editorMessageText;
 
+  UICachedText interiorText;
+  UICachedText exteriorText;
+
   u16 menubarHeight;
 } EditorUI;
 

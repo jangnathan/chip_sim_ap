@@ -222,8 +222,10 @@ void updateEditor(Editor *editor, Input *input, UICtx *uiCtx) {
 }
 
 void initEditor(Editor *editor) {
+  editor->mode = EDIT_MODE_INTERIOR;
   editor->state = EDIT_NONE;
   editor->simulating = 0;
+  editor->choosingEditorMode = 0;
 
   editor->camera.zoom = 1.0f;
   editor->camera.position = newVec2f(0.0f, 0.0f);

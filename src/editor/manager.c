@@ -51,15 +51,15 @@ void editorManagerRender(SDL_Renderer *renderer, Textures *textures,
 
   // TODO: RENDER TABS FOR CIRCUITS also an add button to add circuit
 
-  uiSetLayoutCursorPos(uiCtx, 0, 20 + 30);
-
   if (manager->activeEditorIdx != -1) {
+    uiThisLayout(uiCtx)->position.y += 28;
     Editor *editor = manager->editors + manager->activeEditorIdx;
     renderEditor(renderer, textures, editor);
     editorUI_run(uiCtx, editor, editorUI);
   }
 
-  uiSetLayoutCursorPos(uiCtx, 0, 20);
+  uiThisLayout(uiCtx)->position.y -= 28;
+  uiSetLayoutCursorPos(uiCtx, 0, 0);
   uiBeginLayout(uiCtx,
 		&(UILayoutOptions){.padding = newVec4i(2, 2, 2, 2),
 				   .orientation = UI_HORIZONTAL,
@@ -72,7 +72,7 @@ void editorManagerRender(SDL_Renderer *renderer, Textures *textures,
     if (!manager->editors[i].isTab) {
       continue;
     }
-    
+
     Color tabColor;
     if (i == manager->activeEditorIdx) {
       tabColor = newColor(200, 200, 225, 255);
@@ -90,11 +90,10 @@ void editorManagerRender(SDL_Renderer *renderer, Textures *textures,
 					    .onClickParams = &i});
     uiLabel(uiCtx, &(UILabelOptions){.cachedText = manager->cachedText + i,
 				     .fontSize = 20,
-            .text = "new tab"});
+				     .text = "new tab"});
     uiSetLayoutCursorPos(uiCtx,
-			 uiThisLayout(uiCtx)->position.x +
-			     uiThisLayout(uiCtx)->size.x - 20,
-			 uiThisLayout(uiCtx)->position.y);
+
+			 uiThisLayout(uiCtx)->size.x - 20, 0);
 
     // btn
     uiBeginLayout(uiCtx, &(UILayoutOptions){.size = newVec2i(20, 20),
@@ -136,7 +135,7 @@ u8 editorManagerDeleteCtx(EditorManager *manager, u16 ID) {
 u8 editorManagerDeleteEditor(EditorManager *manager, u16 ID) {
   manager->editorsLen--;
   for (u16 i = ID; i < manager->editorsLen; i++) {
-    manager->editors[i] = manager->editors[i+1];
+    manager->editors[i] = manager->editors[i + 1];
   }
 }
 
@@ -177,10 +176,11 @@ u16 editorManagerAddEditor(EditorManager *manager, u16 ctxID) {
 }
 
 void editorManagerFree(EditorManager *manager) {
+  printf("Num ctx %d\n", manager->ctxArrayLen);
   for (u16 i = 0; i < manager->ctxArrayLen; i++) {
     ctxFree(manager->ctxArray + i);
   }
   free(manager->ctxArray);
-
   free(manager->editors);
+  printf("Freed editor manager\n");
 }

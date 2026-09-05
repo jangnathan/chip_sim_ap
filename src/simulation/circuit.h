@@ -104,29 +104,34 @@ typedef struct {
   Vec2f position;
 } InputChipOptions;
 
-enum CircuitIOPinType {
-  CIRCUIT_PIN_IN,
-  CIRCUIT_PIN_OUT
-};
-
-typedef struct {
-  Vec2f chipPosition;
-  Vec2f position;
-  enum CircuitIOPinType type;
-} CircuitIOPin;
-
-typedef struct {
-  CircuitIOPin *array;
-  u32 len;
-  u32 size;
-} CircuitIOPins;
-
 typedef struct {
   u32 customID;
   Vec2f position;
 
-  u32 designatedPivotPins[16];
+  u32 designatedPivotPinIDs[16];
 } CustomChip;
+
+typedef enum {
+  CUSTOM_CHIP_PIN_INPUT,
+  CUSTOM_CHIP_PIN_OUTPUT,
+} CustomChipPinIOType;
+
+typedef struct {
+  char name[4];
+  u32 ID;
+  u8 exteriorPinExists;
+  Vec2f exteriorPinPos;
+  
+  u8 interiorPinExists;
+  Vec2f interiorPinPos;
+  CustomChipPinIOType ioType;
+} CustomChipPin;
+
+typedef struct {
+  CustomChipPin array[16];
+  u32 len;
+  u32 size;
+} CustomChipPins;
 
 typedef struct {
   CustomChip *array;

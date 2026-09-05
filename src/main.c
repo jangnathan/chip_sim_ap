@@ -18,6 +18,8 @@ int main(int argc, char *argv[]) {
   printf("press any key to exit...");
   scanf("%c", &h);*/
   free(app);
+  printf("Freed app\n");
+
 
   return 0;
 }
