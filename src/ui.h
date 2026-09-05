@@ -127,6 +127,8 @@ typedef struct {
   SDL_Texture *texture;
   u8 textLen;
   Color color;
+  u8 fontSize;
+  Vec2i boxDimensions;
 } UICachedText;
 
 typedef struct {

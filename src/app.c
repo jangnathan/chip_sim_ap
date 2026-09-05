@@ -24,7 +24,7 @@ void initApp(App *app) {
     exit(1);
   }
 
-  app->font = TTF_OpenFont("asset/ARIAL.ttf", 16);
+  app->font = TTF_OpenFont("asset/ARIAL.ttf", 32);
   if (!app->font) {
     fprintf(stderr, "error loading font");
     exit(1);

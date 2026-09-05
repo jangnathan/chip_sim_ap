@@ -8,6 +8,7 @@ SDL_Texture *newTextTexture(SDL_Renderer *renderer, char *text, TTF_Font *font,
   SDL_Color sdl_color = {color.r, color.g, color.b, color.a};
   surface = TTF_RenderText_Blended(font, text, 0, sdl_color);
   SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+
   SDL_DestroySurface(surface);
 
   return texture;
@@ -242,6 +243,8 @@ void uiLabel(UICtx *ctx, const UILabelOptions *options) {
   if (strncmp(options->cachedText->text, options->text, MAX_TEXT_LEN)) {
     textureNeedsRefresh = 1;
     strncpy(options->cachedText->text, options->text, MAX_TEXT_LEN);
+
+    options->cachedText->textLen = strnlen(options->text, MAX_TEXT_LEN);
   } else if (!equalColor(options->color, options->cachedText->color)) {
     textureNeedsRefresh = 1;
     options->cachedText->color = options->color;
@@ -255,11 +258,26 @@ void uiLabel(UICtx *ctx, const UILabelOptions *options) {
 	ctx->window->renderer, options->text, ctx->font, options->color);
   }
 
+  if (options->fontSize != options->cachedText->fontSize || textureNeedsRefresh == 1) {
+    options->cachedText->fontSize = options->fontSize;
+
+    int text_width = 0;
+    int text_height = 0;
+    if (TTF_GetStringSize(ctx->font, options->text, options->cachedText->textLen, &text_width, &text_height)) {
+      options->cachedText->boxDimensions.x = text_width;
+      options->cachedText->boxDimensions.y = text_height;
+
+      printf("Text size: %d x %d\n", text_width, text_height);
+    } else {
+    }
+  }
+
   options->cachedText->textLen = strnlen(options->text, MAX_TEXT_LEN);
-  float width = options->cachedText->textLen * options->fontSize * 0.5f;
+  float width = options->cachedText->boxDimensions.x * (options->fontSize / 32.0f); // font resolution
+  float height = options->cachedText->boxDimensions.y * (options->fontSize / 32.0f);
 
   SDL_FRect dest = {(float)layout->cursorPos.x, (float)layout->cursorPos.y,
-		    width, (float)options->fontSize};
+		    width, height};
   SDL_RenderTexture(renderer, options->cachedText->texture, NULL, &dest);
 
   switch (layout->orientation) {
@@ -267,7 +285,7 @@ void uiLabel(UICtx *ctx, const UILabelOptions *options) {
     layout->cursorPos.x += (i32)width + layout->spacing;
     break;
   case UI_VERTICAL:
-    layout->cursorPos.y += options->fontSize + layout->spacing;
+    layout->cursorPos.y += (i32)height + layout->spacing;
     break;
   default:
     break;
