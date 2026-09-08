@@ -12,3 +12,11 @@ It uses its own immediate mode gui library that uses SDL3 and SDL3_ttf
 
 ## Here is a 4 bit binary adder:
 <img width="430" height="459" alt="image" src="https://github.com/user-attachments/assets/2f84e856-a55d-40d7-b0e3-641265237fa0" />
+
+[youtube video](https://www.youtube.com/watch?v=wCNC5mkF6RE)
+
+Project discontinued because the was unmaintainable -- Better for a rewrite,
+needs better app state
+
+features soon
+- Importing and exporting circuits to different circuits to reuse
