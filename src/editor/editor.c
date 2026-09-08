@@ -93,39 +93,8 @@ void checkCollisionsCE(Editor *editor, Input *input) {
   }
 }
 
-void updateEditor(Editor *editor, Input *input, UICtx *uiCtx) {
+void updateEditorInterior(Editor *editor, Input *input, UICtx *uiCtx) {
   Circuit *circuit = &editor->ctx->circuit;
-
-  editor->collisionStep = input->mouse.positionUpdated;
-  if (editor->collisionStep) {
-    checkCollisionsCE(editor, input);
-  }
-
-  const bool *keystates = SDL_GetKeyboardState(NULL);
-  editor->selectBoxActive = 0;
-
-  if (keystates[SDL_SCANCODE_SPACE]) {
-    input->mouse.cursorIcon = CURSOR_MOVE;
-
-    if (input->mouse.leftDown) {
-      editor->camera.oldPosition = editor->camera.position;
-    }
-
-    if (input->mouse.leftHeld) {
-      editor->camera.position = translateVec2f(
-	  editor->camera.oldPosition,
-	  scaleVec2f(vec2ItoF(subtractVec2i(input->mouse.oldCenterPosition,
-					    input->mouse.centerPosition)),
-		     1.0f / editor->camera.zoom));
-    }
-    return;
-  }
-
-  if (input->keys[editor->zoomInKey]) {
-    editorZoomIn(editor);
-  } else if (input->keys[editor->zoomOutKey]) {
-    editorZoomOut(editor);
-  }
 
   // temp ce as pointer
   CircuitEntity *ce = circuit->array + editor->tempCE_ID;
@@ -195,7 +164,8 @@ void updateEditor(Editor *editor, Input *input, UICtx *uiCtx) {
       u32 current_time = SDL_GetTicks();
       if ((current_time - editor->editorMessageLastTime) / 1000.0f > 1) {
 	editor->editorMessageID = 0;
-  strncpy(editor->editorMessage, "Error cannot select wire pivot twice", MAX_TEXT_LEN);
+	strncpy(editor->editorMessage, "Error cannot select wire pivot twice",
+		MAX_TEXT_LEN);
       }
     }
 
@@ -204,8 +174,8 @@ void updateEditor(Editor *editor, Input *input, UICtx *uiCtx) {
 	Wire *wire = circuit->wires.array + ce->typeID;
 	if (editor->hoveredCE_ID == wire->pivotCEID1) {
 	  strncpy(editor->editorMessage,
-		 "cannot connect to the same pivot twice", MAX_TEXT_LEN);
-	      editor->editorMessageID = 1;
+		  "cannot connect to the same pivot twice", MAX_TEXT_LEN);
+	  editor->editorMessageID = 1;
 	  editor->editorMessageLastTime = SDL_GetTicks();
 	  break;
 	}
@@ -218,6 +188,51 @@ void updateEditor(Editor *editor, Input *input, UICtx *uiCtx) {
     }
     break;
   }
+  }
+}
+
+void updateEditorExterior(Editor *editor, Input *input, UICtx *uiCtx) {
+  
+}
+
+void updateEditor(Editor *editor, Input *input, UICtx *uiCtx) {
+  Circuit *circuit = &editor->ctx->circuit;
+
+  editor->collisionStep = input->mouse.positionUpdated;
+  if (editor->collisionStep) {
+    checkCollisionsCE(editor, input);
+  }
+
+  const bool *keystates = SDL_GetKeyboardState(NULL);
+  editor->selectBoxActive = 0;
+
+  if (keystates[SDL_SCANCODE_SPACE]) {
+    input->mouse.cursorIcon = CURSOR_MOVE;
+
+    if (input->mouse.leftDown) {
+      editor->camera.oldPosition = editor->camera.position;
+    }
+
+    if (input->mouse.leftHeld) {
+      editor->camera.position = translateVec2f(
+	  editor->camera.oldPosition,
+	  scaleVec2f(vec2ItoF(subtractVec2i(input->mouse.oldCenterPosition,
+					    input->mouse.centerPosition)),
+		     1.0f / editor->camera.zoom));
+    }
+    return;
+  }
+
+  if (input->keys[editor->zoomInKey]) {
+    editorZoomIn(editor);
+  } else if (input->keys[editor->zoomOutKey]) {
+    editorZoomOut(editor);
+  }
+
+  if (editor->mode == EDIT_MODE_INTERIOR) {
+    updateEditorInterior(editor, input, uiCtx);
+  } else if (editor->mode == EDIT_MODE_EXTERIOR) {
+    updateEditorExterior(editor, input, uiCtx);
   }
 }
 

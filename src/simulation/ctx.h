@@ -6,6 +6,11 @@ typedef struct {
   char path[64];
   char identifier[32];
   u32 ctxID_psd;
+
+  // SoA array to track
+  u32 *designatedPivotIDs;
+  u32 designatedPivotIDs_len;
+  u32 designatedPivotIDs_size;
 } CircuitDependency;
 
 typedef struct {

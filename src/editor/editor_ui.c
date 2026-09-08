@@ -262,6 +262,25 @@ void editorUI_navbar(UICtx *uiCtx, Editor *editor, EditorUI *editorUI) {
   uiEndLayout(uiCtx);
   // </simulate button>
 
+  // Other buttons (will have logos)
+  uiMoveLayoutCursor(uiCtx, 10, 0);
+  uiBeginLayout(uiCtx,
+		&(UILayoutOptions){.size = newVec2i(500, 50),
+				   .padding = newVec4i(10, 10, 10, 10),
+				   .bgColor = newColor(200, 200, 200, 255)});
+
+  // manage chip pins button (opens manage chip button screen)
+
+  uiBeginLayout(uiCtx,
+		&(UILayoutOptions){.size = newVec2i(35, 35),
+				   .padding = newVec4i(10, 10, 10, 10),
+				   .bgColor = newColor(200, 200, 200, 255),
+				   .hoverCursorIcon = CURSOR_POINTER});
+
+
+  uiEndLayout(uiCtx);
+  uiEndLayout(uiCtx);
+
   uiEndLayout(uiCtx);
   // </navbar>
 }
@@ -359,6 +378,8 @@ void editorUI_mode_interior(UICtx *uiCtx, Editor *editor, EditorUI *editorUI) {
   }
 }
 
+void editorUI_mode_exterior(UICtx *uiCtx, Editor *editor, EditorUI *editorUI) {}
+
 void editorUI_run(UICtx *uiCtx, Editor *editor, EditorUI *editorUI) {
   // draw navbar
   uiSetLayoutCursorPos(uiCtx, 0, editorUI->menubarHeight);
@@ -369,12 +390,14 @@ void editorUI_run(UICtx *uiCtx, Editor *editor, EditorUI *editorUI) {
     uiLabel(uiCtx, &(UILabelOptions){.cachedText = &editorUI->editorMessageText,
 				     .fontSize = 16,
 				     .text = editor->editorMessage});
-    uiSetLayoutCursorPos(uiCtx, 0, uiThisLayout(uiCtx)->cursorPos.y - 16);
+    uiSetLayoutCursorPos(uiCtx, 0, editorUI->menubarHeight);
   }
   // </editor message>
 
   if (editor->mode == EDIT_MODE_INTERIOR) {
     editorUI_mode_interior(uiCtx, editor, editorUI);
+  } else if (editor->mode == EDIT_MODE_EXTERIOR) {
+    editorUI_mode_exterior(uiCtx, editor, editorUI);
   }
 
   // draw navbar

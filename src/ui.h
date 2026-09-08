@@ -145,6 +145,7 @@ typedef struct {
   Vec2i size;
 } UIDecalOptions;
 void uiDecal(UICtx *ctx, const UIDecalOptions *options);
+SDL_Texture *loadPNGTexture(SDL_Renderer *renderer, const char *filePath);
 
 SDL_Texture *newTextTexture(SDL_Renderer *renderer, char *text, TTF_Font *font,
 			    Color color);

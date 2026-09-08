@@ -193,13 +193,12 @@ void renderGrid(SDL_Renderer *renderer, Editor *editor, float x, float y,
 
   for (u16 i = 1; i < h / editor->gridSize / editor->camera.zoom; i++) {
     // line across x axis
-    SDL_FRect lineX = {
-	0,
-	((i * editor->gridSize +
-	  ((i32)editor->camera.position.y % editor->gridSize)) *
-	     editor->camera.zoom +
-	 y),
-	w, 1.0f};
+    SDL_FRect lineX = {0,
+		       ((i * editor->gridSize +
+			 ((i32)editor->camera.position.y % editor->gridSize)) *
+			    editor->camera.zoom +
+			y),
+		       w, 1.0f};
     SDL_RenderFillRect(renderer, &lineX);
   }
   for (u16 i = 1; i < w / editor->gridSize / editor->camera.zoom; i++) {
@@ -212,6 +211,32 @@ void renderGrid(SDL_Renderer *renderer, Editor *editor, float x, float y,
   }
 }
 
+void renderInterior(RendererCtx *renderCtx, Editor *editor) {
+  Color bgColor = editor->bgColor;
+  Circuit *circuit = &editor->ctx->circuit;
+
+  // render circuit
+  for (u32 i = 1; i < circuit->pivots.len; i++) {
+    drawPivot(renderCtx, circuit->pivots.array + i);
+  }
+  for (u32 i = 1; i < circuit->wires.len; i++) {
+    if (circuit->wires.array[i].pivotCEID1 == 0 ||
+	circuit->wires.array[i].pivotCEID2 == 0) {
+      continue;
+    }
+    renderWire(renderCtx, circuit, circuit->wires.array + i);
+  }
+  for (u32 i = 1; i < circuit->inputChips.len; i++) {
+    renderInputChip(renderCtx, circuit->inputChips.array + i);
+  }
+  for (u32 i = 1; i < circuit->simpleChips.len; i++) {
+    renderSimpleChip(renderCtx, circuit->simpleChips.array + i);
+  }
+}
+
+void renderExterior(RendererCtx *renderCtx, Editor *editor) {
+}
+
 void renderEditor(SDL_Renderer *renderer, Textures *textures, Editor *editor) {
   Camera camera = editor->camera;
   Circuit *circuit = &editor->ctx->circuit;
@@ -221,27 +246,14 @@ void renderEditor(SDL_Renderer *renderer, Textures *textures, Editor *editor) {
   renderCtx.renderer = renderer;
   renderCtx.textures = textures;
 
-  Color bgColor = editor->bgColor;
+  renderGrid(renderCtx.renderer, editor, 0, 0,
+	     (float)renderCtx.camera.viewportSize.x,
+	     (float)renderCtx.camera.viewportSize.y);
 
-  renderGrid(renderer, editor, 0, 0, (float)camera.viewportSize.x,
-	     (float)camera.viewportSize.y);
-
-  // render circuit
-  for (u32 i = 1; i < circuit->pivots.len; i++) {
-    drawPivot(&renderCtx, circuit->pivots.array + i);
-  }
-  for (u32 i = 1; i < circuit->wires.len; i++) {
-    if (circuit->wires.array[i].pivotCEID1 == 0 ||
-	circuit->wires.array[i].pivotCEID2 == 0) {
-      continue;
-    }
-    renderWire(&renderCtx, circuit, circuit->wires.array + i);
-  }
-  for (u32 i = 1; i < circuit->inputChips.len; i++) {
-    renderInputChip(&renderCtx, circuit->inputChips.array + i);
-  }
-  for (u32 i = 1; i < circuit->simpleChips.len; i++) {
-    renderSimpleChip(&renderCtx, circuit->simpleChips.array + i);
+  if (editor->mode == EDIT_MODE_INTERIOR) {
+    renderInterior(&renderCtx, editor);
+  } else if (editor->mode == EDIT_MODE_EXTERIOR) {
+    renderExterior(&renderCtx, editor);
   }
 
   if (editor->selectBoxActive) {

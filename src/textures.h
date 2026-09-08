@@ -10,6 +10,8 @@ typedef struct {
 	SDL_Texture *simpleNOR;
 	SDL_Texture *simpleXOR;
 	SDL_Texture *simpleXNOR;
+
+	SDL_Texture *boneEditorIcon;
 } Textures;
 
 void loadTextures(SDL_Renderer *renderer, Textures *textures, TTF_Font *font);

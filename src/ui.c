@@ -2,6 +2,25 @@
 #include <stdlib.h>
 #include <string.h>
 
+SDL_Texture *loadPNGTexture(SDL_Renderer *renderer, const char *filePath) {
+  /*
+  SDL_Surface *surface = SDL_LoadPNG(filePath);
+  if (!surface) {
+    fprintf(stderr, "Failed to load PNG: %s\n", SDL_GetError());
+    return NULL;
+  }
+
+  SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+  SDL_FreeSurface(surface);
+
+  if (!texture) {
+    fprintf(stderr, "Failed to create texture: %s\n", SDL_GetError());
+    return NULL;
+  }
+
+  return texture;*/
+}
+
 SDL_Texture *newTextTexture(SDL_Renderer *renderer, char *text, TTF_Font *font,
 			    Color color) {
   SDL_Surface *surface;
