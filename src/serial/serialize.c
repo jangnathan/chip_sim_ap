@@ -116,12 +116,12 @@ void serializeCtx(Ctx *ctx, FILE *fptr) {
 
   // write sim name
   u8 paddingBytesNeeded = 0;
-  for (u8 i = 0; i < sizeof(ctx->name); i++) {
-    if (ctx->name[i] == '\0') {
-      paddingBytesNeeded = sizeof(ctx->name) - i;
+  for (u8 i = 0; i < sizeof(ctx->identifier); i++) {
+    if (ctx->identifier[i] == '\0') {
+      paddingBytesNeeded = sizeof(ctx->identifier) - i;
       break;
     }
-    BinaryWriter_writeByte(&writer, ctx->name[i]);
+    BinaryWriter_writeByte(&writer, ctx->identifier[i]);
   }
   BinaryWriter_padding(&writer, paddingBytesNeeded);
 
